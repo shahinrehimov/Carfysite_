@@ -1,8 +1,7 @@
 export const defaultMetaTags = {
   title: "Carfy",
   description: "Carfy ",
-  keywords:
-    "carfy",
+  keywords: "carfy",
   openGraph: {
     title: "Carfy",
     description: "Carfy",

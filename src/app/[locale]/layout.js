@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Providers } from "@/providers/providers";
 import { poppins } from "@/lib/fonts";
 import "@/assets/styles/globals.css";
-
+import Header from "@/components/header/header";
 import { defaultMetaTags } from "@/lib/constants/defaultMetaTags";
 export const viewport = {
   width: "device-width",
@@ -39,8 +39,6 @@ export const metadata = {
   },
 };
 
-
-
 export default async function LocaleLayout({ children, params }) {
   const { locale } = await params;
   if (!routing.locales.includes(locale)) notFound();
@@ -49,9 +47,8 @@ export default async function LocaleLayout({ children, params }) {
     <html lang={locale} className={poppins.variable}>
       <body>
         <Providers locale={locale} messages={messages}>
-          
+          <Header />
           {children}
-          
         </Providers>
       </body>
     </html>

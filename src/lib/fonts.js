@@ -58,7 +58,7 @@ export const poppins = localFont({
       style: "normal",
     },
     {
-          path: "../assets/fonts/Poppins-Italic.ttf",
+      path: "../assets/fonts/Poppins-Italic.ttf",
       weight: "400",
       style: "italic",
     },
