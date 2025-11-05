@@ -41,7 +41,7 @@ export default function LangSwitcher() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 lg:gap-3 bg-white rounded-full px-4 lg:px-6 py-2 lg:py-3 hover:bg-white/90 transition-colors min-w-[100px] lg:min-w-[140px]"
+        className="flex items-center gap-2 lg:gap-3 bg-white rounded-full px-2 lg:px-6 py-1 lg:py-4 hover:bg-white/90 transition-colors lg:min-w-[140px]"
         aria-label="Select language"
       >
         <Image
@@ -51,7 +51,7 @@ export default function LangSwitcher() {
           height={20}
           className="w-[16px] h-[16px] lg:w-[20px] lg:h-[20px] object-contain"
         />
-        <span className="text-base lg:text-lg font-regular text-blue flex-1 text-center">
+        <span className="text-sm lg:text-base font-regular text-blue flex-1 text-center">
           {languages[locale].code}
         </span>
         <ChevronDown

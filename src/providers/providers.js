@@ -1,5 +1,7 @@
 "use client";
 import { NextIntlClientProvider } from "next-intl";
+import { CartProvider } from "@/contexts/cart-context";
+
 export function Providers({ children, locale, messages }) {
   function onError(error) {
     if (error.code === "MISSING_MESSAGE") return;
@@ -12,7 +14,7 @@ export function Providers({ children, locale, messages }) {
       onError={onError}
       timeZone="Asia/Baku"
     >
-      {children}
+      <CartProvider>{children}</CartProvider>
     </NextIntlClientProvider>
   );
 }

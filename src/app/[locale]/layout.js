@@ -6,6 +6,7 @@ import { poppins } from "@/lib/fonts";
 import "@/assets/styles/globals.css";
 import Header from "@/components/header/header";
 import { defaultMetaTags } from "@/lib/constants/defaultMetaTags";
+import Footer from "@/components/footer/footer";
 export const viewport = {
   width: "device-width",
   initialScale: 1,
@@ -49,6 +50,7 @@ export default async function LocaleLayout({ children, params }) {
         <Providers locale={locale} messages={messages}>
           <Header />
           {children}
+          <Footer />
         </Providers>
       </body>
     </html>
