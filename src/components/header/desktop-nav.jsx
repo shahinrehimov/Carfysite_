@@ -49,7 +49,7 @@ export default function DesktopNav() {
                 onClick={() => setIsMenuOpen(false)}
               />
 
-              <div className="absolute top-full left-0 mt-2  rounded-lg shadow-lg py-2 backdrop-blur-[32px] min-w-[200px] z-40">
+              <div className="absolute top-full left-0 mt-2  rounded-lg shadow-lg py-2 backdrop-blur-[32px] min-w-[200px] z-40 bg-[#FFFFFF8F]">
                 {menuItems.map((item, index) => (
                   <Link
                     key={index}
