@@ -195,6 +195,44 @@
     @media (width >= 110rem) {
       width: calc(50% + 55rem);
       margin-left: calc(50% - 55rem);
+      max-width: 120rem;
+    }
+    display: flex;
+    .container-left-aligned-content {
+      width: 100%;
+      padding-right: 1rem;
+      @media (width >= 40rem) {
+        max-width: 30rem;
+      }
+      @media (width >= 48rem) {
+        max-width: 38rem;
+      }
+      @media (width >= 64rem) {
+        max-width: 54rem;
+      }
+      @media (width >= 80rem) {
+        max-width: 70rem;
+      }
+      @media (width >= 110rem) {
+        max-width: 100rem;
+      }
+    }
+
+    .ads-container {
+      position: sticky;
+      top: 5vh;
+      right: 0;
+      height: auto;
+      background-color: green;
+      flex: 1;
+      height: 90vh;
+      border-radius: 20px 0 0 20px;
+      overflow: hidden;
+      img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+      }
     }
   }
 

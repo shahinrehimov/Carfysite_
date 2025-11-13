@@ -45,7 +45,7 @@ export default function Footer({ translations = {} }) {
   ];
 
   return (
-    <footer className="bg-amber-white rounded-t-[32px] lg:rounded-t-[100px]">
+    <footer className="bg-amber-white rounded-t-[32px] lg:rounded-t-[100px] relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
