@@ -23,6 +23,7 @@ export default function Home() {
         </div>
       </div>
       <Promotion />
+      <div className="w-full h-[100px] bg-[#CEE5F8] mb-[-100px]"></div>
     </div>
   );
 }

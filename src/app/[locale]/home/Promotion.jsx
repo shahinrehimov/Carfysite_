@@ -10,7 +10,7 @@ function Promotion() {
           alt="Carfy Mobile App"
           width={660}
           height={620}
-          className=" absolute bottom-0 w-[300px] lg:w-[600px] lg:left-[200px]"
+          className=" absolute bottom-0 w-[300px] lg:w-[550px] lg:left-[200px]"
           priority
         />
         <div className="w-full relative z-10 lg:py-10">
