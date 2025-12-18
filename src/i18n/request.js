@@ -14,7 +14,7 @@ async function getTranslations(locale) {
 
     if (lang_version !== versionCache || !translationsCache[locale]) {
       const response = await fetch(
-        `${siteConfig.apiUrl}/app/local-translations/${locale}`,
+        `${siteConfig.apiUrl}/site/local-translations/${locale}`,
         { headers: { Token: siteConfig.apiToken } }
       );
       const { data } = await response.json();

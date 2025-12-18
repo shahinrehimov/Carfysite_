@@ -12,7 +12,7 @@ const createAxiosInstance = (serverSide = false) => {
       process.env.NEXT_PUBLIC_API_PROTOCOL +
       "://" +
       process.env.NEXT_PUBLIC_API_HOST +
-      "/api",
+      "/api/site",
     timeout: 10000,
     headers: {
       "Content-Type": "application/json",
