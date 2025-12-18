@@ -124,7 +124,10 @@ export default function DesktopNav() {
           <span className="text-sm">{t("favorites")}</span>
         </Link>
 
-        <Link href="/login" className="flex items-center gap-2 text-[#1A1A1A] ">
+        <Link
+          href="/auth/login"
+          className="flex items-center gap-2 text-[#1A1A1A] "
+        >
           <Image
             src="/icons/user.svg"
             alt="login"

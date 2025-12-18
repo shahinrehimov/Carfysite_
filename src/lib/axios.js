@@ -23,6 +23,7 @@ const createAxiosInstance = (serverSide = false) => {
   api.interceptors.request.use(
     async (config) => {
       let currentLang;
+      let authToken;
 
       if (serverSide) {
         try {
@@ -30,11 +31,19 @@ const createAxiosInstance = (serverSide = false) => {
         } catch {
           currentLang = "az";
         }
+        // Get auth token from cookies on server side
+        authToken = getCookieValue("auth_token");
       } else {
         currentLang = getCookieValue("NEXT_LOCALE") || "az";
+        authToken = getCookieValue("auth_token");
       }
 
       config.headers["Accept-Language"] = currentLang;
+
+      // Add Authorization header if token exists
+      if (authToken) {
+        config.headers["Authorization"] = `Bearer ${authToken}`;
+      }
 
       return config;
     },
