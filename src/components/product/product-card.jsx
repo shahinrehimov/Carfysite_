@@ -4,12 +4,16 @@ import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export default function ProductCard({ product }) {
   const [isLiked, setIsLiked] = useState(false);
-
+  const router = useRouter();
   return (
-    <div className="bg-white rounded-[20px] p-3 lg:p-5 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
+    <div
+      className=" cursor-pointer bg-white rounded-[20px] p-3 lg:p-5 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col"
+      onClick={() => router.push(`/products/${product.slug}`)}
+    >
       {/* Image Container */}
       <div className="relative mb-3 lg:mb-4 aspect-square">
         <Image
@@ -20,7 +24,10 @@ export default function ProductCard({ product }) {
         />
         {/* Heart Icon */}
         <button
-          onClick={() => setIsLiked(!isLiked)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsLiked(!isLiked);
+          }}
           className={cn(
             "absolute top-2 right-2 w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer",
             isLiked
@@ -76,6 +83,7 @@ export default function ProductCard({ product }) {
           variant="primary"
           size="default"
           className="w-full text-[12px] lg:text-[14px] font-medium cursor-pointer h-10 lg:h-11"
+          onClick={(e) => e.stopPropagation()}
         >
           <ShoppingCart className="w-4 h-4" />
           Səbətə əlavə et
