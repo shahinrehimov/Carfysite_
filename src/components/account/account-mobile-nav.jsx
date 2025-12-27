@@ -62,7 +62,7 @@ export default function AccountMobileNav() {
     if (href === "/account") {
       return pathname === href || pathname.endsWith("/account");
     }
-    return pathname?.endsWith(href);
+    return pathname?.includes(href);
   };
 
   const getCurrentPageTitle = () => {

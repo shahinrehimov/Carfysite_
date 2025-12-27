@@ -8,7 +8,7 @@ const axiosInstance = axios.create({
     process.env.NEXT_PUBLIC_API_PROTOCOL +
     "://" +
     process.env.NEXT_PUBLIC_API_HOST +
-    "/api/app",
+    "/api/site",
   timeout: 10000,
 });
 
@@ -58,4 +58,3 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
-

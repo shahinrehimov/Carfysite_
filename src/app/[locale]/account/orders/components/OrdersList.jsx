@@ -183,7 +183,7 @@ const OrdersList = () => {
               <div className="flex gap-2">
                 <Link
                   href={`/account/orders/${order.id}`}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-primary-dark text-white rounded-md hover:bg-green-primary-dark transition-colors self-start lg:self-center"
+                  className="flex items-center justify-center px-4 h-[44px] bg-[#3696E7] text-white rounded-full px-6 font-medium"
                 >
                   {t("details")}
                 </Link>

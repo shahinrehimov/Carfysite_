@@ -67,7 +67,7 @@ export default function AccountSidebar() {
     if (href === "/account") {
       return pathname === href || pathname.endsWith("/account");
     }
-    return pathname?.endsWith(href);
+    return pathname?.includes(href);
   };
 
   const handleLogout = async () => {
