@@ -39,3 +39,4 @@ export const logout = () => {
   deleteCookie("auth_token", { path: "/" });
   deleteCookie("user_data", { path: "/" });
 };
+

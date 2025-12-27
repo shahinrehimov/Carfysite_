@@ -20,3 +20,6 @@ export const emailLoginSchema = yup.object({
   email: yup.string().email("email_invalid").required("email_required"),
   password: yup.string().required("password_required"),
 });
+
+
+
