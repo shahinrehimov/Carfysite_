@@ -1,6 +1,7 @@
 "use client";
 import { NextIntlClientProvider } from "next-intl";
 import { CartProvider } from "@/contexts/cart-context";
+import { GuestProvider } from "./GuestProvider";
 
 export function Providers({ children, locale, messages }) {
   function onError(error) {
@@ -14,7 +15,9 @@ export function Providers({ children, locale, messages }) {
       onError={onError}
       timeZone="Asia/Baku"
     >
-      <CartProvider>{children}</CartProvider>
+      <GuestProvider>
+        <CartProvider>{children}</CartProvider>
+      </GuestProvider>
     </NextIntlClientProvider>
   );
 }

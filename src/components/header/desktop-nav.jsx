@@ -2,15 +2,33 @@
 
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import CartDropdown from "@/components/cart/cart-dropdown";
+import { isAuthenticated } from "@/lib/auth";
 
 export default function DesktopNav() {
   const t = useTranslations();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState("Bakı");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check authentication status on mount
+    setIsLoggedIn(isAuthenticated());
+
+    // Listen for storage events (login/logout in other tabs)
+    const handleStorageChange = () => {
+      setIsLoggedIn(isAuthenticated());
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -124,19 +142,35 @@ export default function DesktopNav() {
           <span className="text-sm">{t("favorites")}</span>
         </Link>
 
-        <Link
-          href="/auth/login"
-          className="flex items-center gap-2 text-[#1A1A1A] "
-        >
-          <Image
-            src="/icons/user.svg"
-            alt="login"
-            width={20}
-            height={20}
-            className="w-5 h-5"
-          />
-          <span className="text-sm">{t("login")}</span>
-        </Link>
+        {isLoggedIn ? (
+          <Link
+            href="/account"
+            className="flex items-center gap-2 text-[#1A1A1A] "
+          >
+            <Image
+              src="/icons/user.svg"
+              alt="account"
+              width={20}
+              height={20}
+              className="w-5 h-5"
+            />
+            <span className="text-sm">{t("account")}</span>
+          </Link>
+        ) : (
+          <Link
+            href="/auth/login"
+            className="flex items-center gap-2 text-[#1A1A1A] "
+          >
+            <Image
+              src="/icons/user.svg"
+              alt="login"
+              width={20}
+              height={20}
+              className="w-5 h-5"
+            />
+            <span className="text-sm">{t("login")}</span>
+          </Link>
+        )}
 
         <CartDropdown />
       </div>

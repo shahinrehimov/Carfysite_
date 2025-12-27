@@ -2,11 +2,12 @@
 
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useCart } from "@/contexts/cart-context";
 import { usePathname } from "next/navigation";
 import MobileCategoriesModal from "@/components/categories/mobile-categories-modal";
+import { isAuthenticated } from "@/lib/auth";
 
 export default function MobileNav() {
   const t = useTranslations();
@@ -14,6 +15,23 @@ export default function MobileNav() {
   const pathname = usePathname();
   const cartCount = getCartCount();
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check authentication status on mount
+    setIsLoggedIn(isAuthenticated());
+
+    // Listen for storage events (login/logout in other tabs)
+    const handleStorageChange = () => {
+      setIsLoggedIn(isAuthenticated());
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   const isActive = (path) => {
     return pathname?.includes(path);
@@ -46,9 +64,9 @@ export default function MobileNav() {
       badge: cartCount,
     },
     {
-      href: "/profile",
+      href: isLoggedIn ? "/account" : "/auth/login",
       icon: "/icons/user.svg",
-      label: t("login"),
+      label: isLoggedIn ? t("account") : t("login"),
       key: "profile",
     },
   ];

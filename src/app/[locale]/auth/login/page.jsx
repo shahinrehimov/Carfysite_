@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/axios";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { setCookie } from "cookies-next";
+import { setCookie, removeCookie, deleteCookie } from "cookies-next";
 
 // Phone login components
 import { PhoneStep } from "./phone-login/PhoneStep";
@@ -93,26 +93,37 @@ export default function LoginPage() {
       });
 
       if (response.data.token) {
-        // Store token in cookies
+        // Store token in cookies (using both access_token and auth_token for compatibility)
+        setCookie("access_token", response.data.token, {
+          maxAge: 30 * 24 * 60 * 60, // 30 days
+          secure: process.env.NODE_ENV === "production",
+          httpOnly: false, // Allow client-side access for axios interceptor
+          sameSite: "lax",
+        });
+
         setCookie("auth_token", response.data.token, {
           maxAge: 30 * 24 * 60 * 60, // 30 days
-          path: "/",
-          sameSite: "lax",
           secure: process.env.NODE_ENV === "production",
+          httpOnly: false,
+          sameSite: "lax",
         });
 
         // Store user data in cookies
         setCookie("user_data", JSON.stringify(response.data.data), {
           maxAge: 30 * 24 * 60 * 60, // 30 days
-          path: "/",
-          sameSite: "lax",
           secure: process.env.NODE_ENV === "production",
+          httpOnly: false,
+          sameSite: "lax",
         });
+
+        // Clear guest identifier when user logs in
+        deleteCookie("guest_identifier");
 
         // Redirect to home or dashboard
         router.push("/");
       }
     } catch (err) {
+      console.log(err);
       setError(err.response?.data?.message || t("invalid_otp"));
     } finally {
       setLoading(false);
@@ -149,21 +160,31 @@ export default function LoginPage() {
       });
 
       if (response.data.token) {
-        // Store token in cookies
+        // Store token in cookies (using both access_token and auth_token for compatibility)
+        setCookie("access_token", response.data.token, {
+          maxAge: 30 * 24 * 60 * 60, // 30 days
+          secure: process.env.NODE_ENV === "production",
+          httpOnly: false, // Allow client-side access for axios interceptor
+          sameSite: "lax",
+        });
+
         setCookie("auth_token", response.data.token, {
           maxAge: 30 * 24 * 60 * 60, // 30 days
-          path: "/",
-          sameSite: "lax",
           secure: process.env.NODE_ENV === "production",
+          httpOnly: false,
+          sameSite: "lax",
         });
 
         // Store user data in cookies
         setCookie("user_data", JSON.stringify(response.data.data), {
           maxAge: 30 * 24 * 60 * 60, // 30 days
-          path: "/",
-          sameSite: "lax",
           secure: process.env.NODE_ENV === "production",
+          httpOnly: false,
+          sameSite: "lax",
         });
+
+        // Clear guest identifier when user logs in
+        removeCookie("guest_identifier");
 
         // Redirect to home or dashboard
         router.push("/");
