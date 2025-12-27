@@ -35,52 +35,50 @@ export default async function AccountPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Personal Information Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {t("personal_info")}
-            </h2>
-            <Link
-              href="/account/profile"
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 min-h-[260px] flex flex-col justify-between">
+          <div className="w-full">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {t("personal_info")}
+              </h2>
+              <Link
+                href="/account/profile"
+                className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </Link>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-base font-medium text-gray-900 mb-3">
-                {user.fullName}
-              </h3>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span>{user.email}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span>{user.phone}</span>
-                </div>
-              </div>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Link>
             </div>
 
-            <Link
-              href="/account/change-password"
-              className="inline-flex items-center text-sm text-[#00569C] hover:text-[#004580] font-medium transition-colors"
-            >
-              {t("change_password")}
-            </Link>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              {user.fullName}
+            </h3>
+          </div>
+
+          <div className="space-y-4 ">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6 text-sm text-gray-600">
+                <span>{user.email}</span>
+                <span>{user.phone}</span>
+              </div>
+              <Link
+                href="/account/change-password"
+                className="inline-flex items-center text-sm text-[#00569C] hover:text-[#004580] font-medium transition-colors whitespace-nowrap"
+              >
+                {t("change_password")}
+              </Link>
+            </div>
           </div>
         </div>
 
