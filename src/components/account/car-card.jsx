@@ -11,11 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useTranslations } from "next-intl";
 
 export default function CarCard({ car, onEdit, onDelete, onSave }) {
   const t = useTranslations();
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editData, setEditData] = useState(car);
 
   const handleSave = () => {
@@ -31,6 +39,15 @@ export default function CarCard({ car, onEdit, onDelete, onSave }) {
   const handleSearchByCar = () => {
     // Navigate to products page with car filters
     console.log("Search by car:", car);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(car.id);
+    setShowDeleteModal(false);
   };
 
   if (isEditing) {
@@ -64,7 +81,7 @@ export default function CarCard({ car, onEdit, onDelete, onSave }) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onDelete(car.id)}
+            onClick={handleDeleteClick}
             className="text-[#EC5C30] border-[#EC5C30] hover:bg-[#EC5C30] hover:text-white cursor-pointer group px-4 py-2 rounded-full"
           >
             Sil
@@ -344,7 +361,7 @@ export default function CarCard({ car, onEdit, onDelete, onSave }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onDelete(car.id)}
+              onClick={handleDeleteClick}
               className="text-gray-500 hover:text-gray-900 hover:bg-gray-100 w-10 h-10 cursor-pointer"
             >
               <Image
@@ -401,7 +418,7 @@ export default function CarCard({ car, onEdit, onDelete, onSave }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onDelete(car.id)}
+              onClick={handleDeleteClick}
               className="text-gray-500 hover:text-gray-900 hover:bg-gray-100 w-9 h-9"
             >
               <Image
@@ -430,6 +447,38 @@ export default function CarCard({ car, onEdit, onDelete, onSave }) {
           </span>
         </Button>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="sm:max-w-md" showCloseButton={true}>
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
+              Avtomobili silmək istəyirsiniz?
+            </DialogTitle>
+            <DialogDescription className="text-center text-gray-600 pt-2">
+              Bu əməliyyat geri qaytarıla bilməz.
+              <br />
+              Seçilmiş avtomobil məlumatları silinəcək.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={handleConfirmDelete}
+              className="flex-1 border-[#EC5C30] text-[#EC5C30] hover:bg-[#EC5C30]/10 hover:text-red-500 cursor-pointer rounded-full h-12 text-base font-medium"
+            >
+              Sil
+            </Button>
+            <Button
+              onClick={() => setShowDeleteModal(false)}
+              variant="primary"
+              className="flex-1 text-white rounded-full h-12 text-base font-medium cursor-pointer"
+            >
+              Ləğv et
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

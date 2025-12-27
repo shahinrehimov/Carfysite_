@@ -35,14 +35,12 @@ export default function MyCarsPage() {
   };
 
   const handleDeleteCar = (carId) => {
-    if (confirm("Maşını silmək istədiyinizdən əminsiniz?")) {
-      setCars(cars.filter((car) => car.id !== carId));
-    }
+    setCars(cars.filter((car) => car.id !== carId));
   };
 
   return (
     <div className="space-y-6">
-      <div className="mb-6">
+      <div className="mb-6 hidden lg:block">
         <h1 className="text-2xl lg:text-3xl font-semibold text-gray-900">
           {t("my_cars")}
         </h1>

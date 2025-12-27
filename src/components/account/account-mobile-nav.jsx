@@ -7,51 +7,49 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 export default function AccountMobileNav() {
-  const t = useTranslations("account");
+  const t = useTranslations();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
     {
       href: "/account",
+      label: t("personal_info"),
+      key: "personal_info",
+    },
+    {
+      href: "/account/profile",
       label: t("profile"),
-      icon: "/icons/user.svg",
       key: "profile",
     },
     {
       href: "/account/cars",
       label: t("my_cars"),
-      icon: "/icons/car.svg",
       key: "cars",
     },
     {
       href: "/account/orders",
       label: t("my_orders"),
-      icon: "/icons/cart.svg",
       key: "orders",
     },
     {
       href: "/account/addresses",
       label: t("my_addresses"),
-      icon: "/icons/location.svg",
       key: "addresses",
     },
     {
       href: "/account/referrals",
       label: t("referrals_bonuses"),
-      icon: "/icons/coupon.svg",
       key: "referrals",
     },
     {
       href: "/account/settings",
       label: t("settings"),
-      icon: "/icons/category.svg",
       key: "settings",
     },
     {
       href: "/account/notifications",
       label: t("notifications"),
-      icon: "/icons/notification.svg",
       key: "notifications",
     },
   ];
@@ -60,7 +58,7 @@ export default function AccountMobileNav() {
     if (href === "/account") {
       return pathname === href || pathname.endsWith("/account");
     }
-    return pathname?.startsWith(href);
+    return pathname?.endsWith(href);
   };
 
   const getCurrentPageTitle = () => {
@@ -71,7 +69,7 @@ export default function AccountMobileNav() {
   return (
     <>
       {/* Mobile Header */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-6">
+      <div className="bg-white rounded-2xl p-4 ">
         <button
           onClick={() => setIsOpen(true)}
           className="flex items-center justify-between w-full"
@@ -85,22 +83,9 @@ export default function AccountMobileNav() {
               className="w-6 h-6"
             />
             <span className="text-base font-semibold text-gray-900">
-              {t("personal_cabinet")}
+              {getCurrentPageTitle()}
             </span>
           </div>
-          <svg
-            className="w-5 h-5 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
         </button>
       </div>
 
@@ -114,13 +99,10 @@ export default function AccountMobileNav() {
           />
 
           {/* Sidebar */}
-          <div className="absolute right-0 top-0 bottom-0 w-[280px] bg-white shadow-xl animate-slide-in-right">
+          <div className="absolute right-0 top-0 bottom-0 w-full bg-white shadow-xl animate-slide-in-right">
             <div className="flex flex-col h-full">
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {t("personal_cabinet")}
-                </h2>
+              <div className="flex items-center justify-end p-6">
                 <button
                   onClick={() => setIsOpen(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -156,34 +138,18 @@ export default function AccountMobileNav() {
                           : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
-                      <Image
-                        src={item.icon}
-                        alt={item.label}
-                        width={20}
-                        height={20}
-                        className={`w-5 h-5 ${
-                          active ? "brightness-0 invert" : ""
-                        }`}
-                      />
                       <span className="text-sm font-medium">{item.label}</span>
                     </Link>
                   );
                 })}
+                <div className="p-0 ">
+                  <button className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors w-full">
+                    <span className="text-sm font-medium">{t("logout")}</span>
+                  </button>
+                </div>
               </nav>
 
               {/* Logout Button */}
-              <div className="p-2 border-t border-gray-200">
-                <button className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors w-full">
-                  <Image
-                    src="/icons/reset.svg"
-                    alt="Logout"
-                    width={20}
-                    height={20}
-                    className="w-5 h-5"
-                  />
-                  <span className="text-sm font-medium">{t("logout")}</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -191,7 +157,3 @@ export default function AccountMobileNav() {
     </>
   );
 }
-
-
-
-
