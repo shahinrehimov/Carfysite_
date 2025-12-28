@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { useCart } from "@/contexts/cart-context";
+import { useSelector, useDispatch } from "react-redux";
+import { selectCartItems, selectBasketData, selectTotalItems, removeItem, setBasketData } from "@/store/cart";
+import { basketService } from "@/lib/basketService";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
@@ -9,18 +11,43 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
 export default function CartDropdown() {
-  const { cartItems, removeFromCart, getCartTotal, getCartCount } = useCart();
+  const cartItems = useSelector(selectCartItems);
+  const basketData = useSelector(selectBasketData);
+  const cartCount = useSelector(selectTotalItems);
+  const dispatch = useDispatch();
   const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
-  const cartCount = getCartCount();
+
+  // Load basket data on component mount
+  useEffect(() => {
+    const loadBasket = async () => {
+      try {
+        const data = await basketService.load();
+        dispatch(setBasketData(data));
+      } catch (error) {
+        console.error("Failed to load basket:", error);
+      }
+    };
+
+    loadBasket();
+  }, [dispatch]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat("az-AZ", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(price);
+  };
+
+  const handleRemoveFromCart = async (productId) => {
+    try {
+      const response = await basketService.remove(productId);
+      dispatch(removeItem(response));
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+    }
   };
 
   // Close dropdown when clicking outside
@@ -95,49 +122,57 @@ export default function CartDropdown() {
               <>
                 <div className="overflow-y-auto max-h-[400px] p-4 bg-white/50 backdrop-blur-sm rounded-2xl">
                   <div className="space-y-3">
-                    {cartItems.map((item) => (
-                      <div key={item.id} className="rounded-xl p-3 flex  gap-3">
-                        <div className="w-[66px] h-[66px] rounded-lg bg-white  flex items-center justify-center shrink-0 overflow-hidden">
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={64}
-                            height={64}
-                            className="w-full h-full object-contain p-1"
-                          />
-                        </div>
-
-                        <div className="flex-1 min-w-0 ">
-                          <h4 className="text-sm font-normal text-[#1A1A1A] mb-1 line-clamp-2">
-                            {item.name}
-                          </h4>
-                          <p className="text-xs text-gray-500 mb-1">
-                            {item.code || item.id}
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            x{item.quantity}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-col items-end gap-2 h-full flex-1">
-                          <p className="text-sm font-semibold text-[#1A1A1A] whitespace-nowrap">
-                            {formatPrice(item.price * item.quantity)} ₼
-                          </p>
-                          <button
-                            onClick={() => removeFromCart(item.id)}
-                            className="cursor-pointer"
-                          >
+                    {cartItems.map((item) => {
+                      const itemData = item.product || item;
+                      const imageUrl = item.hover_image || itemData.hover_image || "/images/product-placeholder.png";
+                      const title = item.title || itemData.title || "Product";
+                      const quantity = item.basket_quantity || item.quantity || 1;
+                      const price = item.price_final || item.price || 0;
+                      
+                      return (
+                        <div key={item.id} className="rounded-xl p-3 flex  gap-3">
+                          <div className="w-[66px] h-[66px] rounded-lg bg-white  flex items-center justify-center shrink-0 overflow-hidden">
                             <Image
-                              src="/icons/delete.svg"
-                              alt="delete"
-                              width={20}
-                              height={20}
-                              className="w-5 h-5"
+                              src={imageUrl}
+                              alt={title}
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-contain p-1"
                             />
-                          </button>
+                          </div>
+
+                          <div className="flex-1 min-w-0 ">
+                            <h4 className="text-sm font-normal text-[#1A1A1A] mb-1 line-clamp-2">
+                              {title}
+                            </h4>
+                            <p className="text-xs text-gray-500 mb-1">
+                              {item.code || item.id}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              x{quantity}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-2 h-full flex-1">
+                            <p className="text-sm font-semibold text-[#1A1A1A] whitespace-nowrap">
+                              {formatPrice(price * quantity)} ₼
+                            </p>
+                            <button
+                              onClick={() => handleRemoveFromCart(item.id)}
+                              className="cursor-pointer"
+                            >
+                              <Image
+                                src="/icons/delete.svg"
+                                alt="delete"
+                                width={20}
+                                height={20}
+                                className="w-5 h-5"
+                              />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -148,7 +183,7 @@ export default function CartDropdown() {
                     </span>
                     <div className="border-b border-gray-900  w-full border-dashed pt-3"></div>
                     <span className="text-xl font-semibold text-[#1A1A1A] whitespace-nowrap">
-                      {formatPrice(getCartTotal())} ₼
+                      {formatPrice(basketData.total_price_final_in_basket || 0)} ₼
                     </span>
                   </div>
 

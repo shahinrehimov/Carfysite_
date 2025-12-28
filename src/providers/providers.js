@@ -1,7 +1,9 @@
 "use client";
 import { NextIntlClientProvider } from "next-intl";
-import { CartProvider } from "@/contexts/cart-context";
+import { Provider } from "react-redux";
+import { store } from "@/store";
 import { GuestProvider } from "./GuestProvider";
+import { ToastProvider } from "./ToastProvider";
 
 export function Providers({ children, locale, messages }) {
   function onError(error) {
@@ -15,9 +17,11 @@ export function Providers({ children, locale, messages }) {
       onError={onError}
       timeZone="Asia/Baku"
     >
-      <GuestProvider>
-        <CartProvider>{children}</CartProvider>
-      </GuestProvider>
+      <Provider store={store}>
+        <GuestProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </GuestProvider>
+      </Provider>
     </NextIntlClientProvider>
   );
 }

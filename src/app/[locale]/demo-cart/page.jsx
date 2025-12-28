@@ -97,42 +97,43 @@ export default function DemoCartPage() {
 
       <div className="mt-12 p-6 bg-blue-50 rounded-xl">
         <h2 className="text-xl font-semibold text-[#1A1A1A] mb-4">
-          How to Use the Cart Context
+          How to Use Redux Cart
         </h2>
         <div className="space-y-4 text-sm text-gray-700">
           <div>
             <h3 className="font-semibold mb-2">1. Add items to cart:</h3>
             <pre className="bg-white p-3 rounded-lg overflow-x-auto">
-              {`import { useCart } from "@/contexts/cart-context";
+              {`import { useDispatch } from "react-redux";
+import { basketService } from "@/lib/basketService";
+import { addItem } from "@/store/cart";
 
-const { addToCart } = useCart();
+const dispatch = useDispatch();
 
-addToCart({
-  id: "123",
-  name: "Product Name",
-  price: 100,
-  image: "/path/to/image.jpg",
-  code: "PROD-123"
-});`}
+const response = await basketService.add(productId, 1);
+dispatch(addItem(response));`}
             </pre>
           </div>
 
           <div>
             <h3 className="font-semibold mb-2">2. Remove items:</h3>
             <pre className="bg-white p-3 rounded-lg overflow-x-auto">
-              {`const { removeFromCart } = useCart();
+              {`import { basketService } from "@/lib/basketService";
+import { removeItem } from "@/store/cart";
 
-removeFromCart(itemId);`}
+const response = await basketService.remove(productId);
+dispatch(removeItem(response));`}
             </pre>
           </div>
 
           <div>
             <h3 className="font-semibold mb-2">3. Get cart info:</h3>
             <pre className="bg-white p-3 rounded-lg overflow-x-auto">
-              {`const { cartItems, getCartTotal, getCartCount } = useCart();
+              {`import { useSelector } from "react-redux";
+import { selectCartItems, selectBasketData, selectTotalItems } from "@/store/cart";
 
-const total = getCartTotal();
-const count = getCartCount();`}
+const cartItems = useSelector(selectCartItems);
+const basketData = useSelector(selectBasketData);
+const totalItems = useSelector(selectTotalItems);`}
             </pre>
           </div>
         </div>

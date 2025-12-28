@@ -129,7 +129,7 @@ export default function DesktopNav() {
         </Link>
 
         <Link
-          href="/favorites"
+          href="/wishlist"
           className="flex items-center gap-2 text-[#1A1A1A] "
         >
           <Image

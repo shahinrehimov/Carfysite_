@@ -1,7 +1,10 @@
 "use client";
 
-import React from "react";
-import { useCart } from "@/contexts/cart-context";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { basketService } from "@/lib/basketService";
+import { addItem, setLoading, setError } from "@/store/cart";
+import { useToast } from "@/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { ShoppingCart } from "lucide-react";
@@ -12,20 +15,39 @@ export default function AddToCartButton({
   size = "default",
   className = "",
 }) {
-  const { addToCart } = useCart();
+  const dispatch = useDispatch();
+  const { toast } = useToast();
   const t = useTranslations();
+  const [isAdding, setIsAdding] = useState(false);
 
-  const handleAddToCart = () => {
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      code: product.code,
-    });
+  const handleAddToCart = async () => {
+    if (isAdding || !product?.id) {
+      return;
+    }
 
-    // Optional: Show toast notification
-    // You can add a toast library like react-hot-toast or sonner
+    setIsAdding(true);
+
+    try {
+      dispatch(setLoading(true));
+      const response = await basketService.add(product.id, 1);
+      dispatch(addItem(response));
+
+      toast({
+        title: t("success"),
+        description: t("product-added-to-cart"),
+        variant: "success",
+      });
+    } catch (error) {
+      toast({
+        title: t("error"),
+        description: error?.response?.data?.message || t("failed-to-add-to-cart"),
+        variant: "error",
+      });
+      dispatch(setError(error.message));
+    } finally {
+      dispatch(setLoading(false));
+      setIsAdding(false);
+    }
   };
 
   return (
@@ -34,9 +56,10 @@ export default function AddToCartButton({
       variant={variant}
       size={size}
       className={className}
+      disabled={isAdding}
     >
       <ShoppingCart size={18} />
-      <span>{t("add-to-cart")}</span>
+      <span>{isAdding ? t("adding") : t("add-to-cart")}</span>
     </Button>
   );
 }

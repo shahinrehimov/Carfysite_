@@ -4,16 +4,16 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useCart } from "@/contexts/cart-context";
+import { useSelector } from "react-redux";
+import { selectTotalItems } from "@/store/cart";
 import { usePathname } from "next/navigation";
 import MobileCategoriesModal from "@/components/categories/mobile-categories-modal";
 import { isAuthenticated } from "@/lib/auth";
 
 export default function MobileNav() {
   const t = useTranslations();
-  const { getCartCount } = useCart();
+  const cartCount = useSelector(selectTotalItems);
   const pathname = usePathname();
-  const cartCount = getCartCount();
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -51,7 +51,7 @@ export default function MobileNav() {
       key: "messages",
     },
     {
-      href: "/favorites",
+      href: "/wishlist",
       icon: "/icons/heart.svg",
       label: t("favorites"),
       key: "favorites",
