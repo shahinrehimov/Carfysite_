@@ -16,7 +16,7 @@ export default async function AccountPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="relative h-[160px] lg:h-[200px] bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 rounded-2xl lg:rounded-3xl overflow-hidden">
+      <div className="relative h-[160px] lg:h-[200px] bg-linear-to-r from-gray-800 via-gray-700 to-gray-600 rounded-2xl lg:rounded-3xl overflow-hidden">
         <Image
           src="/images/account-banner.png"
           alt="Banner"
@@ -83,7 +83,7 @@ export default async function AccountPage() {
         </div>
 
         {/* Bonus Card */}
-        <div className="bg-gradient-to-br from-[#4A90E2] to-[#357ABD] rounded-2xl p-6 text-white relative overflow-hidden">
+        <div className="bg-linear-to-br from-[#4A90E2] to-[#357ABD] rounded-2xl p-6 text-white relative overflow-hidden">
           <div
             className="relative z-10 flex flex-col items-center justify-center
           gap-6"

@@ -70,10 +70,10 @@ export default function OrderPage({ params }) {
   }
 
   return (
-    <div className="container">
+    <div className="w-full">
       <div className="flex flex-col gap-10 py-10">
         <div className="grid grid-cols-12 gap-2 lg:gap-10">
-          <div className="col-span-12 lg:col-span-10 flex flex-col gap-10">
+          <div className="col-span-12 flex flex-col gap-10">
             {/* Order Header */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-4">
@@ -110,7 +110,7 @@ export default function OrderPage({ params }) {
 
             {/* Order Tracking Timeline */}
             <div className="bg-white rounded-lg  p-6 relative hidden lg:block">
-              <div className="absolute top-12 left-0 right-0 w-[calc(100%-350px)] mx-auto h-0.5 bg-gray-200 z-0"></div>
+              <div className="absolute top-12 left-0 right-0 w-[calc(100%-300px)] mx-auto h-0.5 bg-gray-200 z-0"></div>
 
               <div className="flex justify-between items-center relative z-10">
                 {order.status_tree?.map((statusItem) => (
@@ -132,7 +132,9 @@ export default function OrderPage({ params }) {
                     <p className="font-medium text-gray-900">
                       {statusItem.status_label}
                     </p>
-                    <p className="text-sm text-gray-500">{statusItem.date}</p>
+                    <p className="text-sm text-gray-500 h-4">
+                      {statusItem.date}
+                    </p>
                   </div>
                 ))}
               </div>
