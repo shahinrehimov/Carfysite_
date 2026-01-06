@@ -302,7 +302,7 @@ export default function OrderPage({ params }) {
                       <div className="block lg:hidden w-full">
                         <div className="flex items-center gap-3">
                           {/* Product image */}
-                          <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
                             <Image
                               src={item.product_variant?.hover_image}
                               alt={
