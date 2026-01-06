@@ -1,5 +1,5 @@
 export function generateServiceUrl(services) {
-  const baseUrl = "/app/services/load";
+  const baseUrl = "/services/load";
 
   if (!services || !services.length) {
     return baseUrl;
