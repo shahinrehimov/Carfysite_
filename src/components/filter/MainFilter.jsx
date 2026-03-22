@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -7,21 +7,14 @@ import { Combobox } from "@/components/ui/combobox";
 import { ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useProductFilters } from "@/hooks/useProductFilters";
+import {
+  brandOptionsFromBrands,
+  categoriesForUi,
+  modelOptionsForBrandId,
+} from "@/lib/productFilters";
 
-export default function MainFilter({ type = "default" }) {
-  const t = useTranslations();
-  const router = useRouter();
-  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filterType, setFilterType] = useState("all");
-  const [marka, setMarka] = useState("");
-  const [model, setModel] = useState("");
-  const [city, setCity] = useState("");
-  const [color, setColor] = useState("");
-  const [currency, setCurrency] = useState("AZN");
-
-  const categories = [
+const FALLBACK_CATEGORIES = [
     {
       id: 1,
       name: "Mühərrik hissələri",
@@ -43,27 +36,42 @@ export default function MainFilter({ type = "default" }) {
     { id: 9, name: "Filtrlər və Mayeler", subcategories: [] },
     { id: 10, name: "Teker və Aksesuarlar", subcategories: [] },
     { id: 11, name: "Aksesuar və Digər Məhsullar", subcategories: [] },
-  ];
+];
 
-  const markaOptions = [
-    { value: "toyota", label: "Toyota" },
-    { value: "mercedes", label: "Mercedes" },
-    { value: "bmw", label: "BMW" },
-    { value: "audi", label: "Audi" },
-    { value: "hyundai", label: "Hyundai" },
-    { value: "kia", label: "Kia" },
-    { value: "volkswagen", label: "Volkswagen" },
-    { value: "nissan", label: "Nissan" },
-    { value: "honda", label: "Honda" },
-    { value: "mazda", label: "Mazda" },
-  ];
+export default function MainFilter({ type = "default" }) {
+  const t = useTranslations();
+  const router = useRouter();
+  const { data: filterData } = useProductFilters();
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filterType, setFilterType] = useState("all");
+  const [marka, setMarka] = useState("");
+  const [model, setModel] = useState("");
+  const [city, setCity] = useState("");
+  const [color, setColor] = useState("");
+  const [currency, setCurrency] = useState("AZN");
 
-  const modelOptions = [
-    { value: "model1", label: "Model 1" },
-    { value: "model2", label: "Model 2" },
-    { value: "model3", label: "Model 3" },
-    { value: "model4", label: "Model 4" },
-  ];
+  const brands = filterData?.brands ?? [];
+  const categories = useMemo(() => {
+    if (filterData?.categories?.length) {
+      return categoriesForUi(filterData.categories);
+    }
+    return FALLBACK_CATEGORIES;
+  }, [filterData]);
+
+  const markaOptions = useMemo(
+    () => brandOptionsFromBrands(brands),
+    [brands]
+  );
+  const modelOptions = useMemo(
+    () => modelOptionsForBrandId(brands, marka),
+    [brands, marka]
+  );
+
+  useEffect(() => {
+    setModel("");
+  }, [marka]);
 
   const cityOptions = [
     { value: "baku", label: "Bakı" },
@@ -218,9 +226,10 @@ export default function MainFilter({ type = "default" }) {
                 options={modelOptions}
                 value={model}
                 onValueChange={setModel}
-                placeholder="Model"
+                placeholder={marka ? "Model" : "Əvvəlcə marka seçin"}
                 searchPlaceholder="Model axtar..."
                 emptyText="Nəticə tapılmadı"
+                disabled={!marka}
                 triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-sm lg:text-base font-light border-none w-full"
               />
 
@@ -400,9 +409,10 @@ export default function MainFilter({ type = "default" }) {
               options={modelOptions}
               value={model}
               onValueChange={setModel}
-              placeholder="Model"
+              placeholder={marka ? "Model" : "Əvvəlcə marka seçin"}
               searchPlaceholder="Model axtar..."
               emptyText="Nəticə tapılmadı"
+              disabled={!marka}
               triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
             />
 

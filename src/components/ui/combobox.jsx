@@ -27,6 +27,7 @@ export function Combobox({
   emptyText = "No results found.",
   className,
   triggerClassName,
+  disabled = false,
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -39,6 +40,7 @@ export function Combobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          disabled={disabled}
           className={cn(
             "justify-between bg-white text-[#00569C] hover:bg-white hover:text-[#00569C]",
             triggerClassName,

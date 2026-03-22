@@ -1,10 +1,17 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProductFilters } from "@/hooks/useProductFilters";
+import {
+  brandOptionsFromBrands,
+  modelOptionsForBrandId,
+} from "@/lib/productFilters";
 
 export default function SidebarFilter({ isOpen, onClose }) {
+  const { data: filterData } = useProductFilters();
+  const brands = filterData?.brands ?? [];
   const [expandedSections, setExpandedSections] = useState({
     city: false,
     marka: false,
@@ -42,6 +49,26 @@ export default function SidebarFilter({ isOpen, onClose }) {
     }));
   };
 
+  useEffect(() => {
+    setSelectedModel("");
+  }, [selectedMarka]);
+
+  const markaOptions = useMemo(
+    () => brandOptionsFromBrands(brands),
+    [brands]
+  );
+  const modelOptions = useMemo(
+    () => modelOptionsForBrandId(brands, selectedMarka),
+    [brands, selectedMarka]
+  );
+
+  const modelSectionEmptyHint =
+    !selectedMarka
+      ? "Əvvəlcə marka seçin"
+      : modelOptions.length === 0
+        ? "Bu marka üçün model yoxdur"
+        : null;
+
   const handleReset = () => {
     setSelectedCity("");
     setSelectedMarka("");
@@ -67,30 +94,6 @@ export default function SidebarFilter({ isOpen, onClose }) {
     { value: "shamakhi", label: "Şamaxı" },
   ];
 
-  const markaOptions = [
-    { value: "toyota", label: "Toyota" },
-    { value: "mercedes", label: "Mercedes" },
-    { value: "bmw", label: "BMW" },
-    { value: "audi", label: "Audi" },
-    { value: "honda", label: "Honda" },
-    { value: "hyundai", label: "Hyundai" },
-    { value: "kia", label: "Kia" },
-    { value: "volkswagen", label: "Volkswagen" },
-    { value: "nissan", label: "Nissan" },
-    { value: "mazda", label: "Mazda" },
-  ];
-
-  const modelOptions = [
-    { value: "camry", label: "Camry" },
-    { value: "corolla", label: "Corolla" },
-    { value: "accord", label: "Accord" },
-    { value: "civic", label: "Civic" },
-    { value: "eclass", label: "E-Class" },
-    { value: "cclass", label: "C-Class" },
-    { value: "x5", label: "X5" },
-    { value: "330", label: "330" },
-  ];
-
   const ratingOptions = [
     { value: "5", label: "5 ulduz" },
     { value: "4", label: "4+ ulduz" },
@@ -104,6 +107,7 @@ export default function SidebarFilter({ isOpen, onClose }) {
     value,
     onChange,
     initialShowCount = 5,
+    emptyHint,
   }) => {
     const showMore = showMoreSections[sectionKey];
     const displayOptions = showMore
@@ -139,25 +143,29 @@ export default function SidebarFilter({ isOpen, onClose }) {
           )}
         >
           <div className="space-y-2">
-            {displayOptions.map((option) => (
-              <label
-                key={option.value}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  name={sectionKey}
-                  value={option.value}
-                  checked={value === option.value}
-                  onChange={(e) => onChange(e.target.value)}
-                  className="w-4 h-4 rounded border-gray-300 text-[#00569C] focus:ring-[#00569C]"
-                />
-                <span className="text-sm text-gray-600">{option.label}</span>
-              </label>
-            ))}
+            {displayOptions.length === 0 && emptyHint ? (
+              <p className="text-sm text-gray-500 py-1">{emptyHint}</p>
+            ) : (
+              displayOptions.map((option) => (
+                <label
+                  key={option.value}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    name={sectionKey}
+                    value={option.value}
+                    checked={value === option.value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="w-4 h-4 rounded border-gray-300 text-[#00569C] focus:ring-[#00569C]"
+                  />
+                  <span className="text-sm text-gray-600">{option.label}</span>
+                </label>
+              ))
+            )}
           </div>
 
-          {hasMore && (
+          {hasMore && displayOptions.length > 0 && (
             <button
               onClick={() => toggleShowMore(sectionKey)}
               className="mt-3 text-sm text-gray-600 underline hover:text-[#00569C] transition-colors cursor-pointer"
@@ -198,6 +206,7 @@ export default function SidebarFilter({ isOpen, onClose }) {
         options={modelOptions}
         value={selectedModel}
         onChange={setSelectedModel}
+        emptyHint={modelSectionEmptyHint}
       />
 
       {/* Rating */}
@@ -355,6 +364,7 @@ export default function SidebarFilter({ isOpen, onClose }) {
             options={modelOptions}
             value={selectedModel}
             onChange={setSelectedModel}
+            emptyHint={modelSectionEmptyHint}
           />
 
           {/* Rating */}
