@@ -28,7 +28,7 @@ async function getProducts() {
 
 export default async function Products() {
   const { products, meta } = await getProducts();
-
+  console.log(products);
   return (
     <div>
       {/* Main Filter Bar */}

@@ -112,7 +112,13 @@ export default function ProductCard({ product }) {
   return (
     <div
       className=" cursor-pointer bg-white rounded-[20px] p-3 lg:p-5 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col"
-      onClick={() => router.push(`/products/${slug}`)}
+      onClick={() =>
+        router.push(
+          productData.category_slugs.parent_category_slug
+            ? `/${productData.category_slugs.parent_category_slug}/${productData.category_slugs.sub_category_slug}/${slug}`
+            : `/${productData.category_slugs.sub_category_slug}/${slug}}`
+        )
+      }
     >
       {/* Image Container */}
       <div className="relative mb-3 lg:mb-4 aspect-square">
