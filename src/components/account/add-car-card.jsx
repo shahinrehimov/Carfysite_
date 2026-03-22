@@ -3,8 +3,10 @@
 import { Plus } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export default function AddCarCard({ onClick }) {
+  const t = useTranslations();
   return (
     <>
       <div className="hidden lg:block bg-white rounded-2xl overflow-hidden border-2 border-gray-200 relative">
@@ -19,7 +21,7 @@ export default function AddCarCard({ onClick }) {
           <div className="w-2/3 h-full relative z-1">
             <Image
               src="/images/banner.png"
-              alt="Add car"
+              alt={t("cars_add_banner_alt")}
               fill
               className="object-cover"
             />
@@ -32,7 +34,7 @@ export default function AddCarCard({ onClick }) {
               className="border-1 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white rounded-full px-10 py-6 text-base font-medium transition-all cursor-pointer min-w-[260px]"
             >
               <Plus className="w-5 h-5 mr-2" />
-              Maşın əlavə et
+              {t("cars_add_card")}
             </Button>
           </div>
         </div>
@@ -42,7 +44,7 @@ export default function AddCarCard({ onClick }) {
         <div className="relative h-[240px]">
           <Image
             src="/images/banner.png"
-            alt="Add car"
+            alt={t("cars_add_banner_alt")}
             fill
             className="object-cover"
           />
@@ -56,7 +58,7 @@ export default function AddCarCard({ onClick }) {
               className=" bg-white/95 backdrop-blur-sm border-2 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white rounded-full px-8 py-6 text-base font-medium transition-all w-full cursor-pointer max-w-[260px]"
             >
               <Plus className="w-5 h-5 mr-2" />
-              Maşın əlavə et
+              {t("cars_add_card")}
             </Button>
           </div>
         </div>

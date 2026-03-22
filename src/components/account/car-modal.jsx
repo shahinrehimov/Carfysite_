@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { X, Upload } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
   Dialog,
@@ -17,27 +18,126 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { yearOptions } from "@/lib/profileCarsService";
 
-export default function CarModal({ isOpen, onClose, onSave, car = null }) {
-  const [formData, setFormData] = useState(
-    car || {
-      brand: "",
-      model: "",
-      engine: "",
-      engineNumber: "",
-      vin: "",
-      fuelType: "",
-      seats: "",
-      type: "",
-      color: "",
-      image: null,
+const inputLikeClass =
+  "w-full rounded-full border-gray-300 min-h-[48px] px-4 border bg-white";
+
+const NONE = "none";
+
+export default function CarModal({ isOpen, onClose, onSave, car = null, libraries }) {
+  const t = useTranslations();
+  const y0 = new Date().getFullYear();
+  const [formData, setFormData] = useState({
+    brandId: "",
+    brandModelId: "",
+    carTypeId: "",
+    year: String(y0),
+    engineVolumeId: NONE,
+    fuelTypeId: NONE,
+    transmissionTypeId: NONE,
+    engineNumber: "",
+    vin: "",
+    fuelType: "",
+    seats: "",
+    type: "",
+    color: "",
+    imagePreview: null,
+    photoFile: null,
+  });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (car) {
+      setFormData({
+        brandId: car.brandId != null ? String(car.brandId) : "",
+        brandModelId: car.brandModelId != null ? String(car.brandModelId) : "",
+        carTypeId: car.carTypeId != null ? String(car.carTypeId) : "",
+        year: car.year ? String(car.year) : String(y0),
+        engineVolumeId:
+          car.engineVolumeId != null ? String(car.engineVolumeId) : NONE,
+        fuelTypeId: car.fuelTypeId != null ? String(car.fuelTypeId) : NONE,
+        transmissionTypeId:
+          car.transmissionTypeId != null
+            ? String(car.transmissionTypeId)
+            : NONE,
+        engineNumber: car.engineNumber ?? "",
+        vin: car.vin ?? "",
+        fuelType: car.fuelType ?? "",
+        seats: car.seats ?? "",
+        type: car.type ?? "",
+        color: car.color ?? "",
+        imagePreview: car.image || null,
+        photoFile: null,
+      });
+    } else {
+      setFormData({
+        brandId: "",
+        brandModelId: "",
+        carTypeId: "",
+        year: String(y0),
+        engineVolumeId: NONE,
+        fuelTypeId: NONE,
+        transmissionTypeId: NONE,
+        engineNumber: "",
+        vin: "",
+        fuelType: "",
+        seats: "",
+        type: "",
+        color: "",
+        imagePreview: null,
+        photoFile: null,
+      });
     }
-  );
+  }, [isOpen, car, y0]);
 
-  const handleSubmit = (e) => {
+  const brands = libraries?.brands ?? [];
+  const carTypes = libraries?.carTypes ?? [];
+  const fuelTypes = libraries?.fuelTypes ?? [];
+  const transmissionTypes = libraries?.transmissionTypes ?? [];
+  const engineVolumes = libraries?.engineVolumes ?? [];
+
+  const selectedBrand = brands.find(
+    (b) => String(b.id) === String(formData.brandId)
+  );
+  const brandModels = selectedBrand?.brand_models ?? [];
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(formData);
-    onClose();
+    const bm = Number(formData.brandModelId);
+    const ct = Number(formData.carTypeId);
+    const yr = Number(formData.year);
+    if (!Number.isFinite(bm) || bm <= 0) return;
+    if (!Number.isFinite(ct) || ct <= 0) return;
+    if (!Number.isFinite(yr) || yr < 1900 || yr > y0 + 1) return;
+
+    const payload = {
+      brandModelId: bm,
+      carTypeId: ct,
+      year: yr,
+      engineVolumeId:
+        formData.engineVolumeId && formData.engineVolumeId !== NONE
+          ? Number(formData.engineVolumeId)
+          : null,
+      fuelTypeId:
+        formData.fuelTypeId && formData.fuelTypeId !== NONE
+          ? Number(formData.fuelTypeId)
+          : null,
+      transmissionTypeId:
+        formData.transmissionTypeId &&
+        formData.transmissionTypeId !== NONE
+          ? Number(formData.transmissionTypeId)
+          : null,
+      engineNumber: formData.engineNumber,
+      vin: formData.vin,
+      photoFile: formData.photoFile,
+      color: formData.color,
+      seats: formData.seats,
+    };
+
+    const ok = await onSave(payload);
+    if (ok !== false) onClose();
   };
 
   const handleImageUpload = (e) => {
@@ -45,29 +145,37 @@ export default function CarModal({ isOpen, onClose, onSave, car = null }) {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result });
+        setFormData((prev) => ({
+          ...prev,
+          imagePreview: reader.result,
+          photoFile: file,
+        }));
       };
       reader.readAsDataURL(file);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
-            Yeni maşın əlavə et
+            {t("cars_add_modal_title")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Image Upload */}
           <div className="flex items-center gap-4">
             <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-              {formData.image ? (
+              {formData.imagePreview ? (
                 <Image
-                  src={formData.image}
-                  alt="Car"
+                  src={formData.imagePreview}
+                  alt={t("cars_image_preview_alt")}
                   width={112}
                   height={112}
                   className="object-cover w-full h-full"
@@ -84,230 +192,267 @@ export default function CarModal({ isOpen, onClose, onSave, car = null }) {
                 className="hidden"
               />
               <span className="text-sm text-[#4A90E2] hover:underline">
-                Fayl seç
+                {t("cars_select_file")}
               </span>
             </label>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-            {/* Brand */}
-            <div>
-              <label className="text-sm text-gray-500 mb-2 block">Marka</label>
-              <Select
-                value={formData.brand}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, brand: value })
-                }
-              >
-                <SelectTrigger className="w-full rounded-full border-gray-300">
-                  <SelectValue placeholder="Seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Audi">Audi</SelectItem>
-                  <SelectItem value="BMW">BMW</SelectItem>
-                  <SelectItem value="Mercedes">Mercedes</SelectItem>
-                  <SelectItem value="Toyota">Toyota</SelectItem>
-                  <SelectItem value="Honda">Honda</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Model */}
-            <div>
-              <label className="text-sm text-gray-500 mb-2 block">Model</label>
-              <Select
-                value={formData.model}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, model: value })
-                }
-              >
-                <SelectTrigger className="w-full rounded-full border-gray-300">
-                  <SelectValue placeholder="Seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="R8">R8</SelectItem>
-                  <SelectItem value="A6">A6</SelectItem>
-                  <SelectItem value="Q7">Q7</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Engine */}
             <div>
               <label className="text-sm text-gray-500 mb-2 block">
-                Mühərrik həcmi
+                {t("cars_brand")}
               </label>
               <Select
-                value={formData.engine}
+                value={formData.brandId || undefined}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, engine: value })
+                  setFormData((prev) => ({
+                    ...prev,
+                    brandId: value,
+                    brandModelId: "",
+                  }))
                 }
               >
-                <SelectTrigger className="w-full rounded-full border-gray-300">
-                  <SelectValue placeholder="Seçin" />
+                <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
+                  <SelectValue placeholder={t("cars_select_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="5.2 L (5,200 sm³)">
-                    5.2 L (5,200 sm³)
-                  </SelectItem>
-                  <SelectItem value="3.0 L (3,000 sm³)">
-                    3.0 L (3,000 sm³)
-                  </SelectItem>
-                  <SelectItem value="2.0 L (2,000 sm³)">
-                    2.0 L (2,000 sm³)
-                  </SelectItem>
+                  {brands.map((b) => (
+                    <SelectItem key={b.id} value={String(b.id)}>
+                      {b.title}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Engine Number */}
             <div>
               <label className="text-sm text-gray-500 mb-2 block">
-                Mühərrik nömrəsi
+                {t("cars_model")}
               </label>
               <Select
+                value={formData.brandModelId || undefined}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, brandModelId: value }))
+                }
+                disabled={!formData.brandId}
+              >
+                <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
+                  <SelectValue placeholder={t("cars_select_placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {brandModels.map((m) => (
+                    <SelectItem key={m.id} value={String(m.id)}>
+                      {m.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-2 block">
+                {t("cars_year")}
+              </label>
+              <Select
+                value={formData.year || undefined}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, year: value }))
+                }
+              >
+                <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
+                  <SelectValue placeholder={t("cars_select_placeholder")} />
+                </SelectTrigger>
+                <SelectContent className="max-h-[240px]">
+                  {yearOptions().map((y) => (
+                    <SelectItem key={y} value={String(y)}>
+                      {y}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-2 block">
+                {t("cars_engine_volume")}
+              </label>
+              <Select
+                value={formData.engineVolumeId}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, engineVolumeId: value }))
+                }
+              >
+                <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
+                  <SelectValue placeholder={t("cars_select_placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>{t("cars_optional_dash")}</SelectItem>
+                  {engineVolumes.map((ev) => (
+                    <SelectItem key={ev.id} value={String(ev.id)}>
+                      {ev.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-2 block">
+                {t("cars_engine_number")}
+              </label>
+              <Input
+                className={inputLikeClass}
                 value={formData.engineNumber}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, engineNumber: value })
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    engineNumber: e.target.value,
+                  }))
                 }
-              >
-                <SelectTrigger className="w-full rounded-full border-gray-300">
-                  <SelectValue placeholder="Seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ABC1234567">ABC1234567</SelectItem>
-                  <SelectItem value="ABC7654321">ABC7654321</SelectItem>
-                </SelectContent>
-              </Select>
+                maxLength={100}
+              />
             </div>
 
-            {/* VIN */}
             <div>
               <label className="text-sm text-gray-500 mb-2 block">
-                Şassi (VIN) nömrəsi
+                {t("cars_vin")}
               </label>
-              <Select
+              <Input
+                className={inputLikeClass}
                 value={formData.vin}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, vin: value })
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, vin: e.target.value }))
                 }
-              >
-                <SelectTrigger className="w-full rounded-full border-gray-300">
-                  <SelectValue placeholder="Seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="WF0AXXWPMAR123456">
-                    WF0AXXWPMAR123456
-                  </SelectItem>
-                  <SelectItem value="WF0AXXWPMAR654321">
-                    WF0AXXWPMAR654321
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                maxLength={100}
+              />
             </div>
 
-            {/* Fuel Type */}
             <div>
               <label className="text-sm text-gray-500 mb-2 block">
-                Yanacaq növü
+                {t("cars_fuel_type")}
               </label>
               <Select
-                value={formData.fuelType}
+                value={formData.fuelTypeId}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, fuelType: value })
+                  setFormData((prev) => ({ ...prev, fuelTypeId: value }))
                 }
               >
-                <SelectTrigger className="w-full rounded-full border-gray-300">
-                  <SelectValue placeholder="Seçin" />
+                <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
+                  <SelectValue placeholder={t("cars_select_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Premium benzindən istifadə olunur">
-                    Premium benzindən istifadə olunur
-                  </SelectItem>
-                  <SelectItem value="Benzin">Benzin</SelectItem>
-                  <SelectItem value="Dizel">Dizel</SelectItem>
-                  <SelectItem value="Elektrik">Elektrik</SelectItem>
-                  <SelectItem value="Hibrid">Hibrid</SelectItem>
+                  <SelectItem value={NONE}>{t("cars_optional_dash")}</SelectItem>
+                  {fuelTypes.map((f) => (
+                    <SelectItem key={f.id} value={String(f.id)}>
+                      {f.title}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Seats */}
             <div>
               <label className="text-sm text-gray-500 mb-2 block">
-                Oturacaq sayı
+                {t("cars_transmission")}
+              </label>
+              <Select
+                value={formData.transmissionTypeId}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    transmissionTypeId: value,
+                  }))
+                }
+              >
+                <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
+                  <SelectValue placeholder={t("cars_select_placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>{t("cars_optional_dash")}</SelectItem>
+                  {transmissionTypes.map((tt) => (
+                    <SelectItem key={tt.id} value={String(tt.id)}>
+                      {tt.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-2 block">
+                {t("cars_seats")}
               </label>
               <Select
                 value={formData.seats}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, seats: value })
+                  setFormData((prev) => ({ ...prev, seats: value }))
                 }
               >
-                <SelectTrigger className="w-full rounded-full border-gray-300">
-                  <SelectValue placeholder="Seçin" />
+                <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
+                  <SelectValue placeholder={t("cars_select_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="2 (iki oturacaq)">
-                    2 (iki oturacaq)
+                    {t("cars_seats_2")}
                   </SelectItem>
                   <SelectItem value="4 (dörd oturacaq)">
-                    4 (dörd oturacaq)
+                    {t("cars_seats_4")}
                   </SelectItem>
                   <SelectItem value="5 (beş oturacaq)">
-                    5 (beş oturacaq)
+                    {t("cars_seats_5")}
                   </SelectItem>
                   <SelectItem value="7 (yeddi oturacaq)">
-                    7 (yeddi oturacaq)
+                    {t("cars_seats_7")}
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Car Type */}
             <div>
               <label className="text-sm text-gray-500 mb-2 block">
-                Avtomobil tipi
+                {t("cars_type")}
               </label>
               <Select
-                value={formData.type}
+                value={formData.carTypeId || undefined}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, type: value })
+                  setFormData((prev) => ({ ...prev, carTypeId: value }))
                 }
               >
-                <SelectTrigger className="w-full rounded-full border-gray-300">
-                  <SelectValue placeholder="Seçin" />
+                <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
+                  <SelectValue placeholder={t("cars_select_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="İdman avtomobili / coupe / supercar">
-                    İdman avtomobili / coupe / supercar
-                  </SelectItem>
-                  <SelectItem value="Sedan">Sedan</SelectItem>
-                  <SelectItem value="SUV">SUV</SelectItem>
-                  <SelectItem value="Hetçbek">Hetçbek</SelectItem>
-                  <SelectItem value="Kupe">Kupe</SelectItem>
+                  {carTypes.map((ct) => (
+                    <SelectItem key={ct.id} value={String(ct.id)}>
+                      {ct.title}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Color */}
             <div>
-              <label className="text-sm text-gray-500 mb-2 block">Rəng</label>
+              <label className="text-sm text-gray-500 mb-2 block">
+                {t("cars_color")}
+              </label>
               <Select
                 value={formData.color}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, color: value })
+                  setFormData((prev) => ({ ...prev, color: value }))
                 }
               >
-                <SelectTrigger className="w-full rounded-full border-gray-300">
-                  <SelectValue placeholder="Seçin" />
+                <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
+                  <SelectValue placeholder={t("cars_select_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Ağ">Ağ</SelectItem>
-                  <SelectItem value="Qara">Qara</SelectItem>
-                  <SelectItem value="Gümüşü">Gümüşü</SelectItem>
-                  <SelectItem value="Qırmızı">Qırmızı</SelectItem>
-                  <SelectItem value="Mavi">Mavi</SelectItem>
-                  <SelectItem value="Yaşıl">Yaşıl</SelectItem>
+                  <SelectItem value="Ağ">{t("cars_color_white")}</SelectItem>
+                  <SelectItem value="Qara">{t("cars_color_black")}</SelectItem>
+                  <SelectItem value="Gümüşü">
+                    {t("cars_color_silver")}
+                  </SelectItem>
+                  <SelectItem value="Qırmızı">{t("cars_color_red")}</SelectItem>
+                  <SelectItem value="Mavi">{t("cars_color_blue")}</SelectItem>
+                  <SelectItem value="Yaşıl">{t("cars_color_green")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -318,7 +463,7 @@ export default function CarModal({ isOpen, onClose, onSave, car = null }) {
               type="submit"
               className="w-full bg-[#4A90E2] hover:bg-[#357ABD] text-white py-6 text-base font-medium rounded-full"
             >
-              Əlavə et
+              {t("cars_add_submit")}
             </Button>
           </div>
         </form>
