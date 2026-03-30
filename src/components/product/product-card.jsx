@@ -12,13 +12,14 @@ import { addItem, setLoading, setError } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 
 export default function ProductCard({ product }) {
+  console.log(product);
   const [isLiked, setIsLiked] = useState(product.in_wishlist || false);
   const [inBasket, setInBasket] = useState(product.in_basket || false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
   const { toast } = useToast();
-
+  console.log(isLiked);
   // Extract data from API structure
   const productData = product.product || product;
   const imageUrl =
@@ -35,14 +36,14 @@ export default function ProductCard({ product }) {
   const handleWishlistToggle = async (e) => {
     e.stopPropagation();
 
-    if (!product?.id) {
-      console.error("Product ID is required for wishlist operations");
+    if (!product?.uuid) {
+      console.error("Product UUID is required for wishlist operations");
       return;
     }
 
     try {
       if (isLiked) {
-        const result = await wishlistService.remove(product.id);
+        const result = await wishlistService.remove(product.uuid);
         if (result.success) {
           setIsLiked(false);
           toast({
@@ -52,7 +53,7 @@ export default function ProductCard({ product }) {
           });
         }
       } else {
-        const result = await wishlistService.add(product.id);
+        const result = await wishlistService.add(product.uuid);
         if (result.success) {
           setIsLiked(true);
           toast({
@@ -76,7 +77,7 @@ export default function ProductCard({ product }) {
   const handleAddToCart = async (e) => {
     e.stopPropagation();
 
-    if (isAddingToCart || !product?.id || inBasket) {
+    if (isAddingToCart || !product?.uuid || inBasket) {
       return;
     }
 
@@ -84,7 +85,7 @@ export default function ProductCard({ product }) {
 
     try {
       dispatch(setLoading(true));
-      const response = await basketService.add(product.id, 1);
+      const response = await basketService.add(product.uuid, 1);
       dispatch(addItem(response));
 
       // Update local state
@@ -114,9 +115,9 @@ export default function ProductCard({ product }) {
       className=" cursor-pointer bg-white rounded-[20px] p-3 lg:p-5 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col"
       onClick={() =>
         router.push(
-          productData.category_slugs.parent_category_slug
-            ? `/${productData.category_slugs.parent_category_slug}/${productData.category_slugs.sub_category_slug}/${slug}`
-            : `/${productData.category_slugs.sub_category_slug}/${slug}}`
+          product.product.category_slugs.parent_category_slug
+            ? `/${product.product.category_slugs.parent_category_slug}/${product.product.category_slugs.sub_category_slug}/${slug}?variant=${product.variant_slug}&seller=${product.seller.store_code}`
+            : `/${product.product.category_slugs.sub_category_slug}/${slug}?variant=${product.variant_slug}&seller=${product.seller.store_code}`
         )
       }
     >

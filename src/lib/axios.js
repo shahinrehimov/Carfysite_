@@ -31,8 +31,13 @@ const createAxiosInstance = (serverSide = false) => {
         } catch {
           currentLang = "az";
         }
-        // Get auth token from cookies on server side
-        authToken = getCookieValue("auth_token");
+        try {
+          const { cookies } = await import("next/headers");
+          const cookieStore = await cookies();
+          authToken = cookieStore.get("auth_token")?.value;
+        } catch {
+          authToken = undefined;
+        }
       } else {
         currentLang = getCookieValue("NEXT_LOCALE") || "az";
         authToken = getCookieValue("auth_token");

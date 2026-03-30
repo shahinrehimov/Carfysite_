@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 
 export default function ProductImageGallery({ images, productTitle }) {
+  const imagesList = images.filter((image) => image !== null);
   const [selectedImage, setSelectedImage] = useState(0);
 
   return (
@@ -11,7 +12,7 @@ export default function ProductImageGallery({ images, productTitle }) {
       {/* Main Image */}
       <div className="bg-white rounded-xl overflow-hidden border border-gray-200 aspect-square flex items-center justify-center p-8 lg:p-12">
         <Image
-          src={images[selectedImage]}
+          src={imagesList[selectedImage]}
           alt={productTitle}
           width={500}
           height={500}
@@ -21,7 +22,7 @@ export default function ProductImageGallery({ images, productTitle }) {
 
       {/* Thumbnail Gallery */}
       <div className="grid grid-cols-6 gap-2 lg:gap-3">
-        {images.map((image, index) => (
+        {imagesList.map((image, index) => (
           <button
             key={index}
             onClick={() => setSelectedImage(index)}

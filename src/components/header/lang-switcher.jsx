@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 
@@ -17,6 +18,7 @@ export default function LangSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -34,7 +36,9 @@ export default function LangSwitcher() {
 
   const handleLanguageChange = (newLocale) => {
     setIsOpen(false);
-    router.replace(pathname, { locale: newLocale });
+    const query = searchParams.toString();
+    const href = query ? `${pathname}?${query}` : pathname;
+    router.replace(href, { locale: newLocale });
   };
 
   return (

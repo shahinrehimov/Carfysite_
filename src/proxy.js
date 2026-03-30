@@ -39,6 +39,7 @@ export default async function middleware(request) {
   // If no valid locale is found in the pathname, redirect to default locale
   if (!isValidLocale && pathname === "/") {
     const url = new URL(`/${defaultLocale}`, request.url);
+    url.search = request.nextUrl.search;
     return NextResponse.redirect(url);
   }
 
@@ -49,6 +50,7 @@ export default async function middleware(request) {
     !pathname.startsWith(`/${defaultLocale}`)
   ) {
     const url = new URL(`/${defaultLocale}${pathname}`, request.url);
+    url.search = request.nextUrl.search;
     return NextResponse.redirect(url);
   }
 

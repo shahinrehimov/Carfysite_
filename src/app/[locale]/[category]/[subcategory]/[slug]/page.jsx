@@ -11,10 +11,10 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { serverApi } from "@/lib/axios";
 
-const getProduct = async (category, subcategory, slug) => {
+const getProduct = async (category, subcategory, slug, seller, variant) => {
   try {
     const response = await serverApi.get(
-      `/products/show/${category}/${subcategory}/${slug}`
+      `/products/show/${category}/${subcategory}/${slug}?seller=${seller}&variant=${variant}&with_related=yes`
     );
     return response.data.data;
   } catch (error) {
@@ -25,9 +25,10 @@ const getProduct = async (category, subcategory, slug) => {
   }
 };
 
-export default async function ProductDetail({ params }) {
+export default async function ProductDetail({ params, searchParams }) {
   const { category, subcategory, slug } = await params;
-  const data = await getProduct(category, subcategory, slug);
+  const { seller, variant } = await searchParams;
+  const data = await getProduct(category, subcategory, slug, seller, variant);
   console.log(data);
   // Sample product data
   // In production, this would be fetched from API using the slug parameter
@@ -126,9 +127,23 @@ export default async function ProductDetail({ params }) {
           <BreadcrumbView
             data={[
               { id: 1, type: "link", href: "/", title: "Ana səhifə" },
-              { id: 2, type: "link", href: "/", title: "Mühərrik hissələri" },
-              { id: 3, type: "link", href: "/", title: "Mator" },
-              { id: 4, type: "page", title: "BYD Mator" },
+              ...(data.product.main_category.parent
+                ? [
+                    {
+                      id: 2,
+                      type: "link",
+                      href: `/${data.product.main_category.parent.slug}`,
+                      title: data.product.main_category.parent.title,
+                    },
+                    {
+                      id: 3,
+                      type: "link",
+                      href: `/${data.product.main_category.slug}`,
+                      title: data.product.main_category.title,
+                    },
+                  ]
+                : []),
+              { id: 4, type: "page", title: data.title },
             ]}
           />
         </div>
@@ -138,14 +153,14 @@ export default async function ProductDetail({ params }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 pb-10">
               <div className="col-span-1">
                 <ProductImageGallery
-                  images={product.images}
+                  images={[data.main_image, data.hover_image, ...data.images]}
                   productTitle={product.title}
                 />
               </div>
 
               <div className="col-span-1 flex flex-col justify-between">
                 <div>
-                  <ProductInfo product={product} />
+                  <ProductInfo data={data} />
                   <ProductActions />
                 </div>
                 <ProductSpecifications

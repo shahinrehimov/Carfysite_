@@ -8,6 +8,7 @@ import { serverApi } from "@/lib/axios";
 async function getProducts() {
   try {
     const response = await serverApi.get("/products/load?limit=8");
+    console.log(response);
     return {
       products: response.data.data,
       meta: response.data.meta,
