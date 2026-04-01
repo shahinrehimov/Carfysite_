@@ -163,20 +163,18 @@ export default async function ProductDetail({ params, searchParams }) {
                   <ProductInfo data={data} />
                   <ProductActions />
                 </div>
-                <ProductSpecifications
-                  specifications={product.specifications}
-                />
+                <ProductSpecifications data={data} />
               </div>
             </div>
 
             <div className="pb-10">
               <p className="text-gray-700 text-sm lg:text-base leading-relaxed text-justify">
-                {product.description}
+                {data.product.description}
               </p>
             </div>
 
             {/* product reviews */}
-            <ProductReviews product={product} reviews={reviews} />
+            <ProductReviews data={data} />
           </div>
           <div className="col-span-1 hidden lg:block">
             <div className="bg-[#F3F9FE] rounded-4xl p-6 lg:p-8 flex flex-col items-center justify-center gap-4">

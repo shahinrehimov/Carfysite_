@@ -5,23 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import ReviewModal from "./review-modal";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
-export default function ProductReviews({ product, reviews = [] }) {
+export default function ProductReviews({ data }) {
+  console.log(data);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const t = useTranslations();
   const [displayCount, setDisplayCount] = useState(4);
 
+  const averageRating = data.ratings.average;
   // Calculate average rating
-  const averageRating =
-    reviews.length > 0
-      ? (
-          reviews.reduce((acc, review) => acc + review.rating, 0) /
-          reviews.length
-        ).toFixed(1)
-      : 0;
+  // const averageRating =
+  //   reviews.length > 0
+  //     ? (
+  //         reviews.reduce((acc, review) => acc + review.rating, 0) /
+  //         reviews.length
+  //       ).toFixed(1)
+  //     : 0;
 
   // Display limited reviews
-  const displayedReviews = reviews.slice(0, displayCount);
-  const hasMoreReviews = reviews.length > displayCount;
+  const displayedReviews = data.reviews.slice(0, displayCount);
+  const hasMoreReviews = data.reviews.length > displayCount;
 
   const renderStars = (rating, size = "w-5 h-5") => {
     return Array.from({ length: 5 }).map((_, index) => (
@@ -72,7 +76,7 @@ export default function ProductReviews({ product, reviews = [] }) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-4">
           <h2 className="text-xl lg:text-2xl font-semibold text-gray-900">
-            Məhsul haqqında rəylər və reytinq
+            {t("product_reviews")}
           </h2>
           <div className="flex items-center gap-2">
             <div className="flex">{renderStars(averageRating, "w-6 h-6")}</div>
@@ -87,14 +91,14 @@ export default function ProductReviews({ product, reviews = [] }) {
           className="rounded-full px-6"
           onClick={() => setIsModalOpen(true)}
         >
-          Rey yaz
+          {t("write_review")}
         </Button>
       </div>
 
       {/* Reviews List */}
       {reviews.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
-          <p>Hələ heç bir rəy yoxdur. İlk rəyi siz yazın!</p>
+          <p>{t("no_reviews")}</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -105,7 +109,7 @@ export default function ProductReviews({ product, reviews = [] }) {
             >
               <div className="flex gap-4">
                 {/* Avatar */}
-                <div className="w-16 h-16 rounded-full bg-[#C6D9E8] flex items-center justify-center flex-shrink-0">
+                <div className="w-16 h-16 rounded-full bg-[#C6D9E8] flex items-center justify-center shrink-0">
                   <svg
                     width="40"
                     height="40"
@@ -144,7 +148,7 @@ export default function ProductReviews({ product, reviews = [] }) {
                   </p>
 
                   {/* Review Images */}
-                  {review.images && review.images.length > 0 && (
+                  {/* {review.images && review.images.length > 0 && (
                     <div className="flex gap-2 mt-4 flex-wrap">
                       {review.images.map((image, index) => (
                         <div
@@ -161,7 +165,7 @@ export default function ProductReviews({ product, reviews = [] }) {
                         </div>
                       ))}
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
@@ -176,7 +180,7 @@ export default function ProductReviews({ product, reviews = [] }) {
             onClick={() => setDisplayCount((prev) => prev + 4)}
             className="text-[#00569C] hover:text-[#00569C]/80 font-medium text-sm underline"
           >
-            Daha çox göstər
+            {t("show_more")}
           </button>
         </div>
       )}
