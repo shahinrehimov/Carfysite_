@@ -10,6 +10,7 @@ import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { serverApi } from "@/lib/axios";
+import SimilarProductsList from "../../../../components/product/similar-products-list";
 
 const getProduct = async (category, subcategory, seller, variant) => {
   try {
@@ -29,94 +30,8 @@ export default async function ProductDetail({ params, searchParams }) {
   const { category, subcategory } = await params;
   const { seller, variant } = await searchParams;
   const data = await getProduct(category, subcategory, seller, variant);
+
   console.log(data);
-  // Sample product data
-  // In production, this would be fetched from API using the slug parameter
-  const product = {
-    title: "Automobile spare part",
-    subtitle: "362428345 Automobile spare part 2",
-    rating: 4.9,
-    reviewCount: 13,
-    discount: "10% endirim kuponu",
-    currentPrice: "2 499.00",
-    oldPrice: "3 119.00",
-    currency: "₼",
-    productCode: "362428345",
-    specifications: [
-      { label: "Şəhər", value: "Bakı" },
-      { label: "Kateqoriya", value: "Mator" },
-      { label: "Marka", value: "BYD" },
-      { label: "Model", value: "87568" },
-      { label: "Vaziyyət", value: "İşlənmiş" },
-      { label: "İl", value: "2024" },
-    ],
-    images: [
-      "/images/product-1.png",
-      "/images/product-2.png",
-      "/images/product-3.png",
-      "/images/product-4.png",
-      "/images/product-1.png",
-      "/images/product-2.png",
-    ],
-    description:
-      "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.",
-  };
-
-  // Sample reviews data
-  const reviews = [
-    {
-      id: 1,
-      username: "Aysel Mammadova",
-      rating: 5,
-      comment:
-        "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.",
-      date: "2025-08-31T08:04:00",
-      images: [],
-    },
-    {
-      id: 2,
-      username: "Kamran Aliyev",
-      rating: 5,
-      comment:
-        "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.",
-      date: "2025-08-31T08:04:00",
-      images: [],
-    },
-    {
-      id: 3,
-      username: "Nigar Hasanova",
-      rating: 5,
-      comment:
-        "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.",
-      date: "2025-08-31T08:04:00",
-      images: [],
-    },
-    {
-      id: 4,
-      username: "Elvin Quliyev",
-      rating: 5,
-      comment:
-        "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.",
-      date: "2025-08-31T08:04:00",
-      images: [],
-    },
-  ];
-
-  // Similar products data
-  const similarProducts = Array.from({ length: 8 }, (_, index) => {
-    const imageNumber = (index % 4) + 1;
-    return {
-      id: index + 1,
-      image: `/images/product-${imageNumber}.png`,
-      title: "Automobile spare part",
-      code: `362428345`,
-      price: 365.0,
-      oldPrice: 365.0,
-      rating: 5,
-      reviews: 72,
-    };
-  });
-
   return (
     <div>
       <div className="bg-[#F8F8F8]">
@@ -127,9 +42,17 @@ export default async function ProductDetail({ params, searchParams }) {
           <BreadcrumbView
             data={[
               { id: 1, type: "link", href: "/", title: "Ana səhifə" },
-              { id: 2, type: "link", href: "/", title: "Mühərrik hissələri" },
-              { id: 3, type: "link", href: "/", title: "Mator" },
-              { id: 4, type: "page", title: "BYD Mator" },
+              ...(data.product.main_category
+                ? [
+                    {
+                      id: 2,
+                      type: "link",
+                      href: `/${data.product.main_category.slug}`,
+                      title: data.product.main_category.title,
+                    },
+                  ]
+                : []),
+              { id: 3, type: "page", title: data.title },
             ]}
           />
         </div>
@@ -139,30 +62,35 @@ export default async function ProductDetail({ params, searchParams }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 pb-10">
               <div className="col-span-1">
                 <ProductImageGallery
-                  images={product.images}
-                  productTitle={product.title}
+                  images={[
+                    data.main_image,
+                    data.hover_image,
+                    ...data.images,
+                    data.product.main_image || null,
+                    data.product.hover_image || null,
+                    ...(data.product.images || []),
+                  ]}
+                  productTitle={data.title}
                 />
               </div>
 
               <div className="col-span-1 flex flex-col justify-between">
                 <div>
                   <ProductInfo data={data} />
-                  <ProductActions />
+                  <ProductActions data={data} />
                 </div>
-                <ProductSpecifications
-                  specifications={product.specifications}
-                />
+                <ProductSpecifications data={data} />
               </div>
             </div>
 
             <div className="pb-10">
               <p className="text-gray-700 text-sm lg:text-base leading-relaxed text-justify">
-                {product.description}
+                {data.description}
               </p>
             </div>
 
             {/* product reviews */}
-            <ProductReviews product={product} reviews={reviews} />
+            <ProductReviews data={data} />
           </div>
           <div className="col-span-1 hidden lg:block">
             <div className="bg-[#F3F9FE] rounded-4xl p-6 lg:p-8 flex flex-col items-center justify-center gap-4">
@@ -205,20 +133,7 @@ export default async function ProductDetail({ params, searchParams }) {
       </div>
 
       {/* Similar Products Section */}
-      <div className="pb-10 py-10  bg-[#F8F8F8]">
-        <div className="container">
-          <div className="px-0 lg:px-20">
-            <h2 className="text-[24px] lg:text-[32px] font-medium text-center text-gray-900 mb-6">
-              Bənzər məhsullar
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {similarProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      <SimilarProductsList similarProducts={data.related_products} />
     </div>
   );
 }

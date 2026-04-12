@@ -126,7 +126,7 @@ const ProductCard = ({
             {/* Quantity Controls */}
             <div className="flex items-center border border-gray-300 rounded-full overflow-hidden">
               <button
-                onClick={() => onDecrement(product.id)}
+                onClick={() => onDecrement(product.uuid)}
                 className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition-colors"
                 disabled={isLoading || quantity <= 1}
               >
@@ -136,7 +136,7 @@ const ProductCard = ({
                 {quantity}
               </span>
               <button
-                onClick={() => onIncrement(product.id)}
+                onClick={() => onIncrement(product.uuid)}
                 className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition-colors"
                 disabled={isLoading}
               >

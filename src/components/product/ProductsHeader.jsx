@@ -2,7 +2,11 @@
 import React, { useState } from "react";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 
-export default function ProductsHeader({ totalResults, searchTerm, onFilterOpen }) {
+export default function ProductsHeader({
+  totalResults,
+  searchTerm,
+  onFilterOpen,
+}) {
   const [sortOpen, setSortOpen] = useState(false);
   const [selectedSort, setSelectedSort] = useState("Sıralama");
 
@@ -15,10 +19,10 @@ export default function ProductsHeader({ totalResults, searchTerm, onFilterOpen 
   ];
 
   return (
-    <div className="flex items-center justify-between mb-6">
-      <h1 className="text-lg lg:text-xl font-medium text-gray-900">
+    <div className="flex items-center justify-end mb-6">
+      {/* <h1 className="text-lg lg:text-xl font-medium text-gray-900">
         <span className="text-[#00569C]">"{searchTerm}"</span> üzrə {totalResults} nəticə
-      </h1>
+      </h1> */}
 
       <button
         onClick={onFilterOpen}
@@ -71,4 +75,3 @@ export default function ProductsHeader({ totalResults, searchTerm, onFilterOpen 
     </div>
   );
 }
-

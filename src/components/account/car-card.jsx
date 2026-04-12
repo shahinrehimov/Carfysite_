@@ -64,6 +64,7 @@ export default function CarCard({
   const fuelTypes = libraries?.fuelTypes ?? [];
   const transmissionTypes = libraries?.transmissionTypes ?? [];
   const engineVolumes = libraries?.engineVolumes ?? [];
+  const colors = libraries?.colors ?? [];
 
   const selectedBrand = brands.find(
     (b) => String(b.id) === String(editData.brandId ?? "")
@@ -100,7 +101,8 @@ export default function CarCard({
       engineNumber: editData.engineNumber ?? "",
       vin: editData.vin ?? "",
       photoFile,
-      color: editData.color ?? "",
+      colorId: editData.colorId ? Number(editData.colorId) : null,
+      color: colors.find((c) => String(c.id) === String(editData.colorId))?.title ?? editData.color ?? "",
       seats: editData.seats ?? "",
     };
 
@@ -124,8 +126,9 @@ export default function CarCard({
 
   const mergeListCosmetic = (fromApi, listCar) => ({
     ...fromApi,
-    color: listCar?.color ?? fromApi.color ?? "",
-    seats: listCar?.seats ?? fromApi.seats ?? "",
+    color: fromApi.color || listCar?.color || "",
+    colorId: fromApi.colorId ?? listCar?.colorId ?? null,
+    seats: fromApi.seats || listCar?.seats || "",
   });
 
   const openEdit = async () => {
@@ -186,7 +189,7 @@ export default function CarCard({
       <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 lg:p-8">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
               {displayImage ? (
                 <Image
                   src={displayImage}
@@ -451,30 +454,16 @@ export default function CarCard({
             <label className="text-sm text-gray-500 mb-2 block">
               {t("cars_seats")}
             </label>
-            <Select
-              value={editData.seats || undefined}
-              onValueChange={(value) =>
-                setEditData((prev) => ({ ...prev, seats: value }))
+            <Input
+              type="number"
+              min={1}
+              max={99}
+              className={inputLikeClass}
+              value={editData.seats ?? ""}
+              onChange={(e) =>
+                setEditData((prev) => ({ ...prev, seats: e.target.value }))
               }
-            >
-              <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2 (iki oturacaq)">
-                  {t("cars_seats_2")}
-                </SelectItem>
-                <SelectItem value="4 (dörd oturacaq)">
-                  {t("cars_seats_4")}
-                </SelectItem>
-                <SelectItem value="5 (beş oturacaq)">
-                  {t("cars_seats_5")}
-                </SelectItem>
-                <SelectItem value="7 (yeddi oturacaq)">
-                  {t("cars_seats_7")}
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            />
           </div>
 
           <div>
@@ -509,20 +498,45 @@ export default function CarCard({
               {t("cars_color")}
             </label>
             <Select
-              value={editData.color || undefined}
+              value={editData.colorId != null ? String(editData.colorId) : undefined}
               onValueChange={(value) =>
-                setEditData((prev) => ({ ...prev, color: value }))
+                setEditData((prev) => ({ ...prev, colorId: value }))
               }
             >
-              <SelectTrigger className="w-full  rounded-full border-gray-300 min-h-[48px]">
-                <SelectValue />
+              <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
+                <SelectValue placeholder={t("cars_select_placeholder")}>
+                  {editData.colorId != null
+                    ? (() => {
+                        const found = colors.find(
+                          (c) => String(c.id) === String(editData.colorId)
+                        );
+                        return (
+                          <span className="flex items-center gap-2">
+                            {found && (
+                              <span
+                                className="inline-block w-4 h-4 rounded-full border border-gray-300 shrink-0"
+                                style={{ backgroundColor: found.hex_code }}
+                              />
+                            )}
+                            {found?.title ?? editData.color}
+                          </span>
+                        );
+                      })()
+                    : null}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Ağ">{t("cars_color_white")}</SelectItem>
-                <SelectItem value="Qara">{t("cars_color_black")}</SelectItem>
-                <SelectItem value="Gümüşü">
-                  {t("cars_color_silver")}
-                </SelectItem>
+                {colors.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    <span className="flex items-center gap-2">
+                      <span
+                        className="inline-block w-4 h-4 rounded-full border border-gray-300 shrink-0"
+                        style={{ backgroundColor: c.hex_code }}
+                      />
+                      {c.title}
+                    </span>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -541,7 +555,7 @@ export default function CarCard({
       <div className="hidden lg:block bg-white rounded-2xl border-2 border-gray-200 p-6">
         <div className="flex items-center justify-between gap-6">
           <div className="flex items-center gap-4 flex-1">
-            <div className="w-32 h-32 rounded-xl bg-gray-100 flex-shrink-0 overflow-hidden">
+            <div className="w-32 h-32 rounded-xl bg-gray-100 shrink-0 overflow-hidden">
               {car.image ? (
                 <Image
                   src={car.image}
@@ -609,7 +623,7 @@ export default function CarCard({
       <div className="lg:hidden bg-white rounded-2xl border-2 border-gray-200 p-4">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-start gap-3 flex-1">
-            <div className="w-24 h-24 rounded-xl bg-gray-100 flex-shrink-0 overflow-hidden">
+            <div className="w-24 h-24 rounded-xl bg-gray-100 shrink-0 overflow-hidden">
               {car.image ? (
                 <Image
                   src={car.image}

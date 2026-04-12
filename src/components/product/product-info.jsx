@@ -61,9 +61,11 @@ export default function ProductInfo({ data }) {
 
       {/* Product Code */}
 
-      <div className="text-sm ">
-        {t("oem_code")}: {data.oem_code}
-      </div>
+      {data.oem_code && (
+        <div className="text-sm ">
+          {t("oem_code")}: {data.oem_code}
+        </div>
+      )}
     </div>
   );
 }

@@ -11,12 +11,13 @@ export function mapApiCarToUi(row) {
     brand: row.brand?.title ?? "",
     model: row.brand_model?.title ?? "",
     year: row.year != null ? String(row.year) : "",
-    color: "",
+    color: row.car_color?.title ?? "",
+    colorId: row.car_color?.id != null ? row.car_color.id : null,
     fuelType: row.fuel_type?.title ?? "",
     engine: row.engine_volume?.title ?? "",
     engineNumber: row.engine_number ?? "",
     vin: row.vin_number ?? "",
-    seats: "",
+    seats: row.seat_count != null ? String(row.seat_count) : "",
     type: row.car_type?.title ?? "",
     image: row.photo || null,
     transmissionType: row.transmission_type?.title ?? "",
@@ -184,12 +185,14 @@ export const profileCarsService = {
         fuelTypesRes,
         transmissionRes,
         engineVolumesRes,
+        colorsRes,
       ] = await Promise.all([
         api.get("/car-libraries/brands", { params: { with_models: "yes" } }),
         api.get("/car-libraries/car-types"),
         api.get("/car-libraries/fuel-types"),
         api.get("/car-libraries/transmission-types"),
         api.get("/car-libraries/engine-volumes"),
+        api.get("/car-libraries/car-colors"),
       ]);
 
       return {
@@ -200,6 +203,7 @@ export const profileCarsService = {
           fuelTypes: fuelTypesRes.data?.data ?? [],
           transmissionTypes: transmissionRes.data?.data ?? [],
           engineVolumes: engineVolumesRes.data?.data ?? [],
+          colors: colorsRes.data?.data ?? [],
         },
       };
     } catch (error) {
@@ -216,6 +220,7 @@ export const profileCarsService = {
           fuelTypes: [],
           transmissionTypes: [],
           engineVolumes: [],
+          colors: [],
         },
       };
     }
@@ -246,6 +251,12 @@ export function buildCarFormData(v) {
   }
   if (v.vin) {
     fd.append("vin_number", String(v.vin).slice(0, 100));
+  }
+  if (v.colorId) {
+    fd.append("car_color_id", String(v.colorId));
+  }
+  if (v.seats) {
+    fd.append("seat_count", String(v.seats));
   }
   if (v.photoFile instanceof File) {
     fd.append("photo", v.photoFile);

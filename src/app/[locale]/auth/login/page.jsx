@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/axios";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { setCookie, removeCookie, deleteCookie } from "cookies-next";
+import { setCookie, deleteCookie } from "cookies-next";
 
 // Phone login components
 import { PhoneStep } from "./phone-login/PhoneStep";
@@ -184,13 +184,18 @@ export default function LoginPage() {
         });
 
         // Clear guest identifier when user logs in
-        removeCookie("guest_identifier");
+        deleteCookie("guest_identifier");
 
         // Redirect to home or dashboard
         router.push("/");
       }
     } catch (err) {
-      setError(err.response?.data?.message || t("login_failed"));
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          t("login_failed")
+      );
     } finally {
       setLoading(false);
     }

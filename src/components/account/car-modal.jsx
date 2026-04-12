@@ -42,7 +42,7 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
     fuelType: "",
     seats: "",
     type: "",
-    color: "",
+    colorId: "",
     imagePreview: null,
     photoFile: null,
   });
@@ -67,7 +67,7 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
         fuelType: car.fuelType ?? "",
         seats: car.seats ?? "",
         type: car.type ?? "",
-        color: car.color ?? "",
+        colorId: car.colorId != null ? String(car.colorId) : "",
         imagePreview: car.image || null,
         photoFile: null,
       });
@@ -85,7 +85,7 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
         fuelType: "",
         seats: "",
         type: "",
-        color: "",
+        colorId: "",
         imagePreview: null,
         photoFile: null,
       });
@@ -97,6 +97,7 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
   const fuelTypes = libraries?.fuelTypes ?? [];
   const transmissionTypes = libraries?.transmissionTypes ?? [];
   const engineVolumes = libraries?.engineVolumes ?? [];
+  const colors = libraries?.colors ?? [];
 
   const selectedBrand = brands.find(
     (b) => String(b.id) === String(formData.brandId)
@@ -132,7 +133,8 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
       engineNumber: formData.engineNumber,
       vin: formData.vin,
       photoFile: formData.photoFile,
-      color: formData.color,
+      colorId: formData.colorId ? Number(formData.colorId) : null,
+      color: colors.find((c) => String(c.id) === formData.colorId)?.title ?? "",
       seats: formData.seats,
     };
 
@@ -171,7 +173,7 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex items-center gap-4">
-            <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
               {formData.imagePreview ? (
                 <Image
                   src={formData.imagePreview}
@@ -382,30 +384,16 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
               <label className="text-sm text-gray-500 mb-2 block">
                 {t("cars_seats")}
               </label>
-              <Select
+              <Input
+                type="number"
+                min={1}
+                max={99}
+                className={inputLikeClass}
                 value={formData.seats}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, seats: value }))
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, seats: e.target.value }))
                 }
-              >
-                <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
-                  <SelectValue placeholder={t("cars_select_placeholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2 (iki oturacaq)">
-                    {t("cars_seats_2")}
-                  </SelectItem>
-                  <SelectItem value="4 (dörd oturacaq)">
-                    {t("cars_seats_4")}
-                  </SelectItem>
-                  <SelectItem value="5 (beş oturacaq)">
-                    {t("cars_seats_5")}
-                  </SelectItem>
-                  <SelectItem value="7 (yeddi oturacaq)">
-                    {t("cars_seats_7")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div>
@@ -436,23 +424,45 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
                 {t("cars_color")}
               </label>
               <Select
-                value={formData.color}
+                value={formData.colorId}
                 onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, color: value }))
+                  setFormData((prev) => ({ ...prev, colorId: value }))
                 }
               >
                 <SelectTrigger className="w-full rounded-full border-gray-300 min-h-[48px]">
-                  <SelectValue placeholder={t("cars_select_placeholder")} />
+                  <SelectValue placeholder={t("cars_select_placeholder")}>
+                    {formData.colorId
+                      ? (() => {
+                          const found = colors.find(
+                            (c) => String(c.id) === formData.colorId
+                          );
+                          return (
+                            <span className="flex items-center gap-2">
+                              {found && (
+                                <span
+                                  className="inline-block w-4 h-4 rounded-full border border-gray-300 shrink-0"
+                                  style={{ backgroundColor: found.hex_code }}
+                                />
+                              )}
+                              {found?.title ?? formData.colorId}
+                            </span>
+                          );
+                        })()
+                      : null}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Ağ">{t("cars_color_white")}</SelectItem>
-                  <SelectItem value="Qara">{t("cars_color_black")}</SelectItem>
-                  <SelectItem value="Gümüşü">
-                    {t("cars_color_silver")}
-                  </SelectItem>
-                  <SelectItem value="Qırmızı">{t("cars_color_red")}</SelectItem>
-                  <SelectItem value="Mavi">{t("cars_color_blue")}</SelectItem>
-                  <SelectItem value="Yaşıl">{t("cars_color_green")}</SelectItem>
+                  {colors.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="inline-block w-4 h-4 rounded-full border border-gray-300 shrink-0"
+                          style={{ backgroundColor: c.hex_code }}
+                        />
+                        {c.title}
+                      </span>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

@@ -10,28 +10,29 @@ import { cn } from "@/lib/utils";
 import { addressService } from "@/lib/addressService";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/axios/api";
+import Map from "@/components/ui/map";
 
 // Validation schema for address
 const addressSchema = yup.object().shape({
   address_type_id: yup
     .number()
-    .required("Address type is required")
-    .positive("Please select a valid address type"),
+    .required("address_type_required")
+    .positive("address_type_required"),
   city_id: yup
     .number()
-    .required("City is required")
-    .positive("Please select a valid city"),
+    .required("city_required")
+    .positive("city_required"),
   address_line_1: yup
     .string()
-    .required("Address line 1 is required")
-    .min(5, "Address must be at least 5 characters"),
+    .required("address_line_1_required")
+    .min(5, "address_line_1_min_length"),
   address_line_2: yup.string().nullable(),
-  latitude: yup.string().required("Latitude is required"),
-  longitude: yup.string().required("Longitude is required"),
+  latitude: yup.string().required("latitude_required"),
+  longitude: yup.string().required("longitude_required"),
   phone: yup
     .string()
-    .required("Phone is required")
-    .matches(/^\+\d{9,15}$/, "Phone must be in format +994XXXXXXXXX"),
+    .required("phone_required")
+    .matches(/^\+994\d{9}$/, "phone_format_error"),
 });
 
 export default function AddressesPage() {
@@ -515,7 +516,7 @@ export default function AddressesPage() {
                   />
                   {errors.address_type_id && (
                     <p className="text-red-500 text-sm">
-                      {errors.address_type_id.message}
+                      {t(errors.address_type_id.message)}
                     </p>
                   )}
                 </div>
@@ -579,7 +580,7 @@ export default function AddressesPage() {
                   />
                   {errors.city_id && (
                     <p className="text-red-500 text-sm">
-                      {errors.city_id.message}
+                      {t(errors.city_id.message)}
                     </p>
                   )}
                 </div>
@@ -607,7 +608,7 @@ export default function AddressesPage() {
                     />
                     {errors.address_line_1 && (
                       <p className="text-red-500 text-sm">
-                        {errors.address_line_1.message}
+                        {t(errors.address_line_1.message)}
                       </p>
                     )}
                   </div>
@@ -633,32 +634,32 @@ export default function AddressesPage() {
                     />
                     {errors.address_line_2 && (
                       <p className="text-red-500 text-sm">
-                        {errors.address_line_2.message}
+                        {t(errors.address_line_2.message)}
                       </p>
                     )}
                   </div>
                 </div>
 
-                {/* Building and Door (Additional fields based on image) */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Map Location Selector */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("select_location_on_map") || "Xəritədən yer seçin"}
+                  </label>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      {t("building") || "Bina/Ev"}
-                    </label>
-                    <Input
-                      placeholder="294"
-                      className="h-12 lg:h-14 text-base rounded-lg"
+                    <Map
+                      latitude={watch("latitude")}
+                      longitude={watch("longitude")}
+                      height="400px"
+                      onLocationSelect={(location) => {
+                        setValue("latitude", location.lat);
+                        setValue("longitude", location.lng);
+                        setValue("address_line_1", location.fullAddress);
+                      }}
                     />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      {t("door") || "Qapı"}
-                    </label>
-                    <Input
-                      placeholder="40"
-                      className="h-12 lg:h-14 text-base rounded-lg"
-                    />
+                    <div className="text-sm text-gray-500">
+                      {t("click_on_map_to_select_location") ||
+                        "Yer seçmək üçün xəritəyə klikləyin"}
+                    </div>
                   </div>
                 </div>
 
@@ -671,23 +672,34 @@ export default function AddressesPage() {
                     name="phone"
                     control={control}
                     render={({ field }) => (
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-900">
-                          📞
+                      <div
+                        className={`flex h-12 lg:h-14 border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#00569C] focus-within:ring-offset-0 bg-white ${
+                          errors.phone ? "border-red-500" : "border-gray-200"
+                        }`}
+                      >
+                        <span className="flex items-center px-3 bg-gray-50 border-r border-gray-200 text-gray-700 font-medium text-sm whitespace-nowrap select-none">
+                          +994
                         </span>
-                        <Input
-                          {...field}
-                          placeholder="+994 50 555 50 50"
-                          className={`h-12 lg:h-14 text-base rounded-lg pl-12 ${
-                            errors.phone ? "border-red-500" : ""
-                          }`}
+                        <input
+                          placeholder="xx xxxx xx xx"
+                          maxLength={9}
+                          className="flex-1 px-3 text-base outline-none bg-white"
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/\D/g, "").slice(0, 9);
+                            field.onChange(raw ? "+994" + raw : "");
+                          }}
+                          value={
+                            field.value
+                              ? field.value.replace(/^\+994/, "")
+                              : ""
+                          }
                         />
                       </div>
                     )}
                   />
                   {errors.phone && (
                     <p className="text-red-500 text-sm">
-                      {errors.phone.message}
+                      {t(errors.phone.message)}
                     </p>
                   )}
                 </div>

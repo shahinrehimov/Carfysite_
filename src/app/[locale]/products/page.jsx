@@ -1,4 +1,4 @@
-import BreadcrumbView from "@/components/breadcrumb/breadcrumb";
+// import BreadcrumbView from "@/components/breadcrumb/breadcrumb";
 import MainFilter from "@/components/filter/MainFilter";
 import ProductsList from "@/components/product/ProductsList";
 import MobileFilterToggle from "@/components/product/MobileFilterToggle";
@@ -40,13 +40,13 @@ export default async function Products() {
       <div className="container">
         {/* Breadcrumb */}
         <div className="py-4">
-          <BreadcrumbView
+          {/* <BreadcrumbView
             data={[
               { id: 1, type: "link", href: "/", title: "Ana səhifə" },
               { id: 2, type: "link", href: "/", title: "Mühərrik hissələri" },
               { id: 3, type: "page", title: "Mator" },
             ]}
-          />
+          /> */}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pb-10">

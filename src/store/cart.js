@@ -58,10 +58,9 @@ export const cartSlice = createSlice({
       const { productId, quantity, basket_data } = action.payload;
       
       if (quantity === 0) {
-        // Remove item if quantity becomes 0
-        state.items = state.items.filter(item => item.id !== productId);
+        state.items = state.items.filter(item => item.uuid !== productId);
       } else {
-        const itemIndex = state.items.findIndex(item => item.id === productId);
+        const itemIndex = state.items.findIndex(item => item.uuid === productId);
         if (itemIndex >= 0) {
           state.items[itemIndex] = {
             ...state.items[itemIndex],

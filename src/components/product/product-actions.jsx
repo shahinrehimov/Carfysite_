@@ -1,40 +1,135 @@
 "use client";
 
-import React, { useState } from "react";
-import { Heart, Share2, ShoppingCart } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Heart } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useDispatch } from "react-redux";
+import { basketService } from "@/lib/basketService";
+import { wishlistService } from "@/lib/wishlistService";
+import { addItem, setLoading, setError } from "@/store/cart";
+import { useToast } from "@/providers/ToastProvider";
+import { cn } from "@/lib/utils";
 
-export default function ProductActions() {
+export default function ProductActions({ data }) {
   const t = useTranslations();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const dispatch = useDispatch();
+  const { toast } = useToast();
+  const [isFavorite, setIsFavorite] = useState(data?.in_wishlist || false);
+  const [inBasket, setInBasket] = useState(data?.in_basket || false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  const handleAddToCart = () => {
-    // Add to cart logic here
-    console.log("Added to cart");
+  useEffect(() => {
+    setIsFavorite(data?.in_wishlist || false);
+    setInBasket(data?.in_basket || false);
+  }, [data?.uuid, data?.in_wishlist, data?.in_basket]);
+
+  const handleWishlistToggle = async () => {
+    if (!data?.uuid) {
+      console.error("Product UUID is required for wishlist operations");
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        const result = await wishlistService.remove(data.uuid);
+        if (result.success) {
+          setIsFavorite(false);
+          toast({
+            title: t("success"),
+            description:
+              result?.data?.message || t("wishlist_product_removed"),
+            variant: "info",
+          });
+        }
+      } else {
+        const result = await wishlistService.add(data.uuid);
+        if (result.success) {
+          setIsFavorite(true);
+          toast({
+            title: t("success"),
+            description:
+              result?.data?.message || t("wishlist_product_added"),
+            variant: "success",
+          });
+        }
+      }
+    } catch (error) {
+      toast({
+        title: t("error"),
+        description:
+          error?.response?.data?.message || t("wishlist_update_failed"),
+        variant: "error",
+      });
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (isAddingToCart || !data?.uuid || inBasket) {
+      return;
+    }
+
+    setIsAddingToCart(true);
+
+    try {
+      dispatch(setLoading(true));
+      const response = await basketService.add(data.uuid, 1);
+      dispatch(addItem(response));
+
+      setInBasket(true);
+
+      toast({
+        title: t("success"),
+        description:
+          response?.data?.message || t("product-added-to-cart"),
+        variant: "success",
+      });
+    } catch (error) {
+      toast({
+        title: t("error"),
+        description:
+          error?.response?.data?.message || t("failed-to-add-to-cart"),
+        variant: "error",
+      });
+      dispatch(setError(error.message));
+    } finally {
+      dispatch(setLoading(false));
+      setIsAddingToCart(false);
+    }
   };
 
   const handleShare = () => {
-    // Share logic here
     console.log("Share clicked");
   };
 
+  const canAct = Boolean(data?.uuid);
+
   return (
     <div className="space-y-4 mt-4">
-      {/* Favorite Button */}
       <button
-        onClick={() => setIsFavorite(!isFavorite)}
-        className="flex items-center gap-2 text-[#00569C] hover:text-[#00569C] transition-colors cursor-pointer"
+        type="button"
+        onClick={handleWishlistToggle}
+        disabled={!canAct}
+        className={cn(
+          "flex items-center gap-2 text-[#00569C] hover:text-[#00569C] transition-colors",
+          canAct ? "cursor-pointer" : "cursor-not-allowed opacity-50"
+        )}
       >
         <Heart className={`w-5 h-5 ${isFavorite ? "fill-[#00569C]" : ""}`} />
         <span className="text-sm">{t("add_to_favorites")}</span>
       </button>
 
-      {/* Action Buttons */}
       <div className="flex gap-3 pt-2">
         <button
+          type="button"
           onClick={handleAddToCart}
-          className="flex-1 group bg-white hover:bg-[#00569C] hover:text-white text-[#00569C] border border-[#00569C] font-semibold py-3.5 px-6 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer"
+          disabled={isAddingToCart || inBasket || !canAct}
+          className={cn(
+            "flex-1 group bg-white hover:bg-[#00569C] hover:text-white text-[#00569C] border border-[#00569C] font-semibold py-3.5 px-6 rounded-full transition-all flex items-center justify-center gap-2",
+            isAddingToCart || inBasket || !canAct
+              ? "opacity-70 cursor-not-allowed hover:bg-white hover:text-[#00569C]"
+              : "cursor-pointer"
+          )}
         >
           <Image
             src="/icons/cart-primary.svg"
@@ -43,11 +138,18 @@ export default function ProductActions() {
             height={24}
             className="w-5 h-5 group-hover:brightness-0 group-hover:invert"
           />
-          <span>{t("add_to_cart")}</span>
+          <span>
+            {isAddingToCart
+              ? "Əlavə olunur..."
+              : inBasket
+                ? "Səbətdə"
+                : t("add_to_cart")}
+          </span>
         </button>
         <button
+          type="button"
           onClick={handleShare}
-          className="bg-white cursor-pointer  group hover:bg-[#00569C] border border-[#00569C] w-14 h-14 rounded-full transition-colors flex items-center justify-center"
+          className="bg-white cursor-pointer group hover:bg-[#00569C] border border-[#00569C] w-14 h-14 rounded-full transition-colors flex items-center justify-center"
         >
           <Image
             src="/icons/share.svg"

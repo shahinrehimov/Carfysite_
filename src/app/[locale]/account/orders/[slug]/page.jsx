@@ -304,10 +304,10 @@ export default function OrderPage({ params }) {
                           {/* Product image */}
                           <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
                             <Image
-                              src={item.product_variant?.hover_image}
+                              src={item.product?.hover_image}
                               alt={
-                                item.product_variant?.title ||
-                                item.product_variant.product?.title
+                                item.product?.title ||
+                                item.product?.product?.title
                               }
                               width={48}
                               height={48}
@@ -318,23 +318,23 @@ export default function OrderPage({ params }) {
                           {/* Product info and pricing */}
                           <div className="flex-1 min-w-0">
                             <h4 className="font-medium text-gray-900 text-sm mb-1 truncate">
-                              {item.product_variant?.title ||
-                                item.product_variant.product?.title}
+                              {item.product?.title ||
+                                item.product?.product?.title}
                             </h4>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="text-lg font-semibold">
                                   {formatPrice(
-                                    item.product_variant?.price_final
+                                    item.product?.price_final
                                   )}
                                 </span>
-                                {item.product_variant?.has_discount && (
+                                {item.product?.has_discount && (
                                   <>
                                     <span className="text-xs text-gray-500 line-through">
-                                      {formatPrice(item.product_variant?.price)}
+                                      {formatPrice(item.product?.price)}
                                     </span>
                                     <span className="text-xs text-red-primary font-semibold">
-                                      -{item.product_variant?.discount}%
+                                      -{item.product?.discount}%
                                     </span>
                                   </>
                                 )}
@@ -356,12 +356,12 @@ export default function OrderPage({ params }) {
                         <div className="w-20 h-20 rounded-lg flex items-center justify-center">
                           <Image
                             src={
-                              item.product_variant?.hover_image ||
-                              item.product_variant.product?.hover_image
+                              item.product?.hover_image ||
+                              item.product?.product?.hover_image
                             }
                             alt={
-                              item.product_variant?.title ||
-                              item.product_variant.product?.title
+                              item.product?.title ||
+                              item.product?.product?.title
                             }
                             width={80}
                             height={80}
@@ -371,8 +371,8 @@ export default function OrderPage({ params }) {
 
                         <div className="flex-1">
                           <h4 className="font-medium text-gray-900 mb-1">
-                            {item.product_variant?.title ||
-                              item.product_variant.product?.title}
+                            {item.product?.title ||
+                              item.product?.product?.title}
                           </h4>
                         </div>
 
@@ -389,15 +389,15 @@ export default function OrderPage({ params }) {
                           <div className="text-center">
                             <div className="flex items-center gap-2">
                               <span className="text-lg font-semibold">
-                                {formatPrice(item.product_variant?.price_final)}
+                                {formatPrice(item.product?.price_final)}
                               </span>
-                              {item.product_variant?.has_discount && (
+                              {item.product?.has_discount && (
                                 <>
                                   <span className="text-sm text-gray-500 line-through">
-                                    {formatPrice(item.product_variant?.price)}
+                                    {formatPrice(item.product?.price)}
                                   </span>
                                   <span className="text-sm text-red-primary font-semibold px-2 py-1 rounded">
-                                    -{item.product_variant?.discount}%
+                                    -{item.product?.discount}%
                                   </span>
                                 </>
                               )}

@@ -15,23 +15,20 @@ import Map from "@/components/ui/map";
 const addressSchema = yup.object().shape({
   address_type_id: yup
     .number()
-    .required("Address type is required")
-    .positive("Please select a valid address type"),
-  city_id: yup
-    .number()
-    .required("City is required")
-    .positive("Please select a valid city"),
+    .required("address_type_required")
+    .positive("address_type_required"),
+  city_id: yup.number().required("city_required").positive("city_required"),
   address_line_1: yup
     .string()
-    .required("Address line 1 is required")
-    .min(5, "Address must be at least 5 characters"),
+    .required("address_line_1_required")
+    .min(5, "address_line_1_min_length"),
   address_line_2: yup.string().nullable(),
-  latitude: yup.string().required("Latitude is required"),
-  longitude: yup.string().required("Longitude is required"),
+  latitude: yup.string().required("latitude_required"),
+  longitude: yup.string().required("longitude_required"),
   phone: yup
     .string()
-    .required("Phone is required")
-    .matches(/^\+\d{9,15}$/, "Phone must be in format +995XXXXXXXXX"),
+    .required("phone_required")
+    .matches(/^\+994\d{9}$/, "phone_format_error"),
 });
 
 export default function AddressSelection({
@@ -71,8 +68,8 @@ export default function AddressSelection({
       city_id: "",
       address_line_1: "",
       address_line_2: "",
-      latitude: "40.395", // Default to Tbilisi
-      longitude: "49.8822", // Default to Tbilisi
+      latitude: "40.3953",
+      longitude: "49.8671",
       phone: "",
     },
   });
@@ -492,7 +489,7 @@ export default function AddressSelection({
                   />
                   {errors.address_type_id && (
                     <p className="text-red-500 text-sm">
-                      {errors.address_type_id.message}
+                      {t(errors.address_type_id.message)}
                     </p>
                   )}
                 </div>
@@ -560,7 +557,7 @@ export default function AddressSelection({
                   />
                   {errors.city_id && (
                     <p className="text-red-500 text-sm">
-                      {errors.city_id.message}
+                      {t(errors.city_id.message)}
                     </p>
                   )}
                 </div>
@@ -586,7 +583,7 @@ export default function AddressSelection({
                     />
                     {errors.address_line_1 && (
                       <p className="text-red-500 text-sm">
-                        {errors.address_line_1.message}
+                        {t(errors.address_line_1.message)}
                       </p>
                     )}
                   </div>
@@ -643,18 +640,34 @@ export default function AddressSelection({
                     name="phone"
                     control={control}
                     render={({ field }) => (
-                      <Input
-                        {...field}
-                        placeholder="+994XXXXXXXXX"
-                        className={`h-12 lg:h-14 text-base ${
-                          errors.phone ? "border-red-500" : ""
+                      <div
+                        className={`flex h-12 lg:h-14 border rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-[#00569C] focus-within:ring-offset-0 bg-white ${
+                          errors.phone ? "border-red-500" : "border-gray-200"
                         }`}
-                      />
+                      >
+                        <span className="flex items-center px-3 bg-gray-50 border-r border-gray-200 text-gray-700 font-medium text-sm whitespace-nowrap select-none">
+                          +994
+                        </span>
+                        <input
+                          placeholder="xx xxxx xx xx"
+                          maxLength={9}
+                          className="flex-1 px-3 text-base outline-none bg-white"
+                          onChange={(e) => {
+                            const raw = e.target.value
+                              .replace(/\D/g, "")
+                              .slice(0, 9);
+                            field.onChange(raw ? "+994" + raw : "");
+                          }}
+                          value={
+                            field.value ? field.value.replace(/^\+994/, "") : ""
+                          }
+                        />
+                      </div>
                     )}
                   />
                   {errors.phone && (
                     <p className="text-red-500 text-sm">
-                      {errors.phone.message}
+                      {t(errors.phone.message)}
                     </p>
                   )}
                 </div>

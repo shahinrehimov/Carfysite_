@@ -218,7 +218,7 @@ export default function TableList() {
                           variant="ghost"
                           size="sm"
                           className="h-12 w-12 rounded-none hover:bg-gray-100 border-0"
-                          onClick={() => handleDecrement(item.id)}
+                          onClick={() => handleDecrement(item.uuid)}
                           disabled={isLoading || quantity <= 1}
                         >
                           <Minus className="h-4 w-4" />
@@ -230,7 +230,7 @@ export default function TableList() {
                           variant="ghost"
                           size="sm"
                           className="h-12 w-12 rounded-none hover:bg-gray-100 border-0"
-                          onClick={() => handleIncrement(item.id)}
+                          onClick={() => handleIncrement(item.uuid)}
                           disabled={isLoading}
                         >
                           <Plus className="h-4 w-4" />
@@ -292,8 +292,8 @@ export default function TableList() {
                                 ? "fill-[#3696E7] text-[#3696E7]"
                                 : "text-gray-400"
                               : item.in_wishlist
-                              ? "fill-[#3696E7] text-[#3696E7]"
-                              : "text-gray-400"
+                                ? "fill-[#3696E7] text-[#3696E7]"
+                                : "text-gray-400"
                           }`}
                         />
                       </button>
@@ -321,4 +321,3 @@ export default function TableList() {
     </div>
   );
 }
-

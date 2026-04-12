@@ -13,9 +13,9 @@ export default function ProductSpecifications({ data }) {
         <div className="text-[#9E9E9E] text-sm mb-1.5">{t("category")}</div>
         <div className="text-gray-900 font-normal text-base">
           {" "}
-          {data.product.main_category.parent?.title}
-          {data.product.main_category.parent ? ", " : ""}
-          {data.product.main_category?.title}
+          {data.product?.main_category?.parent?.title}
+          {data.product?.main_category?.parent ? ", " : ""}
+          {data.product?.main_category?.title}
         </div>
       </div>
       <div className="flex flex-col">
