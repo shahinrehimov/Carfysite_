@@ -120,7 +120,7 @@ const OrdersList = () => {
   };
 
   const formatPrice = (price) => {
-    return `${price} ₾`;
+    return `${price} `;
   };
 
   if (loading) {
@@ -278,16 +278,12 @@ const OrdersList = () => {
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
                                     <span className="text-lg font-semibold">
-                                      {formatPrice(
-                                        item.product?.price_final
-                                      )}
+                                      {formatPrice(item.product?.price_final)}
                                     </span>
                                     {item.product?.has_discount && (
                                       <>
                                         <span className="text-xs text-gray-500 line-through">
-                                          {formatPrice(
-                                            item.product?.price
-                                          )}
+                                          {formatPrice(item.product?.price)}
                                         </span>
                                         <span className="text-xs text-red-primary font-semibold">
                                           -{item.product?.discount}%
@@ -340,16 +336,12 @@ const OrdersList = () => {
                               <div className="text-center">
                                 <div className="flex items-center gap-2">
                                   <span className="text-lg font-semibold">
-                                    {formatPrice(
-                                      item.product?.price_final
-                                    )}
+                                    {formatPrice(item.product?.price_final)}
                                   </span>
                                   {item.product?.has_discount && (
                                     <>
                                       <span className="text-sm text-gray-500 line-through">
-                                        {formatPrice(
-                                          item.product?.price
-                                        )}
+                                        {formatPrice(item.product?.price)}
                                       </span>
                                       <span className="text-sm text-red-primary font-semibold px-2 py-1 rounded">
                                         -{item.product?.discount}%

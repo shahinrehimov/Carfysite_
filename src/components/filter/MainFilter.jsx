@@ -14,30 +14,6 @@ import {
   modelOptionsForBrandId,
 } from "@/lib/productFilters";
 
-const FALLBACK_CATEGORIES = [
-    {
-      id: 1,
-      name: "Mühərrik hissələri",
-      subcategories: [
-        "Mühərrik komplektləri",
-        "Piston, klapan, şatun, krank",
-        "Zəncir və qayış dəstləri",
-        "Turbin və kompressorlar",
-        "Sensorlar (MAP, MAF, oksigen və s.)",
-      ],
-    },
-    { id: 2, name: "Soyutma və İsitmə Sistemi", subcategories: [] },
-    { id: 3, name: "Ötürücü Sistemi", subcategories: [] },
-    { id: 4, name: "Asqı və Sükan", subcategories: [] },
-    { id: 5, name: "Əyləc Sistemi", subcategories: [] },
-    { id: 6, name: "Elektrik və Elektronika", subcategories: [] },
-    { id: 7, name: "Kuzov", subcategories: [] },
-    { id: 8, name: "Salon və Komfort", subcategories: [] },
-    { id: 9, name: "Filtrlər və Mayeler", subcategories: [] },
-    { id: 10, name: "Teker və Aksesuarlar", subcategories: [] },
-    { id: 11, name: "Aksesuar və Digər Məhsullar", subcategories: [] },
-];
-
 export default function MainFilter({ type = "default" }) {
   const t = useTranslations();
   const router = useRouter();
@@ -57,13 +33,10 @@ export default function MainFilter({ type = "default" }) {
     if (filterData?.categories?.length) {
       return categoriesForUi(filterData.categories);
     }
-    return FALLBACK_CATEGORIES;
+    return [];
   }, [filterData]);
 
-  const markaOptions = useMemo(
-    () => brandOptionsFromBrands(brands),
-    [brands]
-  );
+  const markaOptions = useMemo(() => brandOptionsFromBrands(brands), [brands]);
   const modelOptions = useMemo(
     () => modelOptionsForBrandId(brands, marka),
     [brands, marka]

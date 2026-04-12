@@ -225,7 +225,7 @@ export default function CheckoutPage() {
                   <span className="text-base font-regular">{t("amount")}</span>
                   <div className="flex-1 border-b border-gray-500 border-dashed"></div>
                   <span className="text-base font-medium text-gray-primary">
-                    {basketData.total_price_in_basket?.toFixed(2) || "0.00"}₾
+                    {basketData.total_price_in_basket?.toFixed(2) || "0.00"}
                   </span>
                 </div>
 
@@ -245,7 +245,7 @@ export default function CheckoutPage() {
                   </span>
                   <div className="flex-1 border-b border-gray-500 border-dashed"></div>
                   <span className="text-base font-medium text-green-primary">
-                    {basketData.total_discount_in_basket?.toFixed(2) || "0.00"}₾
+                    {basketData.total_discount_in_basket?.toFixed(2) || "0.00"}
                   </span>
                 </div>
 
@@ -257,7 +257,7 @@ export default function CheckoutPage() {
                   <span className="text-base font-medium text-green-primary">
                     {basketData.shipping === 0
                       ? t("free")
-                      : `${basketData.shipping?.toFixed(2)}₾`}
+                      : `${basketData.shipping?.toFixed(2)} `}
                   </span>
                 </div>
 
@@ -267,7 +267,6 @@ export default function CheckoutPage() {
                   <span className="text-base font-bold text-green-primary">
                     {basketData.total_price_final_in_basket?.toFixed(2) ||
                       "0.00"}
-                    ₾
                   </span>
                 </div>
               </div>

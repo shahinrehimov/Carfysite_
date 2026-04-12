@@ -34,7 +34,7 @@ export default function OrderPage({ params }) {
     }
   }, [unwrappedParams.slug]);
   const formatPrice = (price) => {
-    return `${price.toFixed(2)} ₾`;
+    return `${price.toFixed(2)} `;
   };
 
   const copyOrderId = () => {
@@ -324,9 +324,7 @@ export default function OrderPage({ params }) {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="text-lg font-semibold">
-                                  {formatPrice(
-                                    item.product?.price_final
-                                  )}
+                                  {formatPrice(item.product?.price_final)}
                                 </span>
                                 {item.product?.has_discount && (
                                   <>
