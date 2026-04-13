@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useProductFilters } from "@/hooks/useProductFilters";
 import {
   brandOptionsFromBrands,
-  modelOptionsForBrandId,
+  modelOptionsForBrandSlug,
 } from "@/lib/productFilters";
 
 export default function SidebarFilter({ isOpen, onClose }) {
@@ -58,7 +58,7 @@ export default function SidebarFilter({ isOpen, onClose }) {
     [brands]
   );
   const modelOptions = useMemo(
-    () => modelOptionsForBrandId(brands, selectedMarka),
+    () => modelOptionsForBrandSlug(brands, selectedMarka),
     [brands, selectedMarka]
   );
 

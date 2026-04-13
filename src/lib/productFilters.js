@@ -6,11 +6,20 @@ let inflight = null;
 
 /**
  * Normalizes GET `/{provider}/products/filters` payload (see filterexample.json).
- * Intentionally omits `statuses` from consumer-facing shape.
  */
 export function normalizeProductFiltersPayload(raw) {
   if (!raw || typeof raw !== "object") {
-    return { categories: [], brands: [], priceRanges: null };
+    return {
+      categories: [],
+      brands: [],
+      priceRanges: null,
+      cities: [],
+      colors: [],
+      statuses: [],
+      yearRange: null,
+      sortOptions: [],
+      sortTypes: [],
+    };
   }
   return {
     categories: Array.isArray(raw.categories) ? raw.categories : [],
@@ -19,6 +28,15 @@ export function normalizeProductFiltersPayload(raw) {
       raw.price_ranges && typeof raw.price_ranges === "object"
         ? raw.price_ranges
         : null,
+    cities: Array.isArray(raw.cities) ? raw.cities : [],
+    colors: Array.isArray(raw.colors) ? raw.colors : [],
+    statuses: Array.isArray(raw.statuses) ? raw.statuses : [],
+    yearRange:
+      raw.year_range && typeof raw.year_range === "object"
+        ? raw.year_range
+        : null,
+    sortOptions: Array.isArray(raw.sort_options) ? raw.sort_options : [],
+    sortTypes: Array.isArray(raw.sort_types) ? raw.sort_types : [],
   };
 }
 
@@ -55,18 +73,18 @@ export function fetchProductFilters() {
 
 export function brandOptionsFromBrands(brands) {
   return brands.map((b) => ({
-    value: String(b.id),
+    value: b.slug ?? String(b.id),
     label: b.title ?? "",
   }));
 }
 
-export function modelOptionsForBrandId(brands, brandIdStr) {
-  if (!brandIdStr) return [];
-  const brand = brands.find((b) => String(b.id) === String(brandIdStr));
+export function modelOptionsForBrandSlug(brands, brandSlug) {
+  if (!brandSlug) return [];
+  const brand = brands.find((b) => (b.slug ?? String(b.id)) === brandSlug);
   const models = brand?.brand_models;
   if (!Array.isArray(models)) return [];
   return models.map((m) => ({
-    value: String(m.id),
+    value: m.slug ?? String(m.id),
     label: m.title ?? "",
   }));
 }
@@ -74,9 +92,12 @@ export function modelOptionsForBrandId(brands, brandIdStr) {
 export function categoriesForUi(brandsPayloadCategories) {
   return brandsPayloadCategories.map((cat) => ({
     id: cat.id,
+    slug: cat.slug ?? "",
     name: cat.title ?? "",
     subcategories: Array.isArray(cat.subs)
-      ? cat.subs.map((s) => s.title ?? "").filter(Boolean)
+      ? cat.subs
+          .map((s) => ({ id: s.id, slug: s.slug ?? "", name: s.title ?? "" }))
+          .filter((s) => s.name)
       : [],
   }));
 }

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import ProductCard from "./product-card";
 import { api } from "@/lib/axios";
 
-export default function ProductsList({ initialProducts, initialMeta }) {
+export default function ProductsList({ initialProducts, initialMeta, filterQueryString = "" }) {
   const [products, setProducts] = useState(initialProducts);
   const [meta, setMeta] = useState(initialMeta);
   const [loading, setLoading] = useState(false);
@@ -14,7 +14,10 @@ export default function ProductsList({ initialProducts, initialMeta }) {
     setLoading(true);
     try {
       const nextPage = meta.current_page + 1;
-      const response = await api.get(`/products/load?page=${nextPage}&limit=${meta.per_page}`);
+      const params = new URLSearchParams(filterQueryString);
+      params.set("page", String(nextPage));
+      params.set("limit", String(meta.per_page));
+      const response = await api.get(`/products/load?${params.toString()}`);
       
       setProducts([...products, ...response.data.data]);
       setMeta(response.data.meta);

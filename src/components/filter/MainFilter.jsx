@@ -11,24 +11,41 @@ import { useProductFilters } from "@/hooks/useProductFilters";
 import {
   brandOptionsFromBrands,
   categoriesForUi,
-  modelOptionsForBrandId,
+  modelOptionsForBrandSlug,
 } from "@/lib/productFilters";
 
-export default function MainFilter({ type = "default" }) {
+function firstParam(searchParams, key) {
+  const val = searchParams?.[key];
+  return Array.isArray(val) ? val[0] : (val ?? "");
+}
+
+function arrayParam(searchParams, key) {
+  const val = searchParams?.[key];
+  if (!val) return [];
+  return Array.isArray(val) ? val : [val];
+}
+
+export default function MainFilter({ type = "default", initialFilters }) {
   const t = useTranslations();
   const router = useRouter();
   const { data: filterData } = useProductFilters();
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filterType, setFilterType] = useState("all");
-  const [marka, setMarka] = useState("");
-  const [model, setModel] = useState("");
-  const [city, setCity] = useState("");
-  const [color, setColor] = useState("");
+  const [marka, setMarka] = useState(() => firstParam(initialFilters, "brands[]"));
+  const [model, setModel] = useState(() => arrayParam(initialFilters, "models[]"));
+  const [city, setCity] = useState(() => firstParam(initialFilters, "city_id"));
+  const [color, setColor] = useState(() => firstParam(initialFilters, "color_id"));
+  const [status, setStatus] = useState(() => firstParam(initialFilters, "statuses[]"));
+  const [minYear, setMinYear] = useState(() => firstParam(initialFilters, "min_year"));
+  const [maxYear, setMaxYear] = useState(() => firstParam(initialFilters, "max_year"));
+  const [minPrice, setMinPrice] = useState(() => firstParam(initialFilters, "min_price"));
+  const [maxPrice, setMaxPrice] = useState(() => firstParam(initialFilters, "max_price"));
   const [currency, setCurrency] = useState("AZN");
 
   const brands = filterData?.brands ?? [];
+  const yearRange = filterData?.yearRange ?? null;
+
   const categories = useMemo(() => {
     if (filterData?.categories?.length) {
       return categoriesForUi(filterData.categories);
@@ -38,35 +55,35 @@ export default function MainFilter({ type = "default" }) {
 
   const markaOptions = useMemo(() => brandOptionsFromBrands(brands), [brands]);
   const modelOptions = useMemo(
-    () => modelOptionsForBrandId(brands, marka),
+    () => modelOptionsForBrandSlug(brands, marka),
     [brands, marka]
   );
 
-  useEffect(() => {
-    setModel("");
-  }, [marka]);
+  const cityOptions = useMemo(
+    () =>
+      (filterData?.cities ?? []).map((c) => ({
+        value: String(c.id),
+        label: c.title,
+      })),
+    [filterData]
+  );
 
-  const cityOptions = [
-    { value: "baku", label: "Bakı" },
-    { value: "ganja", label: "Gəncə" },
-    { value: "sumqayit", label: "Sumqayıt" },
-    { value: "mingachevir", label: "Mingəçevir" },
-    { value: "lankaran", label: "Lənkəran" },
-    { value: "shaki", label: "Şəki" },
-    { value: "shamakhi", label: "Şamaxı" },
-    { value: "quba", label: "Quba" },
-  ];
+  const colorOptions = useMemo(
+    () =>
+      (filterData?.colors ?? []).map((c) => ({
+        value: String(c.id),
+        label: c.title,
+      })),
+    [filterData]
+  );
 
-  const colorOptions = [
-    { value: "black", label: "Qara" },
-    { value: "white", label: "Ağ" },
-    { value: "silver", label: "Gümüşü" },
-    { value: "red", label: "Qırmızı" },
-    { value: "blue", label: "Mavi" },
-    { value: "gray", label: "Boz" },
-    { value: "green", label: "Yaşıl" },
-    { value: "yellow", label: "Sarı" },
-  ];
+  const statusOptions = useMemo(() => {
+    const statuses = filterData?.statuses ?? [];
+    return [
+      { value: "", label: "Hamısı" },
+      ...statuses.map((s) => ({ value: String(s.id), label: s.title })),
+    ];
+  }, [filterData]);
 
   const currencyOptions = [
     { value: "AZN", label: "AZN" },
@@ -74,14 +91,64 @@ export default function MainFilter({ type = "default" }) {
     { value: "EUR", label: "EUR" },
   ];
 
+  useEffect(() => {
+    setModel([]);
+  }, [marka]);
+
+  useEffect(() => {
+    if (categories.length && !selectedCategory) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories]);
+
+  const buildFilterParams = () => {
+    const params = new URLSearchParams();
+    if (marka) params.append("brands[]", marka);
+    for (const m of model) params.append("models[]", m);
+    if (minYear) params.set("min_year", minYear);
+    if (maxYear) params.set("max_year", maxYear);
+    if (minPrice) params.set("min_price", minPrice);
+    if (maxPrice) params.set("max_price", maxPrice);
+    if (city) params.set("city_id", city);
+    if (color) params.set("color_id", color);
+    if (status) params.append("statuses[]", status);
+    return params;
+  };
+
+  const handleSubmit = () => {
+    const params = buildFilterParams();
+    const qs = params.toString();
+    router.push(qs ? `/products?${qs}` : "/products");
+  };
+
+  const handleCategoryClick = (category) => {
+    const params = new URLSearchParams();
+    params.append("categories[]", category.slug);
+    setIsCategoryMenuOpen(false);
+    router.push(`/products?${params.toString()}`);
+  };
+
+  const handleSubcategoryClick = (category, subcategory) => {
+    const params = new URLSearchParams();
+    params.append("categories[]", category.slug);
+    params.append("sub_categories[]", subcategory.slug);
+    setIsCategoryMenuOpen(false);
+    router.push(`/products?${params.toString()}`);
+  };
+
   const handleResetFilters = () => {
     setMarka("");
-    setModel("");
+    setModel([]);
     setCity("");
     setColor("");
     setCurrency("AZN");
-    setFilterType("all");
+    setStatus("");
+    setMinYear("");
+    setMaxYear("");
+    setMinPrice("");
+    setMaxPrice("");
   };
+
   return (
     <>
       <div
@@ -94,10 +161,7 @@ export default function MainFilter({ type = "default" }) {
       >
         <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-4">
           <button
-            onClick={() => {
-              setIsCategoryMenuOpen(true);
-              setSelectedCategory(categories[0]);
-            }}
+            onClick={() => setIsCategoryMenuOpen(true)}
             className={cn(
               "cursor-pointer col-span-1 bg-white text-lg font-regular rounded-full h-[48px] lg:h-[60px] hidden lg:flex items-center justify-center gap-2",
               type == "default" ? "border border-[#00569C]" : ""
@@ -196,6 +260,7 @@ export default function MainFilter({ type = "default" }) {
               />
 
               <Combobox
+                multiple
                 options={modelOptions}
                 value={model}
                 onValueChange={setModel}
@@ -203,18 +268,23 @@ export default function MainFilter({ type = "default" }) {
                 searchPlaceholder="Model axtar..."
                 emptyText="Nəticə tapılmadı"
                 disabled={!marka}
+                selectedCountLabel="model seçilib"
                 triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-sm lg:text-base font-light border-none w-full"
               />
 
               <div className=" grid grid-cols-2 bg-white rounded-full h-[48px] lg:h-[60px]  items-center  gap-2">
                 <input
-                  type="text"
-                  placeholder="İl, min."
+                  type="number"
+                  placeholder={yearRange ? `İl, ${yearRange.min}` : "İl, min."}
+                  value={minYear}
+                  onChange={(e) => setMinYear(e.target.value)}
                   className="border-r border-gray-200 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-sm lg:text-base font-light px-4"
                 />
                 <input
-                  type="text"
-                  placeholder="maks."
+                  type="number"
+                  placeholder={yearRange ? `${yearRange.max}` : "maks."}
+                  value={maxYear}
+                  onChange={(e) => setMaxYear(e.target.value)}
                   className=" bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-sm lg:text-base font-light px-4"
                 />
               </div>
@@ -243,54 +313,31 @@ export default function MainFilter({ type = "default" }) {
             </div>
 
             <div className="grid grid-cols-4 gap-4">
-              <div className="col-span-1 flex items-center justify-between">
-                {/* Tabs */}
-                <div className="bg-white rounded-full h-[48px] lg:h-[60px] flex items-center ">
-                  <button
-                    onClick={() => setFilterType("all")}
-                    className={`px-4 h-full rounded-l-full text-sm lg:text-base font-light transition-colors cursor-pointer ${
-                      filterType === "all"
-                        ? "bg-[#3696E7] text-white"
-                        : "text-[#00569C]"
-                    }`}
-                  >
-                    Hamısı
-                  </button>
-                  <button
-                    onClick={() => setFilterType("new")}
-                    className={`px-4 h-full  text-sm lg:text-base font-light transition-colors cursor-pointer ${
-                      filterType === "new"
-                        ? "bg-[#3696E7] text-white"
-                        : "text-[#00569C]"
-                    }`}
-                  >
-                    Teze
-                  </button>
-                  <button
-                    onClick={() => setFilterType("used")}
-                    className={`px-4 h-full rounded-r-full text-sm lg:text-base font-light transition-colors cursor-pointer ${
-                      filterType === "used"
-                        ? "bg-[#3696E7] text-white"
-                        : "text-[#00569C]"
-                    }`}
-                  >
-                    İstifadə olunmuş
-                  </button>
-                </div>
-
-                {/* Action Buttons */}
+              <div className="col-span-1 flex items-center">
+                <Combobox
+                  options={statusOptions}
+                  value={status}
+                  onValueChange={setStatus}
+                  placeholder="Status"
+                  emptyText="Nəticə tapılmadı"
+                  triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-sm lg:text-base font-light border-none w-full"
+                />
               </div>
 
               {/* Price inputs */}
               <div className="col-span-1 grid grid-cols-2 bg-white rounded-full h-[48px] lg:h-[60px]  items-center  gap-2">
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Qiymət, min."
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
                   className=" bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-sm lg:text-base font-light px-4 border-r border-gray-200"
                 />
                 <input
-                  type="text"
+                  type="number"
                   placeholder="maks."
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
                   className=" bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-sm lg:text-base font-light px-4"
                 />
               </div>
@@ -330,7 +377,10 @@ export default function MainFilter({ type = "default" }) {
                   />
                 </button>
               </div>
-              <button className="bg-[#3696E7] text-white text-sm lg:text-base font-regular rounded-full h-[48px] lg:h-[60px] px-12 cursor-pointer">
+              <button
+                onClick={handleSubmit}
+                className="bg-[#3696E7] text-white text-sm lg:text-base font-regular rounded-full h-[48px] lg:h-[60px] px-12 cursor-pointer"
+              >
                 Göstər
               </button>
             </div>
@@ -379,6 +429,7 @@ export default function MainFilter({ type = "default" }) {
 
             {/* Model */}
             <Combobox
+              multiple
               options={modelOptions}
               value={model}
               onValueChange={setModel}
@@ -386,6 +437,7 @@ export default function MainFilter({ type = "default" }) {
               searchPlaceholder="Model axtar..."
               emptyText="Nəticə tapılmadı"
               disabled={!marka}
+              selectedCountLabel="model seçilib"
               triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
             />
 
@@ -411,17 +463,31 @@ export default function MainFilter({ type = "default" }) {
               triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
             />
 
+            {/* Status */}
+            <Combobox
+              options={statusOptions}
+              value={status}
+              onValueChange={setStatus}
+              placeholder="Status"
+              emptyText="Nəticə tapılmadı"
+              triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
+            />
+
             {/* Year Range */}
             <div className="bg-white rounded-full h-[48px] flex items-center px-2 gap-2 border border-gray-200">
               <input
-                type="text"
-                placeholder="İl, min."
+                type="number"
+                placeholder={yearRange ? `İl, ${yearRange.min}` : "İl, min."}
+                value={minYear}
+                onChange={(e) => setMinYear(e.target.value)}
                 className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
               />
               <div className="w-px h-6 bg-gray-300"></div>
               <input
-                type="text"
-                placeholder="maks."
+                type="number"
+                placeholder={yearRange ? `${yearRange.max}` : "maks."}
+                value={maxYear}
+                onChange={(e) => setMaxYear(e.target.value)}
                 className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
               />
             </div>
@@ -429,14 +495,18 @@ export default function MainFilter({ type = "default" }) {
             {/* Price Range */}
             <div className="bg-white rounded-full h-[48px] flex items-center px-2 gap-2 border border-gray-200">
               <input
-                type="text"
+                type="number"
                 placeholder="Qiymət, min."
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
                 className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
               />
               <div className="w-px h-6 bg-gray-300"></div>
               <input
-                type="text"
+                type="number"
                 placeholder="maks."
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
                 className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
               />
             </div>
@@ -452,42 +522,14 @@ export default function MainFilter({ type = "default" }) {
               triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
             />
 
-            {/* Tabs */}
-            <div className="bg-gray-100 rounded-full h-[48px] flex items-center p-1">
-              <button
-                onClick={() => setFilterType("all")}
-                className={`px-4 flex-1 h-full rounded-l-full text-base font-light transition-colors cursor-pointer ${
-                  filterType === "all"
-                    ? "bg-[#3696E7] text-white"
-                    : "text-[#00569C]"
-                }`}
-              >
-                Hamısı
-              </button>
-              <button
-                onClick={() => setFilterType("new")}
-                className={`px-4 flex-1 h-full  text-base font-light transition-colors cursor-pointer ${
-                  filterType === "new"
-                    ? "bg-[#3696E7] text-white"
-                    : "text-[#00569C]"
-                }`}
-              >
-                Teze
-              </button>
-              <button
-                onClick={() => setFilterType("used")}
-                className={`px-4 flex-1 h-full rounded-r-full text-base font-light transition-colors cursor-pointer text-nowrap ${
-                  filterType === "used"
-                    ? "bg-[#3696E7] text-white"
-                    : "text-[#00569C]"
-                }`}
-              >
-                İstifadə olunmuş
-              </button>
-            </div>
-
             {/* Action Buttons */}
-            <button className="w-full bg-[#3696E7] text-white text-base font-regular rounded-full h-[48px] cursor-pointer">
+            <button
+              onClick={() => {
+                handleSubmit();
+                setIsFilterOpen(false);
+              }}
+              className="w-full bg-[#3696E7] text-white text-base font-regular rounded-full h-[48px] cursor-pointer"
+            >
               Göstər
             </button>
 
@@ -567,24 +609,34 @@ export default function MainFilter({ type = "default" }) {
             <div className="flex-1 p-6 overflow-y-auto">
               {selectedCategory && (
                 <>
-                  <h3 className="text-xl font-semibold text-[#1A1A1A] mb-6">
+                  <h3 className="text-xl font-semibold text-[#1A1A1A] mb-4">
                     {selectedCategory.name}
                   </h3>
+
+                  {/* Click on the parent category itself */}
+                  <button
+                    onClick={() => handleCategoryClick(selectedCategory)}
+                    className="block w-full text-left text-base text-[#3696E7] font-medium hover:text-[#00569C] transition-colors py-2 cursor-pointer border-b border-gray-100 mb-2"
+                  >
+                    Hamısına bax →
+                  </button>
+
                   <div className="space-y-3">
                     {selectedCategory.subcategories.length > 0 ? (
-                      selectedCategory.subcategories.map(
-                        (subcategory, index) => (
-                          <button
-                            key={index}
-                            className="block w-full text-left text-base text-[#1A1A1A] hover:text-[#3696E7] transition-colors py-2 cursor-pointer"
-                          >
-                            {subcategory}
-                          </button>
-                        )
-                      )
+                      selectedCategory.subcategories.map((subcategory) => (
+                        <button
+                          key={subcategory.id}
+                          onClick={() =>
+                            handleSubcategoryClick(selectedCategory, subcategory)
+                          }
+                          className="block w-full text-left text-base text-[#1A1A1A] hover:text-[#3696E7] transition-colors py-2 cursor-pointer"
+                        >
+                          {subcategory.name}
+                        </button>
+                      ))
                     ) : (
                       <p className="text-gray-500 text-sm">
-                        No subcategories available
+                        Alt kateqoriya yoxdur
                       </p>
                     )}
                   </div>

@@ -5,16 +5,51 @@ import MobileFilterToggle from "@/components/product/MobileFilterToggle";
 import DesktopSidebar from "@/components/product/DesktopSidebar";
 import { serverApi } from "@/lib/axios";
 
-async function getProducts() {
+const FILTER_KEYS = [
+  "brands[]",
+  "models[]",
+  "min_year",
+  "max_year",
+  "min_price",
+  "max_price",
+  "city_id",
+  "color_id",
+  "statuses[]",
+  "categories[]",
+  "sub_categories[]",
+  "sort_option",
+  "sort_type",
+];
+
+function buildQueryParams(searchParams, extra = {}) {
+  const params = new URLSearchParams();
+  for (const key of FILTER_KEYS) {
+    const value = searchParams[key];
+    if (!value) continue;
+    if (key.endsWith("[]")) {
+      // Convert brands[]=a&brands[]=b  →  brands[0]=a&brands[1]=b
+      const baseKey = key.slice(0, -2);
+      const values = Array.isArray(value) ? value : [value];
+      values.forEach((v, i) => params.append(`${baseKey}[${i}]`, v));
+    } else {
+      params.append(key, Array.isArray(value) ? value[0] : value);
+    }
+  }
+  for (const [key, value] of Object.entries(extra)) {
+    params.set(key, String(value));
+  }
+  return params;
+}
+
+async function getProducts(searchParams) {
   try {
-    const response = await serverApi.get("/products/load?limit=8");
-    console.log(response);
+    const params = buildQueryParams(searchParams, { limit: 8 });
+    const response = await serverApi.get(`/products/load?${params.toString()}`);
     return {
       products: response.data.data,
       meta: response.data.meta,
     };
   } catch (error) {
-    console.error("Error fetching products:", error);
     return {
       products: [],
       meta: {
@@ -27,14 +62,18 @@ async function getProducts() {
   }
 }
 
-export default async function Products() {
-  const { products, meta } = await getProducts();
-  console.log(products);
+export default async function Products({ searchParams }) {
+  const resolvedParams = await searchParams;
+  const { products, meta } = await getProducts(resolvedParams);
+
+  // Plain query string forwarded to client for load-more pagination
+  const filterQueryString = buildQueryParams(resolvedParams).toString();
+
   return (
     <div>
       {/* Main Filter Bar */}
       <div className="bg-[#F8F8F8]">
-        <MainFilter type="default" />
+        <MainFilter type="default" initialFilters={resolvedParams} />
       </div>
 
       <div className="container">
@@ -55,7 +94,11 @@ export default async function Products() {
           <div className="col-span-1 lg:col-span-4">
             <MobileFilterToggle totalResults={meta.total} searchTerm="Mator" />
 
-            <ProductsList initialProducts={products} initialMeta={meta} />
+            <ProductsList
+              initialProducts={products}
+              initialMeta={meta}
+              filterQueryString={filterQueryString}
+            />
           </div>
         </div>
       </div>
