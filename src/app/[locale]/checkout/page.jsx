@@ -77,18 +77,21 @@ export default function CheckoutPage() {
       }
     };
 
+    fetchServices();
+  }, []);
+
+  useEffect(() => {
     const fetchPreview = async () => {
       setPreviewLoading(true);
-      const result = await checkoutService.getCheckoutPreview();
+      const result = await checkoutService.getCheckoutPreview(selectedAddressId);
       if (result.success) {
         setCheckoutPreview(result.data);
       }
       setPreviewLoading(false);
     };
 
-    fetchServices();
     fetchPreview();
-  }, []);
+  }, [selectedAddressId]);
 
   useEffect(() => {
     if (selectedAddressId !== watchedAddressId) {
@@ -259,10 +262,25 @@ export default function CheckoutPage() {
                       <p className="text-sm font-semibold text-gray-700">
                         {seller.store_code}
                       </p>
+
+                      {seller.weight_warning && (
+                        <div className="flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
+                          <span>⚠️</span>
+                          <span>{t("weight_warning_message")}</span>
+                        </div>
+                      )}
+
+                      {seller.is_sedan && (
+                        <div className="flex items-start gap-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1.5">
+                          <span>🚗</span>
+                          <span>{t("sedan_required_message")}</span>
+                        </div>
+                      )}
+
                       {seller.items?.map((item, idx) => (
                         <div key={idx} className="flex gap-2 items-start text-sm">
                           <span className="flex-1 text-gray-600">
-                            {item.product?.title}{" "}
+                            {item.title}{" "}
                             <span className="text-gray-400">x{item.quantity}</span>
                           </span>
                           <span className="font-medium shrink-0">
@@ -270,15 +288,33 @@ export default function CheckoutPage() {
                           </span>
                         </div>
                       ))}
+
                       <div className="flex gap-2 items-center text-sm">
                         <span className="flex-1 text-gray-500">{t("shipping")}</span>
                         <div className="flex-1 border-b border-dashed border-gray-300"></div>
-                        <span className="text-gray-600 shrink-0">
-                          {seller.shipping === 0
-                            ? t("free")
-                            : `${formatPrice(seller.shipping)} ₼`}
-                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="text-gray-600">
+                            {seller.shipping === 0
+                              ? t("free")
+                              : `${formatPrice(seller.shipping)} ₼`}
+                          </span>
+                          {seller.shipping_is_estimate && (
+                            <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-1">
+                              ~
+                            </span>
+                          )}
+                        </div>
                       </div>
+
+                      {seller.shipping_eta_minutes != null && (
+                        <div className="flex gap-2 items-center text-xs text-gray-500">
+                          <span>🕐</span>
+                          <span>
+                            ~{seller.shipping_eta_minutes} {t("minutes")}
+                          </span>
+                        </div>
+                      )}
+
                       <div className="border-b border-gray-100"></div>
                     </div>
                   ))}

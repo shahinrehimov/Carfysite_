@@ -27,11 +27,15 @@ export const checkoutService = {
 
   /**
    * Get checkout preview — shows order summary grouped by seller before payment
+   * @param {number|null} addressId - Optional address ID for real Wolt shipping calculation
    * @returns {Promise} Checkout preview data with sellers, items and totals
    */
-  getCheckoutPreview: async () => {
+  getCheckoutPreview: async (addressId = null) => {
     try {
-      const response = await api.get("/orders/checkout-preview");
+      const url = addressId
+        ? `/orders/checkout-preview?address_id=${addressId}`
+        : "/orders/checkout-preview";
+      const response = await api.get(url);
       return {
         success: true,
         data: response.data,

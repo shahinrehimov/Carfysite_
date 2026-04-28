@@ -1,13 +1,39 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink, Clock } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { api } from "@/lib/axios/api";
 import { useTranslations } from "next-intl";
 
 const PAGE_LIMIT = 15;
+
+const getDeliveryStatusClass = (status) => {
+  switch (status) {
+    case "delivered":
+      return "bg-green-100 text-green-800";
+    case "pending":
+      return "bg-amber-100 text-amber-800";
+    case "rejected":
+    case "canceled":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
+
+const formatEta = (isoString) => {
+  if (!isoString) return null;
+  try {
+    return new Date(isoString).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return isoString;
+  }
+};
 
 const formatPrice = (value) =>
   value != null ? `${Number(value).toFixed(2)} ₼` : "";
@@ -300,6 +326,64 @@ const OrdersList = () => {
                           {t("total")}: {formatPrice(detail.amount_final)}
                         </span>
                       </div>
+
+                      {detail.delivery_tracking &&
+                        detail.delivery_tracking.length > 0 && (
+                          <div className="mt-6 pt-4 border-t border-gray-200">
+                            <h4 className="text-base font-semibold mb-3">
+                              {t("delivery_tracking")}
+                            </h4>
+                            <div className="flex flex-col gap-4">
+                              {detail.delivery_tracking.map(
+                                (sellerTracking, si) => (
+                                  <div key={si} className="flex flex-col gap-2">
+                                    <p className="text-sm font-medium text-gray-600">
+                                      {sellerTracking.store_code}
+                                    </p>
+                                    {sellerTracking.deliveries?.map(
+                                      (delivery, di) => (
+                                        <div
+                                          key={di}
+                                          className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                                        >
+                                          <div className="flex flex-col gap-1">
+                                            <span
+                                              className={`self-start px-2 py-0.5 rounded-full text-xs font-medium ${getDeliveryStatusClass(delivery.status)}`}
+                                            >
+                                              {delivery.status}
+                                            </span>
+                                            {delivery.dropoff_eta && (
+                                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                <Clock className="w-3 h-3" />
+                                                <span>
+                                                  {t("eta")}:{" "}
+                                                  {formatEta(
+                                                    delivery.dropoff_eta
+                                                  )}
+                                                </span>
+                                              </div>
+                                            )}
+                                          </div>
+                                          {delivery.tracking_url && (
+                                            <a
+                                              href={delivery.tracking_url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-full hover:bg-blue-700 transition-colors shrink-0"
+                                            >
+                                              {t("track_order")}
+                                              <ExternalLink className="w-3 h-3" />
+                                            </a>
+                                          )}
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
                     </>
                   ) : (
                     <div className="text-center py-4 text-gray-500">
