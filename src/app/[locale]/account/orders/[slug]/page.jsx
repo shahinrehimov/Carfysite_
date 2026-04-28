@@ -250,7 +250,11 @@ export default function OrderPage({ params }) {
                           ? "text-[#87A88F]"
                           : order.payment_method.payment_status === "pending"
                             ? "text-yellow-600"
-                            : "text-red-600"
+                            : order.payment_method.payment_status === "partially_refunded"
+                              ? "text-amber-600"
+                              : order.payment_method.payment_status === "refunded"
+                                ? "text-blue-600"
+                                : "text-red-600"
                       }`}
                     >
                       {order.payment_method.payment_status_label}
@@ -276,6 +280,26 @@ export default function OrderPage({ params }) {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Order Status History */}
+            {order.statuses && order.statuses.length > 0 && (
+              <div className="bg-white rounded-lg border p-6">
+                <h3 className="text-lg font-semibold mb-4">
+                  {t("order_status_history")}
+                </h3>
+                <ol className="relative border-l border-gray-200 ml-3 space-y-6">
+                  {order.statuses.map((s, idx) => (
+                    <li key={idx} className="ml-6">
+                      <span
+                        className={`absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white ${getOrderStatusClass(s.status)}`}
+                      />
+                      <p className="font-medium text-gray-900">{s.status_label}</p>
+                      <p className="text-sm text-gray-500">{s.date}</p>
+                    </li>
+                  ))}
+                </ol>
               </div>
             )}
 

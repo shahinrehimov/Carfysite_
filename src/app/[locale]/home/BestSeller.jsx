@@ -3,80 +3,23 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Navigation } from "swiper/modules";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import ProductCard from "@/components/product/product-card";
 
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 
-const products = [
-  {
-    id: 1,
-    image: "/images/product-1.png",
-    title: "Automobile spare part",
-    code: "362428345",
-    price: 365.0,
-    oldPrice: 365.0,
-    rating: 5,
-    reviews: 72,
-  },
-  {
-    id: 2,
-    image: "/images/product-2.png",
-    title: "Automobile spare part",
-    code: "362428345",
-    price: 365.0,
-    oldPrice: 365.0,
-    rating: 5,
-    reviews: 72,
-  },
-  {
-    id: 3,
-    image: "/images/product-3.png",
-    title: "Automobile spare part",
-    code: "362428345",
-    price: 365.0,
-    oldPrice: 365.0,
-    rating: 5,
-    reviews: 72,
-  },
-  {
-    id: 4,
-    image: "/images/product-4.png",
-    title: "Automobile spare part",
-    code: "362428345",
-    price: 365.0,
-    oldPrice: 365.0,
-    rating: 5,
-    reviews: 72,
-  },
-  {
-    id: 5,
-    image: "/images/product-1.png",
-    title: "Automobile spare part",
-    code: "362428345",
-    price: 365.0,
-    oldPrice: 365.0,
-    rating: 5,
-    reviews: 72,
-  },
-];
+function BestSeller({ products = [] }) {
+  const t = useTranslations();
 
-function BestSeller() {
   return (
     <div className="py-12">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-[24px] font-semibold text-gray-900">
-          Ən çox satılan məhsullar
+          {t("best_sellers")}
         </h2>
-        <Link
-          href="#"
-          className="text-[14px] text-gray-600 hover:text-gray-900 transition-colors underline"
-        >
-          Hamısı
-        </Link>
       </div>
 
       {/* Swiper */}
@@ -84,6 +27,7 @@ function BestSeller() {
         modules={[Pagination, Navigation]}
         spaceBetween={20}
         slidesPerView={1}
+        style={{ alignItems: "stretch", paddingBottom: "40px" }}
         pagination={{
           clickable: true,
           bulletClass: "swiper-pagination-bullet",
@@ -108,16 +52,23 @@ function BestSeller() {
           },
         }}
         className="best-seller-swiper"
-        style={{ paddingBottom: "40px" }}
       >
         {products.map((product) => (
-          <SwiperSlide key={product.id}>
-            <ProductCard product={product} />
+          <SwiperSlide key={product.uuid} className="h-auto">
+            <div className="h-full">
+              <ProductCard product={product} />
+            </div>
           </SwiperSlide>
         ))}
       </Swiper>
 
       <style jsx global>{`
+        .best-seller-swiper .swiper-wrapper {
+          align-items: stretch;
+        }
+        .best-seller-swiper .swiper-slide {
+          height: auto;
+        }
         .best-seller-swiper .swiper-pagination {
           bottom: 0px !important;
         }

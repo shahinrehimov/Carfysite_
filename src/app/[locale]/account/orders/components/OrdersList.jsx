@@ -9,11 +9,6 @@ import { useTranslations } from "next-intl";
 
 const PAGE_LIMIT = 15;
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return "";
-  return dateStr.replace("T", " ").slice(0, 16);
-};
-
 const formatPrice = (value) =>
   value != null ? `${Number(value).toFixed(2)} ₼` : "";
 
@@ -124,11 +119,6 @@ const OrdersList = () => {
     }
   };
 
-  const getOrderStatusLabel = (status) => {
-    const key = `order_status_${status}`;
-    return t(key);
-  };
-
   if (loading) {
     return (
       <div className="flex flex-col gap-4">
@@ -173,19 +163,19 @@ const OrdersList = () => {
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                   <div className="flex flex-col">
                     <span className="text-lg font-semibold text-gray-900">
-                      {formatDate(order.created_at)}
+                      {order.date}
                     </span>
                     <span className="text-sm text-gray-500 font-mono">
-                      {order.id}
+                      {order.code}
                     </span>
                     <span className="text-sm font-medium text-gray-700">
-                      {formatPrice(order.grand_total)}
+                      {order.products_count} {t("products")}
                     </span>
                   </div>
 
                   <div className="lg:ml-8">
                     <span className={getStatusBadge(order.status)}>
-                      {getOrderStatusLabel(order.status)}
+                      {order.status_label}
                     </span>
                   </div>
                 </div>
@@ -231,7 +221,9 @@ const OrdersList = () => {
                       <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                           <div>
-                            <span className="text-gray-600">{t("order_code")}:</span>
+                            <span className="text-gray-600">
+                              {t("order_code")}:
+                            </span>
                             <p className="font-medium">{detail.code}</p>
                           </div>
                           <div>

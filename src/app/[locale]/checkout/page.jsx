@@ -37,6 +37,7 @@ export default function CheckoutPage() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [checkoutPreview, setCheckoutPreview] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(true);
+  const [completedOrder, setCompletedOrder] = useState(null);
   const { toast } = useToast();
   const dispatch = useDispatch();
 
@@ -116,8 +117,10 @@ export default function CheckoutPage() {
       if (result.success) {
         const orderData = result.data?.data;
         if (orderData?.redirect_url) {
+          dispatch(clearCart());
           window.location.href = orderData.redirect_url;
         } else {
+          setCompletedOrder(orderData);
           setOrderSuccess(true);
           dispatch(clearCart());
         }
@@ -162,13 +165,34 @@ export default function CheckoutPage() {
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
               {t("order_successful")}
             </h2>
-            <p className="text-gray-600 mb-8">{t("order_successful_body")}</p>
-            <Link
-              href="/"
-              className="inline-block bg-green-primary text-white px-8 py-3 rounded-full hover:bg-green-primary/90 transition-colors"
-            >
-              {t("continue_shopping")}
-            </Link>
+            <p className="text-gray-600 mb-4">{t("order_successful_body")}</p>
+
+            {completedOrder && (
+              <div className="mb-8 p-4 bg-gray-50 rounded-lg text-sm text-gray-700 space-y-1">
+                {completedOrder.grand_total != null && (
+                  <p className="text-lg font-semibold text-gray-900">
+                    {t("total")}: {formatPrice(completedOrder.grand_total)} ₼
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {completedOrder?.order_uuid && (
+                <Link
+                  href={`/account/orders/${completedOrder.order_uuid}`}
+                  className="inline-block border border-green-primary text-green-primary px-8 py-3 rounded-full hover:bg-green-primary/10 transition-colors"
+                >
+                  {t("view_order")}
+                </Link>
+              )}
+              <Link
+                href="/"
+                className="inline-block bg-green-primary text-white px-8 py-3 rounded-full hover:bg-green-primary/90 transition-colors"
+              >
+                {t("continue_shopping")}
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -233,16 +257,16 @@ export default function CheckoutPage() {
                   {checkoutPreview.sellers?.map((seller) => (
                     <div key={seller.company_id} className="flex flex-col gap-2">
                       <p className="text-sm font-semibold text-gray-700">
-                        {seller.company_name}
+                        {seller.store_code}
                       </p>
                       {seller.items?.map((item, idx) => (
                         <div key={idx} className="flex gap-2 items-start text-sm">
                           <span className="flex-1 text-gray-600">
-                            {item.product_title}{" "}
+                            {item.product?.title}{" "}
                             <span className="text-gray-400">x{item.quantity}</span>
                           </span>
                           <span className="font-medium shrink-0">
-                            {formatPrice(item.subtotal)} ₼
+                            {formatPrice(item.price)} ₼
                           </span>
                         </div>
                       ))}

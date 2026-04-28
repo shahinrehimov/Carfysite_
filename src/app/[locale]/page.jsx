@@ -4,22 +4,104 @@ import CategoryCards from "./home/CategoryCards";
 import BestSeller from "./home/BestSeller";
 import AllProducts from "./home/AllProducts";
 import Promotion from "./home/Promotion";
+import serverApi from "@/lib/serverApi";
+import { serverApi as axiosServerApi } from "@/lib/axios";
+import { generateServiceUrl } from "../../lib/generateServiceUrl";
 
-export default function Home() {
+const getCategories = async () => {
+  try {
+    const response = await serverApi.get("/categories/list?with_image=yes");
+    return response.data?.data ?? [];
+  } catch {
+    return [];
+  }
+};
+
+const getProducts = async () => {
+  try {
+    const response = await axiosServerApi.get("/products/load?limit=24");
+    return response.data?.data ?? [];
+  } catch {
+    return [];
+  }
+};
+
+const getBestSellers = async () => {
+  try {
+    const response = await axiosServerApi.get(
+      "/groups/single/bestsellers/products/load"
+    );
+    return response.data?.data?.product_variants ?? [];
+  } catch {
+    return [];
+  }
+};
+
+const getHomeBanner = async () => {
+  try {
+    const response = await axiosServerApi.get(
+      "/advertisements/by-key/home_banner"
+    );
+    return response.data?.data ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const services = [
+  {
+    key: "setting",
+    limit: 100,
+  },
+];
+
+const getServices = async () => {
+  try {
+    const res = await axiosServerApi.get(generateServiceUrl(services));
+    return res.data.data;
+  } catch (error) {
+    return {
+      setting: null,
+    };
+  }
+};
+export default async function Home() {
+  const [categories, products, bestSellers, homeBanner, services] =
+    await Promise.all([
+      getCategories(),
+      getProducts(),
+      getBestSellers(),
+      getHomeBanner(),
+      getServices(),
+    ]);
+
   return (
     <div className="w-full">
-      <Banner />
-      <CategoryCards />
+      <Banner services={services} />
+      <CategoryCards categories={categories} />
       <div className="w-full bg-[#F8F8F8]">
         <div className="container-left-aligned ">
           <div className="container-left-aligned-content">
-            <BestSeller />
-            <AllProducts />
+            <BestSeller products={bestSellers} />
+            <AllProducts products={products} />
           </div>
 
-          <div className="ads-container">
-            <Image src="/images/ads.png" alt="ads" width={300} height={1000} />
-          </div>
+          {homeBanner && (
+            <div className="ads-container">
+              <a
+                href={homeBanner.link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src={homeBanner.image_url}
+                  alt={homeBanner.title}
+                  width={300}
+                  height={1000}
+                />
+              </a>
+            </div>
+          )}
         </div>
       </div>
       <Promotion />
