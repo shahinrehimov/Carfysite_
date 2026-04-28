@@ -3,8 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useDispatch, useSelector } from "react-redux";
-import { selectBasketData, selectTotalItems } from "@/store/cart";
+import { useDispatch } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
@@ -16,7 +15,7 @@ import { api } from "@/lib/axios/api";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/providers/ToastProvider";
 import { clearCart } from "@/store/cart";
-// Validation schema for checkout
+
 const checkoutSchema = yup.object().shape({
   address_id: yup
     .number()
@@ -24,6 +23,9 @@ const checkoutSchema = yup.object().shape({
     .positive("Please select a valid address"),
   payment_method: yup.string().required("Please select a payment method"),
 });
+
+const formatPrice = (value) =>
+  value != null ? Number(value).toFixed(2) : "0.00";
 
 export default function CheckoutPage() {
   const t = useTranslations("");
@@ -33,11 +35,10 @@ export default function CheckoutPage() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [checkoutPreview, setCheckoutPreview] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(true);
   const { toast } = useToast();
   const dispatch = useDispatch();
-  // Get cart data from Redux store
-  const basketData = useSelector(selectBasketData);
-  const totalItems = useSelector(selectTotalItems);
 
   const {
     handleSubmit,
@@ -52,30 +53,19 @@ export default function CheckoutPage() {
     },
   });
 
-  // Watch form values
   const watchedAddressId = watch("address_id");
   const watchedPaymentMethod = watch("payment_method");
 
-  // Load address types and cities on component mount
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const services = [
-          {
-            key: "address_type",
-            limit: 100,
-          },
-          {
-            key: "country_and_city",
-            limit: 100,
-          },
+          { key: "address_type", limit: 100 },
+          { key: "country_and_city", limit: 100 },
         ];
         const res = await api.get(generateServiceUrl(services));
         const data = res.data.data;
-
         setAddressTypes(data.address_type || []);
-
-        // Extract cities from the first country (Georgia)
         const countryAndCity = data.country_and_city || [];
         const firstCountry = countryAndCity[0];
         setCities(firstCountry?.cities || []);
@@ -86,10 +76,19 @@ export default function CheckoutPage() {
       }
     };
 
+    const fetchPreview = async () => {
+      setPreviewLoading(true);
+      const result = await checkoutService.getCheckoutPreview();
+      if (result.success) {
+        setCheckoutPreview(result.data);
+      }
+      setPreviewLoading(false);
+    };
+
     fetchServices();
+    fetchPreview();
   }, []);
 
-  // Sync form values with state
   useEffect(() => {
     if (selectedAddressId !== watchedAddressId) {
       setValue("address_id", selectedAddressId);
@@ -102,13 +101,8 @@ export default function CheckoutPage() {
     }
   }, [selectedPaymentMethod, watchedPaymentMethod, setValue]);
 
-  const handleAddressSelect = (addressId) => {
-    setSelectedAddressId(addressId);
-  };
-
-  const handlePaymentMethodSelect = (paymentMethod) => {
-    setSelectedPaymentMethod(paymentMethod);
-  };
+  const handleAddressSelect = (addressId) => setSelectedAddressId(addressId);
+  const handlePaymentMethodSelect = (method) => setSelectedPaymentMethod(method);
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -116,11 +110,13 @@ export default function CheckoutPage() {
       const result = await checkoutService.submitOrder({
         payment_method: data.payment_method,
         address_id: data.address_id,
+        ...(data.note ? { note: data.note } : {}),
       });
 
       if (result.success) {
-        if (result.data?.redirect) {
-          window.location.href = result.data.redirect_url;
+        const orderData = result.data?.data;
+        if (orderData?.redirect_url) {
+          window.location.href = orderData.redirect_url;
         } else {
           setOrderSuccess(true);
           dispatch(clearCart());
@@ -219,57 +215,84 @@ export default function CheckoutPage() {
             </div>
 
             {/* Order Summary */}
-            <div className="col-span-12 lg:col-span-4 border border-gray-200 rounded-lg px-2 py-3 lg:px-10 lg:py-12 h-fit">
-              <div className="flex flex-col gap-5">
-                <div className="flex flex-row gap-2 items-center">
-                  <span className="text-base font-regular">{t("amount")}</span>
-                  <div className="flex-1 border-b border-gray-500 border-dashed"></div>
-                  <span className="text-base font-medium text-gray-primary">
-                    {basketData.total_price_in_basket?.toFixed(2) || "0.00"}
-                  </span>
-                </div>
+            <div className="col-span-12 lg:col-span-4 border border-gray-200 rounded-lg px-2 py-3 lg:px-10 lg:py-8 h-fit">
+              <h3 className="text-lg font-semibold mb-4">{t("order_summary")}</h3>
 
-                <div className="flex flex-row gap-2 items-center">
-                  <span className="text-base font-regular">
-                    {t("products")}
-                  </span>
-                  <div className="flex-1 border-b border-gray-500 border-dashed"></div>
-                  <span className="text-base font-medium text-gray-primary">
-                    {totalItems} {totalItems === 1 ? "item" : "items"}
-                  </span>
+              {previewLoading ? (
+                <div className="space-y-3 animate-pulse">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex justify-between">
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      <div className="h-4 bg-gray-200 rounded w-16"></div>
+                    </div>
+                  ))}
                 </div>
+              ) : checkoutPreview ? (
+                <div className="flex flex-col gap-4">
+                  {/* Sellers breakdown */}
+                  {checkoutPreview.sellers?.map((seller) => (
+                    <div key={seller.company_id} className="flex flex-col gap-2">
+                      <p className="text-sm font-semibold text-gray-700">
+                        {seller.company_name}
+                      </p>
+                      {seller.items?.map((item, idx) => (
+                        <div key={idx} className="flex gap-2 items-start text-sm">
+                          <span className="flex-1 text-gray-600">
+                            {item.product_title}{" "}
+                            <span className="text-gray-400">x{item.quantity}</span>
+                          </span>
+                          <span className="font-medium shrink-0">
+                            {formatPrice(item.subtotal)} ₼
+                          </span>
+                        </div>
+                      ))}
+                      <div className="flex gap-2 items-center text-sm">
+                        <span className="flex-1 text-gray-500">{t("shipping")}</span>
+                        <div className="flex-1 border-b border-dashed border-gray-300"></div>
+                        <span className="text-gray-600 shrink-0">
+                          {seller.shipping === 0
+                            ? t("free")
+                            : `${formatPrice(seller.shipping)} ₼`}
+                        </span>
+                      </div>
+                      <div className="border-b border-gray-100"></div>
+                    </div>
+                  ))}
 
-                <div className="flex flex-row gap-2 items-center">
-                  <span className="text-base font-regular">
-                    {t("discount")}
-                  </span>
-                  <div className="flex-1 border-b border-gray-500 border-dashed"></div>
-                  <span className="text-base font-medium text-green-primary">
-                    {basketData.total_discount_in_basket?.toFixed(2) || "0.00"}
-                  </span>
-                </div>
+                  {/* Totals */}
+                  <div className="flex flex-col gap-3 mt-1">
+                    <div className="flex gap-2 items-center">
+                      <span className="text-base">{t("amount")}</span>
+                      <div className="flex-1 border-b border-gray-500 border-dashed"></div>
+                      <span className="text-base font-medium text-gray-primary">
+                        {formatPrice(checkoutPreview.subtotal)} ₼
+                      </span>
+                    </div>
 
-                <div className="flex flex-row gap-2 items-center">
-                  <span className="text-base font-regular">
-                    {t("shipping")}
-                  </span>
-                  <div className="flex-1 border-b border-gray-500 border-dashed"></div>
-                  <span className="text-base font-medium text-green-primary">
-                    {basketData.shipping === 0
-                      ? t("free")
-                      : `${basketData.shipping?.toFixed(2)} `}
-                  </span>
-                </div>
+                    <div className="flex gap-2 items-center">
+                      <span className="text-base">{t("shipping")}</span>
+                      <div className="flex-1 border-b border-gray-500 border-dashed"></div>
+                      <span className="text-base font-medium text-gray-primary">
+                        {checkoutPreview.total_shipping === 0
+                          ? t("free")
+                          : `${formatPrice(checkoutPreview.total_shipping)} ₼`}
+                      </span>
+                    </div>
 
-                <div className="flex flex-row gap-2 items-center">
-                  <span className="text-base font-bold">{t("total")}</span>
-                  <div className="flex-1 border-b border-gray-500 border-dashed"></div>
-                  <span className="text-base font-bold text-green-primary">
-                    {basketData.total_price_final_in_basket?.toFixed(2) ||
-                      "0.00"}
-                  </span>
+                    <div className="flex gap-2 items-center">
+                      <span className="text-base font-bold">{t("total")}</span>
+                      <div className="flex-1 border-b border-gray-500 border-dashed"></div>
+                      <span className="text-base font-bold text-green-primary">
+                        {formatPrice(checkoutPreview.grand_total)} ₼
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-sm text-gray-500 text-center py-4">
+                  {t("no_items_in_cart")}
+                </div>
+              )}
 
               <Button
                 type="submit"
@@ -277,7 +300,7 @@ export default function CheckoutPage() {
                 disabled={
                   isSubmitting || !selectedAddressId || !selectedPaymentMethod
                 }
-                className="w-full h-12 lg:h-14  text-white rounded-full mt-6 font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full h-12 lg:h-14 text-white rounded-full mt-6 font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isSubmitting ? t("processing") : t("place_order")}
               </Button>

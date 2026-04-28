@@ -26,8 +26,29 @@ export const checkoutService = {
   },
 
   /**
+   * Get checkout preview — shows order summary grouped by seller before payment
+   * @returns {Promise} Checkout preview data with sellers, items and totals
+   */
+  getCheckoutPreview: async () => {
+    try {
+      const response = await api.get("/orders/checkout-preview");
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      console.error("Error fetching checkout preview:", error);
+      return {
+        success: false,
+        error:
+          error.response?.data?.message || "Failed to fetch checkout preview",
+      };
+    }
+  },
+
+  /**
    * Submit checkout order
-   * @param {Object} orderData - Order data containing payment_method and address_id
+   * @param {Object} orderData - Order data: { payment_method, address_id, note? }
    * @returns {Promise} Order submission response
    */
   submitOrder: async (orderData) => {
