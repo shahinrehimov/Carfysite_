@@ -7,20 +7,34 @@ import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import CartDropdown from "@/components/cart/cart-dropdown";
 import { isAuthenticated } from "@/lib/auth";
+import { notificationsService } from "@/lib/notificationsService";
 
 export default function DesktopNav() {
   const t = useTranslations();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState("Bakı");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await notificationsService.getUnreadCount();
+      setUnreadCount(res.data?.count ?? 0);
+    } catch {
+      // silently ignore
+    }
+  };
 
   useEffect(() => {
-    // Check authentication status on mount
-    setIsLoggedIn(isAuthenticated());
+    const loggedIn = isAuthenticated();
+    setIsLoggedIn(loggedIn);
+    if (loggedIn) fetchUnreadCount();
 
-    // Listen for storage events (login/logout in other tabs)
     const handleStorageChange = () => {
-      setIsLoggedIn(isAuthenticated());
+      const auth = isAuthenticated();
+      setIsLoggedIn(auth);
+      if (auth) fetchUnreadCount();
+      else setUnreadCount(0);
     };
 
     window.addEventListener("storage", handleStorageChange);
@@ -101,16 +115,23 @@ export default function DesktopNav() {
 
       <div className="flex items-center gap-6">
         <Link
-          href="/notifications"
-          className="flex items-center gap-2 text-[#1A1A1A] "
+          href="/account/notifications"
+          className="flex items-center gap-2 text-[#1A1A1A]"
         >
-          <Image
-            src="/icons/notification.svg"
-            alt="notifications"
-            width={20}
-            height={20}
-            className="w-5 h-5"
-          />
+          <div className="relative">
+            <Image
+              src="/icons/notification.svg"
+              alt="notifications"
+              width={20}
+              height={20}
+              className="w-5 h-5"
+            />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full leading-none">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </div>
           <span className="text-sm">{t("notifications")}</span>
         </Link>
 
