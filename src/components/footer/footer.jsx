@@ -6,14 +6,17 @@ export default function Footer({ translations = {} }) {
 
   const footerLinks = [
     { href: "/about", label: t("aboutUs") || "Hüquqi məlumat" },
-    { href: "/rules", label: t("rules") || "Carfy qaydaları" },
-    { href: "/warranty", label: t("warranty") || "Zəmanət" },
-    { href: "/returns", label: t("returns") || "Qaytarılma" },
     {
-      href: "/delivery",
+      href: "/pages/privacy-policy",
+      label: t("privacy_policy") || "Məxfilik siyasəti",
+    },
+    { href: "/pages/warranty", label: t("warranty") || "Zəmanət" },
+    { href: "/pages/returns", label: t("returns") || "Qaytarılma" },
+    {
+      href: "/pages/delivery",
       label: t("delivery") || "Çatdırılma və ödəmə",
     },
-    { href: "/faq", label: t("faq") || "Ən çox verilən suallar" },
+    { href: "/pages/faq", label: t("faq") || "Ən çox verilən suallar" },
     { href: "/contact", label: t("contact") || "Əlaqə" },
   ];
 

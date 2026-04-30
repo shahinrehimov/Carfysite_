@@ -29,15 +29,13 @@ const createServerApiInstance = async () => {
         config.headers["Token"] = apiToken;
       }
 
-      // Add Authorization header if access token exists in cookie
       const accessToken = cookieStore.get("access_token");
+      const guestIdentifier = cookieStore.get("guest_identifier");
+
       if (accessToken) {
         config.headers["Authorization"] = `Bearer ${accessToken.value}`;
-      }
-
-      // Add guest identifier header if exists in cookie
-      const guestIdentifier = cookieStore.get("guest_identifier");
-      if (guestIdentifier) {
+        delete config.headers["identifier"];
+      } else if (guestIdentifier) {
         config.headers["identifier"] = guestIdentifier.value;
       }
 

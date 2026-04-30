@@ -27,15 +27,13 @@ axiosInstance.interceptors.request.use(
       config.headers["Token"] = apiToken;
     }
 
-    // Add Authorization header if access token exists in cookie
     const accessToken = await getCookie("access_token");
+    const guestIdentifier = await getCookie("guest_identifier");
+
     if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
-    }
-
-    // Add guest identifier header if exists in cookie
-    const guestIdentifier = await getCookie("guest_identifier");
-    if (guestIdentifier) {
+      delete config.headers["identifier"];
+    } else if (guestIdentifier) {
       config.headers["identifier"] = guestIdentifier;
     }
 
