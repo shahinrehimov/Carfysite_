@@ -1,5 +1,527 @@
-import React from "react";
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import { Lock, Phone, Eye, EyeOff, Camera, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/axios/api";
+import { getCookie, setCookie } from "@/lib/axios/utils";
+import { logout } from "@/lib/auth";
+
+const OTP_DURATION = 120;
+
+function OtpInput({ otp, onChange, inputRefs }) {
+  const handleChange = (idx, val) => {
+    if (!/^\d?$/.test(val)) return;
+    const next = [...otp];
+    next[idx] = val;
+    onChange(next);
+    if (val && idx < 3) inputRefs[idx + 1]?.current?.focus();
+  };
+
+  const handleKeyDown = (idx, e) => {
+    if (e.key === "Backspace" && !otp[idx] && idx > 0) {
+      inputRefs[idx - 1]?.current?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const digits = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 4);
+    if (!digits) return;
+    const next = ["", "", "", ""];
+    for (let i = 0; i < digits.length; i++) next[i] = digits[i];
+    onChange(next);
+    const focusIdx = Math.min(digits.length, 3);
+    inputRefs[focusIdx]?.current?.focus();
+  };
+
+  return (
+    <div className="flex gap-3">
+      {otp.map((digit, idx) => (
+        <input
+          key={idx}
+          ref={inputRefs[idx]}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={digit}
+          onChange={(e) => handleChange(idx, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(idx, e)}
+          onPaste={handlePaste}
+          className="w-12 h-12 text-center text-lg font-medium rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#00569C] focus:border-transparent"
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function ProfilePage() {
-  return <div>ProfilePage</div>;
+  const t = useTranslations();
+
+  const [user] = useState(() => {
+    try {
+      const raw = getCookie("user_data");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [name, setName] = useState(user?.name ?? "");
+  const [surname, setSurname] = useState(user?.surname ?? "");
+  const [email] = useState(user?.email ?? "");
+  const [phone] = useState(user?.phone ?? "");
+
+  const [avatarPreview, setAvatarPreview] = useState(user?.photo ?? null);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+
+  const [showOtpSection, setShowOtpSection] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", ""]);
+  const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+
+  const [otpTimer, setOtpTimer] = useState(OTP_DURATION);
+  const [otpExpired, setOtpExpired] = useState(false);
+  const timerRef = useRef(null);
+
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const router = useRouter();
+
+  const showToast = useCallback((message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  }, []);
+
+  const startOtpTimer = useCallback(() => {
+    setOtpTimer(OTP_DURATION);
+    setOtpExpired(false);
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setOtpTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          setOtpExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => () => clearInterval(timerRef.current), []);
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showToast(t("avatar_size_error"), "error");
+      return;
+    }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const handleUpdateProfile = async () => {
+    try {
+      const payload = {
+        name,
+        surname,
+        gender: user?.gender ?? null,
+        birth_date: user?.birth_date ?? null,
+      };
+      const res = await api.post("/profile/update", payload);
+      const updated = res.data?.data ?? res.data;
+      if (updated) {
+        const merged = {
+          ...user,
+          name: updated.name ?? name,
+          surname: updated.surname ?? surname,
+        };
+        setCookie("user_data", JSON.stringify(merged));
+      }
+      showToast(t("saved_success"));
+    } catch (err) {
+      showToast(err.response?.data?.message ?? t("save_error"), "error");
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!password || !passwordConfirmation) {
+      showToast(t("fill_password_fields"), "error");
+      return;
+    }
+    if (password !== passwordConfirmation) {
+      showToast(t("passwords_mismatch"), "error");
+      return;
+    }
+    try {
+      await api.post("/profile/change-password", {
+        password,
+        password_confirmation: passwordConfirmation,
+      });
+      setShowOtpSection(true);
+      setOtp(["", "", "", ""]);
+      startOtpTimer();
+      setTimeout(() => otpRefs[0]?.current?.focus(), 100);
+    } catch (err) {
+      showToast(
+        err.response?.data?.message ?? t("password_change_error"),
+        "error"
+      );
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    const code = otp.join("");
+    if (code.length < 4) {
+      showToast(t("enter_otp"), "error");
+      return;
+    }
+    try {
+      await api.post("/profile/change-password/verify-otp", {
+        otp: Number(code),
+        password,
+        password_confirmation: passwordConfirmation,
+      });
+      showToast(t("password_changed"));
+      setShowOtpSection(false);
+      setShowPasswordSection(false);
+      setPassword("");
+      setPasswordConfirmation("");
+      setOtp(["", "", "", ""]);
+      clearInterval(timerRef.current);
+    } catch (err) {
+      showToast(err.response?.data?.message ?? t("otp_error"), "error");
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      await api.post("/profile/change-password", {
+        password,
+        password_confirmation: passwordConfirmation,
+      });
+      setOtp(["", "", "", ""]);
+      startOtpTimer();
+      setTimeout(() => otpRefs[0]?.current?.focus(), 100);
+      showToast(t("otp_resent"));
+    } catch (err) {
+      showToast(err.response?.data?.message ?? t("otp_resend_error"), "error");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    try {
+      await api.post("/profile/delete-account");
+      logout();
+      router.replace("/");
+    } catch (err) {
+      setShowDeleteModal(false);
+      showToast(err.response?.data?.message ?? t("delete_error"), "error");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      if (showOtpSection) {
+        await handleVerifyOtp();
+      } else if (showPasswordSection && password) {
+        await handleChangePassword();
+      } else {
+        await handleUpdateProfile();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatTime = (s) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  const inputClass =
+    "w-full rounded-full border border-gray-200 bg-white min-h-[52px] px-5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00569C] focus:border-transparent transition-all";
+
+  return (
+    <div className="max-w-2xl">
+      {/* Toast */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium transition-all ${
+            toast.type === "error"
+              ? "bg-red-50 border border-red-200 text-red-700"
+              : "bg-green-50 border border-green-200 text-green-700"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
+
+      <h1 className="text-xl font-semibold text-gray-900 mb-6">{t("title")}</h1>
+
+      {/* Avatar */}
+      <div className="flex flex-col items-start mb-8">
+        <div className="relative mb-3">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+            {avatarPreview ? (
+              <Image
+                src={avatarPreview}
+                alt="Avatar"
+                width={80}
+                height={80}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                <Camera size={28} />
+              </div>
+            )}
+          </div>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleAvatarChange}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="text-sm border border-[#00569C] text-[#00569C] rounded-full px-5 py-1.5 hover:bg-[#00569C]/5 transition-colors"
+        >
+          {t("choose_file")}
+        </button>
+        <p className="text-xs text-gray-400 mt-2">{t("max_size")}</p>
+      </div>
+
+      {/* Name / Surname */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5 pl-1">
+            {t("name")}
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className={inputClass}
+            placeholder={t("name")}
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5 pl-1">
+            {t("surname")}
+          </label>
+          <input
+            type="text"
+            value={surname}
+            onChange={(e) => setSurname(e.target.value)}
+            className={inputClass}
+            placeholder={t("surname")}
+          />
+        </div>
+      </div>
+
+      {/* Email / Phone */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5 pl-1">
+            {t("email")}
+          </label>
+          <input
+            type="email"
+            value={email}
+            readOnly
+            className={`${inputClass} bg-gray-50 cursor-default`}
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5 pl-1">
+            {t("phone")}
+          </label>
+          <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[#00569C] pointer-events-none">
+              <Phone size={15} />
+              <span className="text-sm font-medium">+994</span>
+            </div>
+            <input
+              type="tel"
+              value={phone}
+              readOnly
+              className={`${inputClass} pl-[90px] bg-gray-50 cursor-default`}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Change Password Toggle */}
+      <div className="mb-6">
+        <button
+          type="button"
+          onClick={() => {
+            if (showOtpSection) return;
+            setShowPasswordSection((v) => !v);
+            if (showPasswordSection) {
+              setPassword("");
+              setPasswordConfirmation("");
+            }
+          }}
+          className="flex items-center gap-2 text-sm font-medium text-[#00569C] hover:text-[#004580] transition-colors"
+        >
+          <Lock size={16} />
+          {t("change_password")}
+        </button>
+
+        {/* Password Fields */}
+        {showPasswordSection && (
+          <div className="mt-4 space-y-3">
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={t("new_password")}
+                className={`${inputClass} pr-12`}
+                disabled={showOtpSection}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                type={showPasswordConfirm ? "text" : "password"}
+                value={passwordConfirmation}
+                onChange={(e) => setPasswordConfirmation(e.target.value)}
+                placeholder={t("confirm_password")}
+                className={`${inputClass} pr-12`}
+                disabled={showOtpSection}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswordConfirm((v) => !v)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPasswordConfirm ? <Eye size={18} /> : <EyeOff size={18} />}
+              </button>
+            </div>
+
+            {/* OTP Section */}
+            {showOtpSection && (
+              <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                  {t("otp_sent_message")}
+                </p>
+                <OtpInput otp={otp} onChange={setOtp} inputRefs={otpRefs} />
+                <div className="mt-3 flex items-center gap-2">
+                  {otpExpired ? (
+                    <span className="text-sm font-medium text-red-500">
+                      {t("time_expired")}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-500">
+                      {formatTime(otpTimer)}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2 text-sm text-gray-500">
+                  {t("no_code")}{" "}
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    className="text-[#00569C] font-medium hover:underline"
+                  >
+                    {t("resend")}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Save Button */}
+      <div className="mb-6">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={loading}
+          className="w-full sm:w-[280px] min-h-[52px] rounded-full bg-[#00569C] text-white font-medium text-sm hover:bg-[#004580] active:bg-[#003d72] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? t("saving") : t("save")}
+        </button>
+      </div>
+
+      {/* Delete Account */}
+      <button
+        type="button"
+        onClick={() => setShowDeleteModal(true)}
+        className="text-sm text-orange-500 underline underline-offset-2 hover:text-orange-600 transition-colors"
+      >
+        {t("delete_account")}
+      </button>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => !deleteLoading && setShowDeleteModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+              <Trash2 size={22} className="text-red-500" />
+            </div>
+            <h2 className="text-base font-semibold text-gray-900 mb-2">
+              {t("delete_confirm_title")}
+            </h2>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+              {t("delete_confirm_body")}
+            </p>
+            <div className="flex gap-3 w-full">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleteLoading}
+                className="flex-1 min-h-[44px] rounded-full border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                {t("cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleteLoading}
+                className="flex-1 min-h-[44px] rounded-full bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {deleteLoading ? t("deleting") : t("delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

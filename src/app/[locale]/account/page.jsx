@@ -1,17 +1,14 @@
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 
 export default async function AccountPage() {
   const t = await getTranslations("account");
 
-  const user = {
-    firstName: "Gunay",
-    fullName: "Gunay Hasanbayli Aliyeva",
-    email: "gunay@gmail.com",
-    phone: "+99450555555",
-    bonusPoints: 4321,
-  };
+  const cookieStore = await cookies();
+  const userDataCookie = cookieStore.get("user_data");
+  const user = userDataCookie ? JSON.parse(userDataCookie.value) : null;
 
   return (
     <div className="space-y-6">
@@ -25,7 +22,7 @@ export default async function AccountPage() {
         />
         <div className="relative z-10 h-full flex flex-col justify-center px-6 lg:px-8">
           <h1 className="text-white text-2xl lg:text-3xl font-semibold mb-2">
-            {t("greeting")}, {user.firstName}
+            {t("greeting")}, {user?.name}
           </h1>
           <p className="text-white/90 text-sm lg:text-base">
             {t("welcome_message")}
@@ -62,15 +59,15 @@ export default async function AccountPage() {
             </div>
 
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              {user.fullName}
+              {user?.name} {user?.surname}
             </h3>
           </div>
 
           <div className="space-y-4 ">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6 text-sm text-gray-600">
-                <span>{user.email}</span>
-                <span>{user.phone}</span>
+                <span>{user?.email}</span>
+                <span>{user?.phone}</span>
               </div>
               <Link
                 href="/account/change-password"
@@ -92,7 +89,7 @@ export default async function AccountPage() {
               {t("bonuses").toUpperCase()}
             </h2>
             <p className="text-4xl lg:text-5xl font-bold mb-4">
-              {user.bonusPoints.toLocaleString()}
+              {(user?.bonusPoints ?? 0).toLocaleString()}
             </p>
           </div>
         </div>
