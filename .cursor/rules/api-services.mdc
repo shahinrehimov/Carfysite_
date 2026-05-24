@@ -1,0 +1,74 @@
+---
+description: carfy App — API çağırış pattern-ləri, client vs server, servis faylları
+globs: carfy/src/lib/**/*.js
+alwaysApply: false
+---
+
+# API Servis Faylları
+
+## İki Instance — Nə Vaxt Hansını İşlət
+
+| Instance | Import | Nə vaxt | Base URL |
+|---|---|---|---|
+| `api` | `import { api } from "@/lib/axios/api"` | Client komponentlər, event handler-lar | `/api/site` |
+| `serverApi` | `import serverApi from "@/lib/serverApi"` | Server komponentlər (`async function Page()`), `generateMetadata` | `/api/app` |
+
+```js
+// ❌ YANLIŞ — server component-də client api işlətmə
+export default async function ProductPage() {
+  const res = await api.get("/products/show/...");  // Cookie context yoxdur
+}
+
+// ✅ DÜZGÜN
+export default async function ProductPage() {
+  const res = await serverApi.get("/products/show/...");
+}
+```
+
+## Servis Fayl Şablonu
+
+```js
+// src/lib/exampleService.js
+import { api } from "@/lib/axios/api";
+
+export const exampleService = {
+  getList: (params) => api.get(`/examples/load`, { params }),
+  getById: (id) => api.get(`/examples/show/${id}`),
+  create: (data) => api.post(`/examples/add`, data),
+  update: (id, data) => api.post(`/examples/update/${id}`, data),
+  delete: (id) => api.delete(`/examples/delete/${id}`),
+};
+```
+
+## Mövcud Servis Faylları
+
+- `basketService.js` — səbət əməliyyatları (`/basket/...`)
+- `wishlistService.js` — sevimlilər (`/wishlist/...`)
+- `addressService.js` — ünvan CRUD (`/profile/addresses/...`)
+- `profileCarsService.js` — avtomobil idarəetmə (`/profile/cars/...`)
+- `checkoutService.js` — sifariş tamamlama (`/orders/checkout`)
+- `notificationsService.js` — bildirişlər (`/notifications/...`)
+- `guestService.js` — qonaq identifier (`/guests/generate-identifier`)
+
+## Xəta Emalı
+
+```js
+// Client komponent (try/catch)
+try {
+  const res = await basketService.add(uuid);
+  // uğurlu əməliyyat
+} catch (err) {
+  const msg = err.response?.data?.message || "Xəta baş verdi";
+  // toast və ya state update
+}
+
+// Server komponent (next.js error.js ilə)
+const res = await serverApi.get("/products/load").catch(() => null);
+if (!res) notFound();
+```
+
+## Qaydalar
+- Servis faylları `src/lib/` altında — route-a spesifik deyil, paylaşılır
+- Server komponentlər yalnız `serverApi` işlədir — `api` client-only-dir
+- Cookie idarəetməsi `cookies-next` ilə — `getCookie`, `setCookie`, `deleteCookie`
+- `access_token` cookie-si `useAuthStore` yox, `cookies-next` ilə oxunur

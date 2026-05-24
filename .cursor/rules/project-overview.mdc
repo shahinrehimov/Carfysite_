@@ -1,0 +1,77 @@
+---
+description: carfy App — Next.js layihə strukturu, i18n, API konvensiyaları
+alwaysApply: true
+---
+
+# carfy — Frontend App
+
+## Texnologiya Yığımı
+
+- **Framework**: Next.js 16 (App Router) + React 19 JSX
+- **i18n**: next-intl v4 — bütün route-lar `[locale]` altında (`src/app/[locale]/`)
+- **Routing**: `src/i18n/routing.js` — dəstəklənən dillər burada
+- **Client state**: Redux Toolkit + Zustand (`src/store/`)
+- **HTTP (client)**: Axios — `api` (`src/lib/axios/api.js`) — base: `/api/site`
+- **HTTP (server)**: `serverApi` (`src/lib/serverApi.js`) — base: `/api/app`
+- **Forma**: React Hook Form + Yup (`@hookform/resolvers/yup`)
+- **UI**: Tailwind CSS v4 + Radix UI + lucide-react
+- **Auth**: cookies-next — `access_token`, `guest_identifier` cookie-ləri
+- **Animasiya**: Framer Motion
+
+## İki API Instance
+
+```js
+// CLIENT-SIDE — import { api } from "@/lib/axios/api"
+// base: https://api.carfy.az/api/site
+await api.get("/products/load"); // ✅ Client komponentlər, service faylları
+await api.post("/basket/add/{uuid}");
+
+// SERVER-SIDE — import serverApi from "@/lib/serverApi"
+// base: https://api.carfy.az/api/site
+const res = await serverApi.get("/products/load"); // ✅ page.jsx server komponentlər, generateMetadata
+```
+
+## Qovluq Strukturu
+
+```
+src/
+  app/[locale]/         # Bütün səhifələr burada
+    auth/               # login, register
+    account/            # profil, sifarişlər, ünvanlar, avtomobillər
+    products/           # məhsul siyahısı və detalı
+    [category]/[subcategory]/  # kategori + alt-kategori naviqasiyası
+    checkout/           # ödəniş axışı
+    cart/               # səbət
+    wishlist/           # sevimlilər
+  components/           # Paylaşılan komponentlər
+  lib/
+    axios/              # api.js (client), index.js (axios instance), serverApi.js (server)
+    *Service.js         # addressService, basketService, wishlistService, ...
+  store/                # Redux store (cart.js, index.js)
+  hooks/                # useGuestIdentifier, useProductFilters
+  i18n/                 # routing.js, request.js
+```
+
+## i18n Qaydaları
+
+- Bütün route-lar `/[locale]/...` altındadır
+- `useTranslations()` — client/server komponentlər üçün (next-intl)
+- `getTranslations()` — `generateMetadata` üçün async server-side
+- Locale-ı URL-dən götürmə, next-intl middleware idarə edir
+- **Fallback istifadə etmə** — `t("key")` yalnız key ilə; `defaultMessage`, inline fallback və ya hardcoded alternativ mətn yazma
+
+```jsx
+// ❌ YANLIŞ
+t("products_title", { defaultMessage: "Məhsullar" })
+
+// ✅ DÜZGÜN
+t("products_title")
+```
+
+Key `messages/{locale}.json` fayllarında olmalıdır — kodda fallback yazma.
+
+## Auth & Guest
+
+- Giriş etmiş user: `access_token` cookie
+- Giriş etməmiş user: `guest_identifier` cookie (basket/wishlist üçün)
+- `api` instance hər iki case-i interceptor ilə idarə edir

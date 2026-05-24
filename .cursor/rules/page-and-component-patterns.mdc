@@ -1,0 +1,87 @@
+---
+description: carfy App — Next.js page.jsx və komponent yazma pattern-ləri
+globs: carfy/src/**/*.jsx
+alwaysApply: false
+---
+
+# Səhifə və Komponent Pattern-ləri
+
+## Server vs Client Komponent
+
+```jsx
+// SERVER KOMPONENTİ — default (async, serverApi işlədir)
+export default async function ProductsPage({ params, searchParams }) {
+  const { locale } = await params;
+  const t = await getTranslations("products");
+  const res = await serverApi.get(`/products/load`);
+  return <ProductsList data={res.data} />;
+}
+
+// CLIENT KOMPONENTİ — interaktivlik lazım olduqda
+"use client";
+import { api } from "@/lib/axios/api";
+export default function AddToCartButton({ uuid }) {
+  const handleClick = async () => {
+    await api.post(`/basket/add/${uuid}`);
+  };
+  return <button onClick={handleClick}>Səbətə əlavə et</button>;
+}
+```
+
+## i18n — `generateMetadata`
+
+```jsx
+import { getTranslations } from "next-intl/server";
+
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return { title: t("products_title") };
+}
+```
+
+## Lazımlı Import-lar
+
+```jsx
+import { useTranslations } from "next-intl";           // Client komponent
+import { getTranslations } from "next-intl/server";    // Server komponent
+import { useRouter, usePathname } from "next/navigation"; // Navigasiya
+import { Link } from "@/i18n/routing";                   // Locale-aware link (next-intl)
+import serverApi from "@/lib/serverApi";                // Server-side API
+import { api } from "@/lib/axios/api";                  // Client-side API
+```
+
+## Account Səhifəsi Şablonu
+
+```jsx
+"use client";
+import { useState } from "react";
+import { api } from "@/lib/axios/api";
+import { useTranslations } from "next-intl";
+
+export default function AccountPage() {
+  const t = useTranslations("account");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (data) => {
+    setLoading(true);
+    try {
+      await api.post("/profile/update", data);
+      // uğurlu
+    } catch (err) {
+      // xəta
+    } finally {
+      setLoading(false);
+    }
+  };
+  return <form onSubmit={handleSubmit}>{/* ... */}</form>;
+}
+```
+
+## Qaydalar
+- Forma validasiyası Yup (`yup`) ilə + React Hook Form
+- Auth tələb edən route-lar `src/middleware.js` ilə qorunur
+- Image-lər `next/image` — `priority` prop ilk ekran şəkilləri üçün
+- `Link` komponentini `@/i18n/routing`-dan import et (locale prefix-i avtomatik)
+- Client komponentlər faylın başında `"use client"` directive-i
+- SEO üçün hər page-də `generateMetadata` export et

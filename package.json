@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev:all": "concurrently -n carfy,admin,company -c blue,green,magenta \"npm run dev\" \"npm run dev --prefix ../carfy_admin\" \"npm run dev --prefix ../carfy_company\"",
+    "install:all": "concurrently -n carfy,admin,company \"npm install\" \"npm install --prefix ../carfy_admin\" \"npm install --prefix ../carfy_company\"",
+    "pull:all": "concurrently -n carfy,admin,company \"git pull\" \"git -C ../carfy_admin pull\" \"git -C ../carfy_company pull\"",
     "dev": "next dev",
     "build": "rm -rf .next && next build && npm run copy-static-files",
     "start": "next start",
