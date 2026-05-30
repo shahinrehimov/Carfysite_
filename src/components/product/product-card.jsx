@@ -8,18 +8,16 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { basketService } from "@/lib/basketService";
 import { wishlistService } from "@/lib/wishlistService";
-import { addItem, setLoading, setError } from "@/store/cart";
+import { setBasketData, setLoading, setError } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 
 export default function ProductCard({ product }) {
-  console.log(product);
   const [isLiked, setIsLiked] = useState(product.in_wishlist || false);
   const [inBasket, setInBasket] = useState(product.in_basket || false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
   const { toast } = useToast();
-  console.log(isLiked);
   // Extract data from API structure
   const productData = product.product || product;
   const imageUrl =
@@ -43,25 +41,21 @@ export default function ProductCard({ product }) {
 
     try {
       if (isLiked) {
-        const result = await wishlistService.remove(product.uuid);
-        if (result.success) {
-          setIsLiked(false);
-          toast({
-            title: "Removed from wishlist",
-            description: "Product removed from your wishlist",
-            variant: "info",
-          });
-        }
+        await wishlistService.remove(product.uuid);
+        setIsLiked(false);
+        toast({
+          title: "Removed from wishlist",
+          description: "Product removed from your wishlist",
+          variant: "info",
+        });
       } else {
-        const result = await wishlistService.add(product.uuid);
-        if (result.success) {
-          setIsLiked(true);
-          toast({
-            title: "Added to wishlist",
-            description: "Product added to your wishlist",
-            variant: "success",
-          });
-        }
+        await wishlistService.add(product.uuid);
+        setIsLiked(true);
+        toast({
+          title: "Added to wishlist",
+          description: "Product added to your wishlist",
+          variant: "success",
+        });
       }
     } catch (error) {
       toast({
@@ -85,8 +79,9 @@ export default function ProductCard({ product }) {
 
     try {
       dispatch(setLoading(true));
-      const response = await basketService.add(product.uuid, 1);
-      dispatch(addItem(response));
+      await basketService.add(product.uuid, 1);
+      const basketData = await basketService.load();
+      dispatch(setBasketData(basketData));
 
       // Update local state
       setInBasket(true);

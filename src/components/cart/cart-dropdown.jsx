@@ -2,13 +2,13 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectCartItems, selectBasketData, selectTotalItems, removeItem, setBasketData } from "@/store/cart";
+import { selectCartItems, selectBasketData, selectTotalItems, setBasketData } from "@/store/cart";
 import { basketService } from "@/lib/basketService";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 
 export default function CartDropdown() {
   const cartItems = useSelector(selectCartItems);
@@ -41,12 +41,33 @@ export default function CartDropdown() {
     }).format(price);
   };
 
-  const handleRemoveFromCart = async (productId) => {
+  const handleRemoveFromCart = async (uuid) => {
     try {
-      const response = await basketService.remove(productId);
-      dispatch(removeItem(response));
+      await basketService.remove(uuid);
+      const data = await basketService.load();
+      dispatch(setBasketData(data));
     } catch (error) {
       console.error("Error removing from cart:", error);
+    }
+  };
+
+  const handleIncrement = async (uuid) => {
+    try {
+      await basketService.increment(uuid);
+      const data = await basketService.load();
+      dispatch(setBasketData(data));
+    } catch (error) {
+      console.error("Error incrementing cart item:", error);
+    }
+  };
+
+  const handleDecrement = async (uuid) => {
+    try {
+      await basketService.decrement(uuid);
+      const data = await basketService.load();
+      dispatch(setBasketData(data));
+    } catch (error) {
+      console.error("Error decrementing cart item:", error);
     }
   };
 
@@ -141,34 +162,46 @@ export default function CartDropdown() {
                             />
                           </div>
 
-                          <div className="flex-1 min-w-0 ">
+                          <div className="flex-1 min-w-0">
                             <h4 className="text-sm font-normal text-[#1A1A1A] mb-1 line-clamp-2">
                               {title}
                             </h4>
-                            <p className="text-xs text-gray-500 mb-1">
-                              {item.code || item.id}
-                            </p>
-                            <p className="text-xs text-gray-600">
-                              x{quantity}
+                            <p className="text-xs text-gray-500">
+                              {item.oem_code || item.id}
                             </p>
                           </div>
 
-                          <div className="flex flex-col items-end gap-2 h-full flex-1">
+                          <div className="flex flex-col items-end justify-between h-full gap-2">
                             <p className="text-sm font-semibold text-[#1A1A1A] whitespace-nowrap">
                               {formatPrice(price * quantity)} ₼
                             </p>
-                            <button
-                              onClick={() => handleRemoveFromCart(item.id)}
-                              className="cursor-pointer"
-                            >
-                              <Image
-                                src="/icons/delete.svg"
-                                alt="delete"
-                                width={20}
-                                height={20}
-                                className="w-5 h-5"
-                              />
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleDecrement(item.uuid)}
+                                className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#3696E7] hover:text-[#3696E7] transition-colors cursor-pointer"
+                              >
+                                <Minus className="w-3 h-3" />
+                              </button>
+                              <span className="text-sm font-medium w-4 text-center">{quantity}</span>
+                              <button
+                                onClick={() => handleIncrement(item.uuid)}
+                                className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#3696E7] hover:text-[#3696E7] transition-colors cursor-pointer"
+                              >
+                                <Plus className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => handleRemoveFromCart(item.uuid)}
+                                className="cursor-pointer"
+                              >
+                                <Image
+                                  src="/icons/delete.svg"
+                                  alt="delete"
+                                  width={20}
+                                  height={20}
+                                  className="w-5 h-5"
+                                />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );

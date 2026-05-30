@@ -107,22 +107,19 @@ export default function TableList() {
         [productId]: !currentWishlistState,
       }));
 
-      let result;
       if (currentWishlistState) {
-        result = await wishlistService.remove(productId);
+        await wishlistService.remove(productId);
       } else {
-        result = await wishlistService.add(productId);
+        await wishlistService.add(productId);
       }
 
-      if (result.success) {
-        toast({
-          title: t("success"),
-          description: currentWishlistState
-            ? t("removed-from-wishlist")
-            : t("added-to-wishlist"),
-          variant: "success",
-        });
-      }
+      toast({
+        title: t("success"),
+        description: currentWishlistState
+          ? t("removed-from-wishlist")
+          : t("added-to-wishlist"),
+        variant: "success",
+      });
     } catch (error) {
       console.error("Error toggling wishlist:", error);
       setWishlistStates((prev) => ({
@@ -279,16 +276,16 @@ export default function TableList() {
                         className="bg-none border-none cursor-pointer text-gray-400 hover:text-[#3696E7] transition-colors"
                         onClick={() => {
                           const currentState =
-                            wishlistStates[item.id] !== undefined
-                              ? wishlistStates[item.id]
+                            wishlistStates[item.uuid] !== undefined
+                              ? wishlistStates[item.uuid]
                               : item.in_wishlist;
-                          toggleWishlist(item.id, currentState);
+                          toggleWishlist(item.uuid, currentState);
                         }}
                       >
                         <Heart
                           className={`h-5 w-5 ${
-                            wishlistStates[item.id] !== undefined
-                              ? wishlistStates[item.id]
+                            wishlistStates[item.uuid] !== undefined
+                              ? wishlistStates[item.uuid]
                                 ? "fill-[#3696E7] text-[#3696E7]"
                                 : "text-gray-400"
                               : item.in_wishlist

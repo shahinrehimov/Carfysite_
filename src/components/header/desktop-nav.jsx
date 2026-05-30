@@ -37,10 +37,17 @@ export default function DesktopNav() {
       else setUnreadCount(0);
     };
 
+    const handleNotificationRead = (e) => {
+      const count = e.detail?.count ?? 1;
+      setUnreadCount((prev) => Math.max(0, prev - count));
+    };
+
     window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("notificationRead", handleNotificationRead);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("notificationRead", handleNotificationRead);
     };
   }, []);
 

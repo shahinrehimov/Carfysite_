@@ -32,27 +32,21 @@ export default function ProductActions({ data }) {
 
     try {
       if (isFavorite) {
-        const result = await wishlistService.remove(data.uuid);
-        if (result.success) {
-          setIsFavorite(false);
-          toast({
-            title: t("success"),
-            description:
-              result?.data?.message || t("wishlist_product_removed"),
-            variant: "info",
-          });
-        }
+        await wishlistService.remove(data.uuid);
+        setIsFavorite(false);
+        toast({
+          title: t("success"),
+          description: t("wishlist_product_removed"),
+          variant: "info",
+        });
       } else {
-        const result = await wishlistService.add(data.uuid);
-        if (result.success) {
-          setIsFavorite(true);
-          toast({
-            title: t("success"),
-            description:
-              result?.data?.message || t("wishlist_product_added"),
-            variant: "success",
-          });
-        }
+        await wishlistService.add(data.uuid);
+        setIsFavorite(true);
+        toast({
+          title: t("success"),
+          description: t("wishlist_product_added"),
+          variant: "success",
+        });
       }
     } catch (error) {
       toast({

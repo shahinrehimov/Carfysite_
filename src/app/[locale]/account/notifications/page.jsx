@@ -4,27 +4,20 @@ import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Trash2, BellOff, CheckCheck, Loader2 } from "lucide-react";
+import {
+  Trash2,
+  BellOff,
+  CheckCheck,
+  Loader2,
+  X,
+  ExternalLink,
+} from "lucide-react";
 import { notificationsService } from "@/lib/notificationsService";
 
-const PAGE_LIMIT = 30;
-
-function getRelativeTime(dateRaw, locale) {
-  try {
-    const diff = Date.now() - new Date(dateRaw).getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
-
-    if (days >= 1) return rtf.format(-days, "day");
-    if (hours >= 1) return rtf.format(-hours, "hour");
-    if (minutes >= 1) return rtf.format(-minutes, "minute");
-    return rtf.format(0, "minute");
-  } catch {
-    return dateRaw;
-  }
+function dispatchNotificationRead(count = 1) {
+  window.dispatchEvent(
+    new CustomEvent("notificationRead", { detail: { count } })
+  );
 }
 
 function NotificationSkeleton() {
@@ -46,11 +39,16 @@ export default function NotificationsPage() {
   const router = useRouter();
 
   const [notifications, setNotifications] = useState([]);
-  const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    total: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [actionLoading, setActionLoading] = useState({});
   const [bulkLoading, setBulkLoading] = useState(null);
+  const [selectedNotification, setSelectedNotification] = useState(null);
 
   const fetchNotifications = useCallback(async (page = 1, append = false) => {
     try {
@@ -79,19 +77,30 @@ export default function NotificationsPage() {
   }, [fetchNotifications]);
 
   const handleNotificationClick = async (notification) => {
+    setSelectedNotification(notification);
+
     if (!notification.is_read) {
       setNotifications((prev) =>
-        prev.map((n) => (n.uuid === notification.uuid ? { ...n, is_read: true } : n))
+        prev.map((n) =>
+          n.id === notification.id ? { ...n, is_read: true } : n
+        )
       );
+      dispatchNotificationRead(1);
       try {
-        await notificationsService.markAsRead(notification.uuid);
+        await notificationsService.markAsRead(notification.id);
       } catch {
         setNotifications((prev) =>
-          prev.map((n) => (n.uuid === notification.uuid ? { ...n, is_read: false } : n))
+          prev.map((n) =>
+            n.id === notification.id ? { ...n, is_read: false } : n
+          )
         );
+        dispatchNotificationRead(-1);
       }
     }
+  };
 
+  const handleNotificationNavigate = (notification) => {
+    setSelectedNotification(null);
     switch (notification.action_type) {
       case "order":
         router.push(`/${locale}/account/orders/${notification.action_id}`);
@@ -110,25 +119,32 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleDelete = async (e, uuid) => {
+  const handleDelete = async (e, id) => {
     e.stopPropagation();
-    setActionLoading((prev) => ({ ...prev, [uuid]: true }));
+    setActionLoading((prev) => ({ ...prev, [id]: true }));
+    const target = notifications.find((n) => n.id === id);
     try {
-      await notificationsService.deleteNotification(uuid);
-      setNotifications((prev) => prev.filter((n) => n.uuid !== uuid));
-      setPagination((prev) => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+      await notificationsService.deleteNotification(id);
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      setPagination((prev) => ({
+        ...prev,
+        total: Math.max(0, prev.total - 1),
+      }));
+      if (target && !target.is_read) dispatchNotificationRead(1);
     } catch (err) {
       console.error("Error deleting notification:", err);
     } finally {
-      setActionLoading((prev) => ({ ...prev, [uuid]: false }));
+      setActionLoading((prev) => ({ ...prev, [id]: false }));
     }
   };
 
   const handleMarkAllRead = async () => {
     setBulkLoading("read");
+    const unreadCount = notifications.filter((n) => !n.is_read).length;
     try {
       await notificationsService.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      if (unreadCount > 0) dispatchNotificationRead(unreadCount);
     } catch (err) {
       console.error("Error marking all as read:", err);
     } finally {
@@ -138,10 +154,12 @@ export default function NotificationsPage() {
 
   const handleDeleteAll = async () => {
     setBulkLoading("delete");
+    const unreadCount = notifications.filter((n) => !n.is_read).length;
     try {
       await notificationsService.deleteAll();
       setNotifications([]);
       setPagination({ current_page: 1, last_page: 1, total: 0 });
+      if (unreadCount > 0) dispatchNotificationRead(unreadCount);
     } catch (err) {
       console.error("Error deleting all notifications:", err);
     } finally {
@@ -159,107 +177,116 @@ export default function NotificationsPage() {
   const hasUnread = notifications.some((n) => !n.is_read);
 
   return (
-    <div className="container">
-      <div className="flex flex-col gap-6 py-10">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            {t("notifications")}
-          </h1>
+    <>
+      <div className="container">
+        <div className="flex flex-col gap-6 py-10">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-semibold text-gray-900">
+              {t("notifications")}
+            </h1>
 
-          {notifications.length > 0 && (
-            <div className="flex items-center gap-2">
-              {hasUnread && (
+            {notifications.length > 0 && (
+              <div className="flex items-center gap-2">
+                {hasUnread && (
+                  <button
+                    onClick={handleMarkAllRead}
+                    disabled={bulkLoading !== null}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#3696E7] border border-[#3696E7] rounded-full hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {bulkLoading === "read" ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCheck className="w-4 h-4" />
+                    )}
+                    {t("mark_all_read") || "Hamısını oxu"}
+                  </button>
+                )}
                 <button
-                  onClick={handleMarkAllRead}
+                  onClick={handleDeleteAll}
                   disabled={bulkLoading !== null}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#3696E7] border border-[#3696E7] rounded-full hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-500 border border-red-300 rounded-full hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {bulkLoading === "read" ? (
+                  {bulkLoading === "delete" ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <CheckCheck className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" />
                   )}
-                  {t("mark_all_read") || "Hamısını oxu"}
+                  {t("delete_all") || "Hamısını sil"}
                 </button>
-              )}
+              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          {loading ? (
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <NotificationSkeleton key={i} />
+              ))}
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4 text-gray-400">
+              <BellOff className="w-14 h-14 text-gray-300" />
+              <p className="text-lg font-medium">
+                {t("no_notifications") || "Bildiriş yoxdur"}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
+              {notifications.map((notification) => (
+                <NotificationItem
+                  key={notification.id}
+                  notification={notification}
+                  actionLoading={actionLoading[notification.id]}
+                  onDelete={handleDelete}
+                  onClick={handleNotificationClick}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Load More */}
+          {hasMore && (
+            <div className="flex justify-center">
               <button
-                onClick={handleDeleteAll}
-                disabled={bulkLoading !== null}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-500 border border-red-300 rounded-full hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="flex items-center gap-2 px-6 py-3 bg-[#3696E7] text-white rounded-full font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {bulkLoading === "delete" ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                {loadingMore ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    {t("loading")}
+                  </>
                 ) : (
-                  <Trash2 className="w-4 h-4" />
+                  t("load_more") || "Daha çox göstər"
                 )}
-                {t("delete_all") || "Hamısını sil"}
               </button>
             </div>
           )}
         </div>
-
-        {/* Content */}
-        {loading ? (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <NotificationSkeleton key={i} />
-            ))}
-          </div>
-        ) : notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4 text-gray-400">
-            <BellOff className="w-14 h-14 text-gray-300" />
-            <p className="text-lg font-medium">
-              {t("no_notifications") || "Bildiriş yoxdur"}
-            </p>
-          </div>
-        ) : (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
-            {notifications.map((notification) => (
-              <NotificationItem
-                key={notification.uuid}
-                notification={notification}
-                locale={locale}
-                actionLoading={actionLoading[notification.uuid]}
-                onDelete={handleDelete}
-                onClick={handleNotificationClick}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Load More */}
-        {hasMore && (
-          <div className="flex justify-center">
-            <button
-              onClick={handleLoadMore}
-              disabled={loadingMore}
-              className="flex items-center gap-2 px-6 py-3 bg-[#3696E7] text-white rounded-full font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loadingMore ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  {t("loading")}
-                </>
-              ) : (
-                t("load_more") || "Daha çox göstər"
-              )}
-            </button>
-          </div>
-        )}
       </div>
-    </div>
+
+      {/* Detail Modal */}
+      {selectedNotification && (
+        <NotificationModal
+          notification={selectedNotification}
+          onClose={() => setSelectedNotification(null)}
+          onNavigate={handleNotificationNavigate}
+          t={t}
+        />
+      )}
+    </>
   );
 }
 
-function NotificationItem({ notification, locale, actionLoading, onDelete, onClick }) {
-  const isClickable = notification.action_type && notification.action_type !== "none";
-
+function NotificationItem({ notification, actionLoading, onDelete, onClick }) {
   return (
     <div
-      className={`flex items-start gap-3 p-4 transition-colors group ${
+      className={`flex items-start gap-3 p-4 transition-colors group cursor-pointer ${
         !notification.is_read ? "bg-blue-50/40" : "bg-white"
-      } ${isClickable ? "cursor-pointer hover:bg-gray-50" : ""}`}
+      } hover:bg-gray-50`}
       onClick={() => onClick(notification)}
     >
       {/* Unread dot */}
@@ -294,7 +321,9 @@ function NotificationItem({ notification, locale, actionLoading, onDelete, onCli
       <div className="flex-1 min-w-0">
         <p
           className={`text-sm leading-snug ${
-            !notification.is_read ? "font-semibold text-gray-900" : "font-medium text-gray-700"
+            !notification.is_read
+              ? "font-semibold text-gray-900"
+              : "font-medium text-gray-700"
           }`}
         >
           {notification.title}
@@ -302,14 +331,12 @@ function NotificationItem({ notification, locale, actionLoading, onDelete, onCli
         <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">
           {notification.body}
         </p>
-        <p className="text-xs text-gray-400 mt-1">
-          {getRelativeTime(notification.date_raw, locale)}
-        </p>
+        <p className="text-xs text-gray-400 mt-1">{notification.date}</p>
       </div>
 
       {/* Delete button */}
       <button
-        onClick={(e) => onDelete(e, notification.uuid)}
+        onClick={(e) => onDelete(e, notification.id)}
         disabled={actionLoading}
         className="shrink-0 p-1.5 rounded-md text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-30 mt-0.5"
         title="Sil"
@@ -320,6 +347,97 @@ function NotificationItem({ notification, locale, actionLoading, onDelete, onCli
           <Trash2 className="w-4 h-4" />
         )}
       </button>
+    </div>
+  );
+}
+
+function NotificationModal({ notification, onClose, onNavigate, t }) {
+  const hasAction =
+    notification.action_type && notification.action_type !== "none";
+
+  useEffect(() => {
+    const handleKey = (e) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+
+      {/* Modal */}
+      <div
+        className="relative bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors z-10"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Image */}
+        {notification.image && (
+          <div className="w-full h-44 overflow-hidden">
+            <Image
+              src={notification.image}
+              alt={notification.title}
+              width={448}
+              height={176}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className="p-6">
+          {/* Icon + Title */}
+          <div className="flex items-start gap-3 mb-3">
+            {!notification.image && (
+              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                <Image
+                  src="/icons/notification.svg"
+                  alt="notification"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 opacity-60"
+                />
+              </div>
+            )}
+            <h2 className="text-base font-semibold text-gray-900 leading-snug pt-1">
+              {notification.title}
+            </h2>
+          </div>
+
+          {/* Body */}
+          {notification.body && (
+            <p className="text-sm text-gray-600 leading-relaxed mb-4">
+              {notification.body}
+            </p>
+          )}
+
+          {/* Date */}
+          {notification.date && (
+            <p className="text-xs text-gray-400 mb-5">{notification.date}</p>
+          )}
+
+          {/* Action button */}
+          {hasAction && (
+            <button
+              onClick={() => onNavigate(notification)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#3696E7] text-white text-sm font-medium rounded-xl hover:bg-blue-600 transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+              {t("view_details") || "Ətraflı bax"}
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

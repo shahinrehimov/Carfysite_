@@ -87,7 +87,7 @@ const ProductCard = ({
                   wishlistState !== undefined
                     ? wishlistState
                     : product.in_wishlist;
-                onToggleWishlist(product.id, currentState);
+                onToggleWishlist(product.uuid, currentState);
               }}
             >
               <Heart
@@ -247,22 +247,19 @@ export default function MobileList() {
         [productId]: !currentWishlistState,
       }));
 
-      let result;
       if (currentWishlistState) {
-        result = await wishlistService.remove(productId);
+        await wishlistService.remove(productId);
       } else {
-        result = await wishlistService.add(productId);
+        await wishlistService.add(productId);
       }
 
-      if (result.success) {
-        toast({
-          title: t("success"),
-          description: currentWishlistState
-            ? t("removed-from-wishlist")
-            : t("added-to-wishlist"),
-          variant: "success",
-        });
-      }
+      toast({
+        title: t("success"),
+        description: currentWishlistState
+          ? t("removed-from-wishlist")
+          : t("added-to-wishlist"),
+        variant: "success",
+      });
     } catch (error) {
       console.error("Error toggling wishlist:", error);
       setWishlistStates((prev) => ({
@@ -290,7 +287,7 @@ export default function MobileList() {
             onRemove={handleRemove}
             onToggleWishlist={toggleWishlist}
             isLoading={isLoading}
-            wishlistState={wishlistStates[item.id]}
+            wishlistState={wishlistStates[item.uuid]}
           />
         ))}
       </AnimatePresence>

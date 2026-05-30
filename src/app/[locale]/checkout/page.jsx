@@ -16,19 +16,19 @@ import { useTranslations } from "next-intl";
 import { useToast } from "@/providers/ToastProvider";
 import { clearCart } from "@/store/cart";
 
-const checkoutSchema = yup.object().shape({
-  address_id: yup
-    .number()
-    .required("Please select a shipping address")
-    .positive("Please select a valid address"),
-  payment_method: yup.string().required("Please select a payment method"),
-});
-
 const formatPrice = (value) =>
   value != null ? Number(value).toFixed(2) : "0.00";
 
 export default function CheckoutPage() {
   const t = useTranslations("");
+
+  const checkoutSchema = yup.object().shape({
+    address_id: yup
+      .number()
+      .required(t("please_select_a_shipping_address"))
+      .positive(t("please_select_a_valid_address")),
+    payment_method: yup.string().required(t("please_select_a_payment_method")),
+  });
   const [addressTypes, setAddressTypes] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -118,11 +118,12 @@ export default function CheckoutPage() {
       });
 
       if (result.success) {
-        const orderData = result.data?.data;
-        if (orderData?.redirect_url) {
+        const responseData = result.data;
+        if (responseData?.redirect && responseData?.redirect_url) {
           dispatch(clearCart());
-          window.location.href = orderData.redirect_url;
+          window.location.href = responseData.redirect_url;
         } else {
+          const orderData = responseData?.data ?? responseData;
           setCompletedOrder(orderData);
           setOrderSuccess(true);
           dispatch(clearCart());
