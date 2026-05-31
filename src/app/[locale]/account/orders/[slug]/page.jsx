@@ -68,7 +68,9 @@ export default function OrderPage({ params }) {
     const fetchOrderDetails = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/orders/show/${unwrappedParams.slug}`);
+        const response = await api.get(
+          `/orders/details/${unwrappedParams.slug}`
+        );
         setOrder(response.data.data);
       } catch (err) {
         console.error("Error fetching order details:", err);
@@ -276,9 +278,11 @@ export default function OrderPage({ params }) {
                           ? "text-[#87A88F]"
                           : order.payment_method.payment_status === "pending"
                             ? "text-yellow-600"
-                            : order.payment_method.payment_status === "partially_refunded"
+                            : order.payment_method.payment_status ===
+                                "partially_refunded"
                               ? "text-amber-600"
-                              : order.payment_method.payment_status === "refunded"
+                              : order.payment_method.payment_status ===
+                                  "refunded"
                                 ? "text-blue-600"
                                 : "text-red-600"
                       }`}
@@ -321,7 +325,9 @@ export default function OrderPage({ params }) {
                       <span
                         className={`absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white ${getOrderStatusClass(s.status)}`}
                       />
-                      <p className="font-medium text-gray-900">{s.status_label}</p>
+                      <p className="font-medium text-gray-900">
+                        {s.status_label}
+                      </p>
                       <p className="text-sm text-gray-500">{s.date}</p>
                     </li>
                   ))}
