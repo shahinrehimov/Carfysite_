@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { phoneRegisterSchema } from "../validation-schemas";
 
-export function PhoneRegisterStep({ onSubmit, loading, error }) {
+export function PhoneRegisterStep({ onSubmit, loading, error, defaultRefCode = "" }) {
   const t = useTranslations();
 
   const registerForm = useForm({
@@ -15,6 +15,7 @@ export function PhoneRegisterStep({ onSubmit, loading, error }) {
       name: "",
       surname: "",
       email: "",
+      ref_code: defaultRefCode,
     },
   });
 
@@ -72,6 +73,22 @@ export function PhoneRegisterStep({ onSubmit, loading, error }) {
               {t(registerForm.formState.errors.email.message)}
             </p>
           )}
+        </div>
+
+        <div>
+          <input
+            type="text"
+            placeholder={t("referral_code_optional") || "Referral kodu (isteğe bağlı)"}
+            {...registerForm.register("ref_code")}
+            onChange={(e) =>
+              registerForm.setValue(
+                "ref_code",
+                e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")
+              )
+            }
+            className="w-full px-6 py-4 rounded-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all font-mono tracking-wider"
+            maxLength={20}
+          />
         </div>
 
         <Button

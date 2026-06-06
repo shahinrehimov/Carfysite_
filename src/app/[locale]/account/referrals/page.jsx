@@ -1,5 +1,10 @@
 import React from "react";
+import ReferralsPanel from "./components/ReferralsPanel";
 
 export default function ReferralsPage() {
-  return <div>ReferralsPage</div>;
+  return (
+    <div className="container">
+      <ReferralsPanel />
+    </div>
+  );
 }

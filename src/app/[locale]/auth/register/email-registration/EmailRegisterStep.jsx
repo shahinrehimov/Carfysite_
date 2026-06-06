@@ -8,7 +8,7 @@ import { emailRegisterSchema } from "../validation-schemas";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
-export function EmailRegisterStep({ onSubmit, loading, error }) {
+export function EmailRegisterStep({ onSubmit, loading, error, defaultRefCode = "" }) {
   const t = useTranslations();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -23,6 +23,7 @@ export function EmailRegisterStep({ onSubmit, loading, error }) {
       password_confirmation: "",
       gender: "male",
       birth_date: "",
+      ref_code: defaultRefCode,
     },
   });
 
@@ -143,6 +144,22 @@ export function EmailRegisterStep({ onSubmit, loading, error }) {
               {t(registerForm.formState.errors.password_confirmation.message)}
             </p>
           )}
+        </div>
+
+        <div>
+          <input
+            type="text"
+            placeholder={t("referral_code_optional") || "Referral kodu (isteğe bağlı)"}
+            {...registerForm.register("ref_code")}
+            onChange={(e) =>
+              registerForm.setValue(
+                "ref_code",
+                e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")
+              )
+            }
+            className="w-full px-6 py-4 rounded-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all font-mono tracking-wider"
+            maxLength={20}
+          />
         </div>
 
         <Button

@@ -38,6 +38,7 @@ export default function CheckoutPage() {
   const [checkoutPreview, setCheckoutPreview] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(true);
   const [completedOrder, setCompletedOrder] = useState(null);
+  const [useReferralBalance, setUseReferralBalance] = useState(false);
   const { toast } = useToast();
   const dispatch = useDispatch();
 
@@ -115,6 +116,7 @@ export default function CheckoutPage() {
         payment_method: data.payment_method,
         address_id: data.address_id,
         ...(data.note ? { note: data.note } : {}),
+        ...(useReferralBalance ? { use_referral_balance: true } : {}),
       });
 
       if (result.success) {
@@ -320,13 +322,33 @@ export default function CheckoutPage() {
                     </div>
                   ))}
 
+                  {/* Referral perks banner */}
+                  {checkoutPreview.referral && (
+                    checkoutPreview.referral.free_delivery_applied ||
+                    checkoutPreview.referral.discount_applied
+                  ) && (
+                    <div className="flex flex-col gap-1.5 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
+                      {checkoutPreview.referral.free_delivery_applied && (
+                        <span>🚚 {t("free_delivery_applied") || "Pulsuz çatdırılma tətbiq edildi"}</span>
+                      )}
+                      {checkoutPreview.referral.discount_applied && (
+                        <span>
+                          🏷️ {t("referral_discount_applied") || "Referral endirimi"}: −{formatPrice(checkoutPreview.referral.discount_amount)} ₼
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   {/* Totals */}
                   <div className="flex flex-col gap-3 mt-1">
                     <div className="flex gap-2 items-center">
                       <span className="text-base">{t("amount")}</span>
                       <div className="flex-1 border-b border-gray-500 border-dashed"></div>
                       <span className="text-base font-medium text-gray-primary">
-                        {formatPrice(checkoutPreview.subtotal)} ₼
+                        {formatPrice(
+                          checkoutPreview.referral?.subtotal_after_discount ??
+                          checkoutPreview.subtotal
+                        )} ₼
                       </span>
                     </div>
 
@@ -334,9 +356,9 @@ export default function CheckoutPage() {
                       <span className="text-base">{t("shipping")}</span>
                       <div className="flex-1 border-b border-gray-500 border-dashed"></div>
                       <span className="text-base font-medium text-gray-primary">
-                        {checkoutPreview.total_shipping === 0
+                        {(checkoutPreview.referral?.shipping_after_perk ?? checkoutPreview.total_shipping) === 0
                           ? t("free")
-                          : `${formatPrice(checkoutPreview.total_shipping)} ₼`}
+                          : `${formatPrice(checkoutPreview.referral?.shipping_after_perk ?? checkoutPreview.total_shipping)} ₼`}
                       </span>
                     </div>
 
@@ -344,10 +366,33 @@ export default function CheckoutPage() {
                       <span className="text-base font-bold">{t("total")}</span>
                       <div className="flex-1 border-b border-gray-500 border-dashed"></div>
                       <span className="text-base font-bold text-green-primary">
-                        {formatPrice(checkoutPreview.grand_total)} ₼
+                        {formatPrice(
+                          checkoutPreview.referral?.grand_total_after_perks ??
+                          checkoutPreview.grand_total
+                        )} ₼
                       </span>
                     </div>
                   </div>
+
+                  {/* Use referral balance toggle */}
+                  {checkoutPreview.referral?.can_use_balance && (
+                    <label className="flex items-start gap-3 cursor-pointer p-3 bg-[#EEF5FD] rounded-lg border border-blue-200 mt-1">
+                      <input
+                        type="checkbox"
+                        checked={useReferralBalance}
+                        onChange={(e) => setUseReferralBalance(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 accent-[#3696E7] shrink-0"
+                      />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-medium text-[#00569C]">
+                          {t("use_referral_balance") || "Bonus balansı ilə ödə"}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {t("available_balance") || "Mövcud"}: {formatPrice(checkoutPreview.referral.available_balance)} ₼
+                        </span>
+                      </div>
+                    </label>
+                  )}
                 </div>
               ) : (
                 <div className="text-sm text-gray-500 text-center py-4">

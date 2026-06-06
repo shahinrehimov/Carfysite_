@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { api } from "@/lib/axios";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Phone registration components
 import { PhoneStep } from "./phone-registration/PhoneStep";
@@ -18,6 +18,8 @@ import { EmailVerifyStep } from "./email-registration/EmailVerifyStep";
 export default function RegisterPage() {
   const t = useTranslations();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get("ref") || "";
 
   // Steps: phone, otp, register, success for phone flow
   // Steps: email-check, email-register, email-verify, success for email flow
@@ -126,6 +128,7 @@ export default function RegisterPage() {
         phone: phone,
         phone_confirmation_token: phoneConfirmationToken,
         otp: parseInt(otp),
+        ...(data.ref_code?.trim() ? { ref_code: data.ref_code.trim() } : {}),
       });
 
       if (response.data.step === "login") {
@@ -191,6 +194,7 @@ export default function RegisterPage() {
         phone: data.phone,
         password: data.password,
         password_confirmation: data.password_confirmation,
+        ...(data.ref_code?.trim() ? { ref_code: data.ref_code.trim() } : {}),
       });
 
       if (response.data.step === "otp_email") {
@@ -285,6 +289,7 @@ export default function RegisterPage() {
                 onSubmit={handlePhoneRegisterSubmit}
                 loading={loading}
                 error={error}
+                defaultRefCode={refCode}
               />
             )}
 
@@ -302,6 +307,7 @@ export default function RegisterPage() {
                 onSubmit={handleEmailRegisterSubmit}
                 loading={loading}
                 error={error}
+                defaultRefCode={refCode}
               />
             )}
 
