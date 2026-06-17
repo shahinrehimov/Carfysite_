@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { store } from "@/store";
 import { GuestProvider } from "./GuestProvider";
 import { ToastProvider } from "./ToastProvider";
+import { EmailVerificationProvider } from "./EmailVerificationProvider";
 
 export function Providers({ children, locale, messages }) {
   function onError(error) {
@@ -19,7 +20,11 @@ export function Providers({ children, locale, messages }) {
     >
       <Provider store={store}>
         <GuestProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <EmailVerificationProvider>
+              {children}
+            </EmailVerificationProvider>
+          </ToastProvider>
         </GuestProvider>
       </Provider>
     </NextIntlClientProvider>

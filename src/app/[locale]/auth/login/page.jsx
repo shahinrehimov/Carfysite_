@@ -119,6 +119,8 @@ export default function LoginPage() {
         // Clear guest identifier when user logs in
         deleteCookie("guest_identifier");
 
+        window.dispatchEvent(new Event("authChange"));
+
         // Redirect to home or dashboard
         router.push("/");
       }
@@ -185,6 +187,8 @@ export default function LoginPage() {
 
         // Clear guest identifier when user logs in
         deleteCookie("guest_identifier");
+
+        window.dispatchEvent(new Event("authChange"));
 
         // Redirect to home or dashboard
         router.push("/");

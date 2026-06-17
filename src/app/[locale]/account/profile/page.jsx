@@ -75,7 +75,10 @@ export default function ProfilePage() {
   const [name, setName] = useState(user?.name ?? "");
   const [surname, setSurname] = useState(user?.surname ?? "");
   const [email] = useState(user?.email ?? "");
-  const [phone] = useState(user?.phone ?? "");
+  const [phone] = useState(() => {
+    const raw = user?.phone ?? "";
+    return raw.startsWith("994") ? raw.slice(3) : raw;
+  });
 
   const [avatarPreview, setAvatarPreview] = useState(user?.photo ?? null);
   const [avatarFile, setAvatarFile] = useState(null);

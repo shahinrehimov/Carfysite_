@@ -43,10 +43,12 @@ export default function DesktopNav() {
     };
 
     window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("authChange", handleStorageChange);
     window.addEventListener("notificationRead", handleNotificationRead);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("authChange", handleStorageChange);
       window.removeEventListener("notificationRead", handleNotificationRead);
     };
   }, []);

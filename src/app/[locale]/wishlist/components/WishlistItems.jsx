@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
 import ProductCard from "@/components/product/product-card";
-import Image from "next/image";
+import { Heart } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function WishlistItems({ initialProducts }) {
+  const t = useTranslations();
   const [favoriteProducts, setFavoriteProducts] = useState(initialProducts);
 
   const handleFavoriteToggle = async (productId) => {
@@ -13,17 +15,12 @@ export default function WishlistItems({ initialProducts }) {
 
   if (favoriteProducts.length === 0) {
     return (
-      <div className="w-full min-h-[500px] pt-10 flex flex-col items-center justify-start gap-10">
-        <div className="relative w-[170px] h-[170px]">
-          <Image
-            src="/images/wishlist-empty.png"
-            alt="empty wishlist"
-            fill
-            className="object-contain"
-          />
+      <div className="w-full min-h-[500px] pt-10 flex flex-col items-center justify-start gap-6">
+        <div className="w-24 h-24 rounded-full bg-[#cee5f8] flex items-center justify-center">
+          <Heart className="w-10 h-10 text-[#3696e7]" strokeWidth={1.5} />
         </div>
         <h2 className="text-lg lg:text-2xl font-regular text-gray-600">
-          Seçilmiş məhsullarınız yoxdur
+          {t("wishlist_empty")}
         </h2>
       </div>
     );
