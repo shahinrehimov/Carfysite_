@@ -2,7 +2,12 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectCartItems, selectBasketData, selectTotalItems, setBasketData } from "@/store/cart";
+import {
+  selectCartItems,
+  selectBasketData,
+  selectTotalItems,
+  setBasketData,
+} from "@/store/cart";
 import { basketService } from "@/lib/basketService";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -145,13 +150,20 @@ export default function CartDropdown() {
                   <div className="space-y-3">
                     {cartItems.map((item) => {
                       const itemData = item.product || item;
-                      const imageUrl = item.hover_image || itemData.hover_image || "/images/product-placeholder.png";
+                      const imageUrl =
+                        item.hover_image ||
+                        itemData.hover_image ||
+                        "/images/product-placeholder.png";
                       const title = item.title || itemData.title || "Product";
-                      const quantity = item.basket_quantity || item.quantity || 1;
+                      const quantity =
+                        item.basket_quantity || item.quantity || 1;
                       const price = item.price_final || item.price || 0;
-                      
+
                       return (
-                        <div key={item.id} className="rounded-xl p-3 flex  gap-3">
+                        <div
+                          key={item.id}
+                          className="rounded-xl p-3 flex  gap-3"
+                        >
                           <div className="w-[66px] h-[66px] rounded-lg bg-white  flex items-center justify-center shrink-0 overflow-hidden">
                             <Image
                               src={imageUrl}
@@ -167,7 +179,7 @@ export default function CartDropdown() {
                               {title}
                             </h4>
                             <p className="text-xs text-gray-500">
-                              {item.oem_code || item.id}
+                              {item.oem_code}
                             </p>
                           </div>
 
@@ -182,7 +194,9 @@ export default function CartDropdown() {
                               >
                                 <Minus className="w-3 h-3" />
                               </button>
-                              <span className="text-sm font-medium w-4 text-center">{quantity}</span>
+                              <span className="text-sm font-medium w-4 text-center">
+                                {quantity}
+                              </span>
                               <button
                                 onClick={() => handleIncrement(item.uuid)}
                                 className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#3696E7] hover:text-[#3696E7] transition-colors cursor-pointer"
@@ -216,7 +230,8 @@ export default function CartDropdown() {
                     </span>
                     <div className="border-b border-gray-900  w-full border-dashed pt-3"></div>
                     <span className="text-xl font-semibold text-[#1A1A1A] whitespace-nowrap">
-                      {formatPrice(basketData.total_price_final_in_basket || 0)} ₼
+                      {formatPrice(basketData.total_price_final_in_basket || 0)}{" "}
+                      ₼
                     </span>
                   </div>
 
