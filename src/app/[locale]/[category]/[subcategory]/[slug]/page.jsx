@@ -14,7 +14,6 @@ import { notFound } from "next/navigation";
 import SimilarProductsList from "../../../../../components/product/similar-products-list";
 
 const getProduct = async (category, subcategory, slug, seller, variant) => {
-  console.log(category, subcategory, slug, seller, variant);
   try {
     const response = await serverApi.get(
       `/products/show/${category}/${subcategory}/${slug}?seller=${seller}${variant ? `&variant=${variant}` : ""}&with_related=yes`
