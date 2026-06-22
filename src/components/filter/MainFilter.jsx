@@ -43,6 +43,30 @@ export default function MainFilter({ type = "default", initialFilters }) {
   const [maxPrice, setMaxPrice] = useState(() => firstParam(initialFilters, "max_price"));
   const [currency, setCurrency] = useState("AZN");
 
+  // Sync state when URL params change (e.g. after SidebarFilter submits)
+  const pMarka   = firstParam(initialFilters, "brands[]");
+  const pCity    = firstParam(initialFilters, "city_id");
+  const pColor   = firstParam(initialFilters, "color_id");
+  const pStatus  = firstParam(initialFilters, "statuses[]");
+  const pMinYear = firstParam(initialFilters, "min_year");
+  const pMaxYear = firstParam(initialFilters, "max_year");
+  const pMinPrice = firstParam(initialFilters, "min_price");
+  const pMaxPrice = firstParam(initialFilters, "max_price");
+  const pModels  = arrayParam(initialFilters, "models[]").join(",");
+
+  useEffect(() => {
+    setMarka(pMarka);
+    setModel(pModels ? pModels.split(",") : []);
+    setCity(pCity);
+    setColor(pColor);
+    setStatus(pStatus);
+    setMinYear(pMinYear);
+    setMaxYear(pMaxYear);
+    setMinPrice(pMinPrice);
+    setMaxPrice(pMaxPrice);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pMarka, pModels, pCity, pColor, pStatus, pMinYear, pMaxYear, pMinPrice, pMaxPrice]);
+
   const brands = filterData?.brands ?? [];
   const yearRange = filterData?.yearRange ?? null;
 
@@ -91,9 +115,10 @@ export default function MainFilter({ type = "default", initialFilters }) {
     { value: "EUR", label: "EUR" },
   ];
 
-  useEffect(() => {
+  const handleMarkaChange = (val) => {
+    setMarka(val);
     setModel([]);
-  }, [marka]);
+  };
 
   useEffect(() => {
     if (categories.length && !selectedCategory) {
@@ -252,7 +277,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
               <Combobox
                 options={markaOptions}
                 value={marka}
-                onValueChange={setMarka}
+                onValueChange={handleMarkaChange}
                 placeholder="Marka"
                 searchPlaceholder="Marka axtar..."
                 emptyText="Nəticə tapılmadı"
@@ -420,7 +445,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
             <Combobox
               options={markaOptions}
               value={marka}
-              onValueChange={setMarka}
+              onValueChange={handleMarkaChange}
               placeholder="Marka"
               searchPlaceholder="Marka axtar..."
               emptyText="Nəticə tapılmadı"

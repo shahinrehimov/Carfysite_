@@ -10,6 +10,7 @@ import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { serverApi } from "@/lib/axios";
+import { notFound } from "next/navigation";
 import SimilarProductsList from "../../../../../components/product/similar-products-list";
 
 const getProduct = async (category, subcategory, slug, seller, variant) => {
@@ -19,10 +20,8 @@ const getProduct = async (category, subcategory, slug, seller, variant) => {
     );
     return response.data.data;
   } catch (error) {
-    console.error("Error fetching product:", error);
-    return {
-      error: error.message,
-    };
+    console.error("Error fetching product:", error?.response?.data?.message ?? error.message);
+    return null;
   }
 };
 
@@ -30,6 +29,8 @@ export default async function ProductDetail({ params, searchParams }) {
   const { category, subcategory, slug } = await params;
   const { seller, variant } = await searchParams;
   const data = await getProduct(category, subcategory, slug, seller, variant);
+
+  if (!data) notFound();
 
   return (
     <div>

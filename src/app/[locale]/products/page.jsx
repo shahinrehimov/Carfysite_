@@ -89,10 +89,10 @@ export default async function Products({ searchParams }) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pb-10">
-          <DesktopSidebar />
+          <DesktopSidebar initialFilters={resolvedParams} />
 
           <div className="col-span-1 lg:col-span-4">
-            <MobileFilterToggle totalResults={meta.total} searchTerm="Mator" />
+            <MobileFilterToggle totalResults={meta.total} searchTerm="Mator" initialFilters={resolvedParams} />
 
             <ProductsList
               initialProducts={products}

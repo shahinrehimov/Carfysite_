@@ -3,10 +3,10 @@ import React from "react";
 import SidebarFilter from "@/components/filter/SidebarFilter";
 import Image from "next/image";
 
-export default function DesktopSidebar() {
+export default function DesktopSidebar({ initialFilters }) {
   return (
     <div className="col-span-1 hidden lg:flex flex-col gap-6">
-      <SidebarFilter isOpen={false} onClose={() => {}} />
+      <SidebarFilter isOpen={false} onClose={() => {}} initialFilters={initialFilters} />
 
       <div className="sticky top-4">
         <Image

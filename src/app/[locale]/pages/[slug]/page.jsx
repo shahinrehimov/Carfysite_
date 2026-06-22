@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { FileText } from "lucide-react";
 import serverApi from "@/lib/serverApi";
 
 const resolveUrl = (item) =>
@@ -36,10 +37,25 @@ export async function generateMetadata({ params }) {
 
 export default async function StaticPage({ params }) {
   const { slug } = await params;
-  const page = await getPageData(slug);
+  const [page, t] = await Promise.all([
+    getPageData(slug),
+    getTranslations("pages"),
+  ]);
 
   if (!page) {
-    notFound();
+    return (
+      <div className="container py-16 lg:py-24 flex flex-col items-center justify-center text-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+          <FileText className="w-8 h-8 text-gray-400" />
+        </div>
+        <h2 className="text-xl font-semibold text-gray-700">
+          {t("page_not_added_title")}
+        </h2>
+        <p className="text-gray-400 text-sm max-w-xs">
+          {t("page_not_added_description")}
+        </p>
+      </div>
+    );
   }
 
   const mainImageUrl = resolveUrl(page.main_image);

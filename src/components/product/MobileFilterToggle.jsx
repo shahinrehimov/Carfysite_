@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import ProductsHeader from "./ProductsHeader";
 import SidebarFilter from "@/components/filter/SidebarFilter";
 
-export default function MobileFilterToggle({ totalResults, searchTerm }) {
+export default function MobileFilterToggle({ totalResults, searchTerm, initialFilters }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   return (
@@ -19,6 +19,7 @@ export default function MobileFilterToggle({ totalResults, searchTerm }) {
         <SidebarFilter
           isOpen={isFilterOpen}
           onClose={() => setIsFilterOpen(false)}
+          initialFilters={initialFilters}
         />
       </div>
     </>
