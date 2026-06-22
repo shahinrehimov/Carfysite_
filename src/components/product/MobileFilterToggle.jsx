@@ -17,6 +17,7 @@ export default function MobileFilterToggle({ totalResults, searchTerm, initialFi
       {/* Mobile Filter Modal - Only on Mobile */}
       <div className="lg:hidden">
         <SidebarFilter
+          mode="mobile"
           isOpen={isFilterOpen}
           onClose={() => setIsFilterOpen(false)}
           initialFilters={initialFilters}

@@ -65,7 +65,6 @@ async function getProducts(searchParams) {
 export default async function Products({ searchParams }) {
   const resolvedParams = await searchParams;
   const { products, meta } = await getProducts(resolvedParams);
-  console.log(products);
 
   // Plain query string forwarded to client for load-more pagination
   const filterQueryString = buildQueryParams(resolvedParams).toString();
@@ -89,7 +88,7 @@ export default async function Products({ searchParams }) {
           /> */}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pb-10 items-start">
           <DesktopSidebar initialFilters={resolvedParams} />
 
           <div className="col-span-1 lg:col-span-4">

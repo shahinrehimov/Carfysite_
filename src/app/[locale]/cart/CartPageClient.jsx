@@ -10,7 +10,6 @@ export default function CartPageClient({ initialBasketData }) {
   const isMobileView = useMediaQuery("(max-width: 768px)");
   const dispatch = useDispatch();
 
-  console.log(initialBasketData);
   // Initialize Redux store with server-side data
   useEffect(() => {
     if (initialBasketData) {

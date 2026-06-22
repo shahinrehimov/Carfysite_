@@ -5,19 +5,21 @@ import Image from "next/image";
 
 export default function DesktopSidebar({ initialFilters }) {
   return (
-    <div className="col-span-1 hidden lg:flex flex-col gap-6">
-      <SidebarFilter isOpen={false} onClose={() => {}} initialFilters={initialFilters} />
+    <div className="col-span-1 hidden lg:block lg:sticky lg:top-4 lg:self-start space-y-6">
+      <SidebarFilter
+        mode="desktop"
+        isOpen={false}
+        onClose={() => {}}
+        initialFilters={initialFilters}
+      />
 
-      <div className="sticky top-4">
-        <Image
-          src="/images/ads.png"
-          alt="Advertisement"
-          width={500}
-          height={800}
-          className="w-full h-auto object-cover rounded-[20px]"
-        />
-      </div>
+      <Image
+        src="/images/ads.png"
+        alt="Advertisement"
+        width={500}
+        height={800}
+        className="w-full max-h-[280px] object-cover rounded-[20px]"
+      />
     </div>
   );
 }
-

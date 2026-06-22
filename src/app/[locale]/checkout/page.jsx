@@ -82,6 +82,12 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
+    if (!selectedAddressId) {
+      setCheckoutPreview(null);
+      setPreviewLoading(false);
+      return;
+    }
+
     const fetchPreview = async () => {
       setPreviewLoading(true);
       const result = await checkoutService.getCheckoutPreview(selectedAddressId);

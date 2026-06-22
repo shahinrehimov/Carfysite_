@@ -5,6 +5,7 @@ import { Copy, Wallet, ExternalLink, Clock } from "lucide-react";
 import Image from "next/image";
 import { api } from "@/lib/axios/api";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 
 const getDeliveryStatusClass = (status) => {
   switch (status) {
@@ -55,6 +56,27 @@ const getOrderStatusClass = (status) => {
 const formatPrice = (value) => {
   if (value == null) return "—";
   return `${Number(value).toFixed(2)} ₼`;
+};
+
+const getProductHref = (product) => {
+  if (!product?.seller?.store_code) return null;
+
+  const productData = product.product || product;
+  const slug = product.slug || productData.slug;
+  const categorySlugs = productData.category_slugs;
+
+  if (!slug || !categorySlugs?.sub_category_slug) return null;
+
+  const sellerQuery = `seller=${product.seller.store_code}`;
+  const variantQuery = product.variant_slug
+    ? `&variant=${product.variant_slug}`
+    : "";
+
+  if (categorySlugs.parent_category_slug) {
+    return `/${categorySlugs.parent_category_slug}/${categorySlugs.sub_category_slug}/${slug}?${sellerQuery}${variantQuery}`;
+  }
+
+  return `/${categorySlugs.sub_category_slug}/${slug}?${sellerQuery}${variantQuery}`;
 };
 
 export default function OrderPage({ params }) {
@@ -230,25 +252,33 @@ export default function OrderPage({ params }) {
                     </span>
                   </div>
 
-                  {order.amount !== order.amount_final && (
-                    <div className="flex gap-4 items-center">
-                      <span className="text-base">{t("subtotal")}</span>
-                      <div className="flex-1 border-b border-dashed border-gray-primary"></div>
-                      <span className="text-base text-gray-primary">
-                        {formatPrice(order.amount)}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex gap-4 items-center">
+                    <span className="text-base">{t("subtotal")}</span>
+                    <div className="flex-1 border-b border-dashed border-gray-primary"></div>
+                    <span className="text-base text-gray-primary">
+                      {formatPrice(order.amount)}
+                    </span>
+                  </div>
 
-                  {order.amount !== order.amount_final && (
+                  {order.total_discount > 0 && (
                     <div className="flex gap-4 items-center">
                       <span className="text-base">{t("discount")}</span>
                       <div className="flex-1 border-b border-dashed border-gray-primary"></div>
                       <span className="text-base text-[#87A88F]">
-                        {formatPrice(order.amount - order.amount_final)}
+                        -{formatPrice(order.total_discount)}
                       </span>
                     </div>
                   )}
+
+                  <div className="flex gap-4 items-center">
+                    <span className="text-base">{t("shipping")}</span>
+                    <div className="flex-1 border-b border-dashed border-gray-primary"></div>
+                    <span className="text-base text-[#87A88F]">
+                      {order.shipping === 0
+                        ? t("free")
+                        : formatPrice(order.shipping)}
+                    </span>
+                  </div>
 
                   <div className="flex gap-4 items-center">
                     <span className="text-base font-bold">{t("total")}</span>
@@ -394,10 +424,20 @@ export default function OrderPage({ params }) {
                 </h3>
 
                 <div className="space-y-4">
-                  {order.items?.map((item, index) => (
-                    <div
+                  {order.items?.map((item, index) => {
+                    const productHref = getProductHref(item.product);
+                    const ItemWrapper = productHref ? Link : "div";
+                    const wrapperProps = productHref ? { href: productHref } : {};
+
+                    return (
+                    <ItemWrapper
                       key={item.product?.uuid || index}
-                      className="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-white rounded-lg"
+                      {...wrapperProps}
+                      className={`flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-white rounded-lg transition-colors${
+                        productHref
+                          ? " cursor-pointer hover:bg-gray-50 hover:shadow-sm"
+                          : ""
+                      }`}
                     >
                       {/* Mobile layout */}
                       <div className="block lg:hidden w-full">
@@ -519,8 +559,9 @@ export default function OrderPage({ params }) {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    </ItemWrapper>
+                    );
+                  })}
                 </div>
               </div>
             </div>

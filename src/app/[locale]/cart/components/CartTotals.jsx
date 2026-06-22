@@ -21,7 +21,9 @@ export default function CartTotals() {
     <div className="col-span-1">
       <div className="flex flex-col gap-5 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <div className="flex flex-row gap-2 items-center">
-          <span className="text-base font-regular text-gray-600">{t("subtotal")}</span>
+          <span className="text-base font-regular text-gray-600">
+            {t("subtotal")}
+          </span>
           <div className="flex-1 border-b border-gray-300 border-dashed"></div>
           <span className="text-base font-medium text-[#1A1A1A]">
             {formatPrice(basketData.total_price_in_basket)} ₼
@@ -29,7 +31,9 @@ export default function CartTotals() {
         </div>
 
         <div className="flex flex-row gap-2 items-center">
-          <span className="text-base font-regular text-gray-600">{t("products")}</span>
+          <span className="text-base font-regular text-gray-600">
+            {t("products")}
+          </span>
           <div className="flex-1 border-b border-gray-300 border-dashed"></div>
           <span className="text-base font-medium text-[#1A1A1A]">
             {basketData.total_basket_quantity || 0}
@@ -38,7 +42,9 @@ export default function CartTotals() {
 
         {basketData.total_discount_in_basket > 0 && (
           <div className="flex flex-row gap-2 items-center">
-            <span className="text-base font-regular text-gray-600">{t("discount")}</span>
+            <span className="text-base font-regular text-gray-600">
+              {t("discount")}
+            </span>
             <div className="flex-1 border-b border-gray-300 border-dashed"></div>
             <span className="text-base font-medium text-green-600">
               -{formatPrice(basketData.total_discount_in_basket)} ₼
@@ -46,18 +52,10 @@ export default function CartTotals() {
           </div>
         )}
 
-        <div className="flex flex-row gap-2 items-center">
-          <span className="text-base font-regular text-gray-600">{t("shipping")}</span>
-          <div className="flex-1 border-b border-gray-300 border-dashed"></div>
-          <span className="text-base font-medium text-green-600">
-            {basketData.shipping === 0
-              ? t("free")
-              : `${formatPrice(basketData.shipping)} ₼`}
-          </span>
-        </div>
-
         <div className="flex flex-row gap-2 items-center pt-4 border-t border-gray-200">
-          <span className="text-lg font-bold text-[#1A1A1A]">{t("total-amount")}</span>
+          <span className="text-lg font-bold text-[#1A1A1A]">
+            {t("total-amount")}
+          </span>
           <div className="flex-1 border-b border-gray-400 border-dashed"></div>
           <span className="text-lg font-bold text-[#3696E7]">
             {formatPrice(
@@ -75,4 +73,3 @@ export default function CartTotals() {
     </div>
   );
 }
-
