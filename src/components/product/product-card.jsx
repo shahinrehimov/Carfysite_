@@ -111,8 +111,8 @@ export default function ProductCard({ product }) {
       onClick={() =>
         router.push(
           product.product.category_slugs.parent_category_slug
-            ? `/${product.product.category_slugs.parent_category_slug}/${product.product.category_slugs.sub_category_slug}/${slug}?variant=${product.variant_slug}&seller=${product.seller.store_code}`
-            : `/${product.product.category_slugs.sub_category_slug}/${slug}?variant=${product.variant_slug}&seller=${product.seller.store_code}`
+            ? `/${product.product.category_slugs.parent_category_slug}/${product.product.category_slugs.sub_category_slug}/${slug}?seller=${product.seller.store_code}${product.variant_slug ? `&variant=${product.variant_slug}` : ""}`
+            : `/${product.product.category_slugs.sub_category_slug}/${slug}?seller=${product.seller.store_code}${product.variant_slug ? `&variant=${product.variant_slug}` : ""}`
         )
       }
     >

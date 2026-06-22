@@ -65,6 +65,7 @@ async function getProducts(searchParams) {
 export default async function Products({ searchParams }) {
   const resolvedParams = await searchParams;
   const { products, meta } = await getProducts(resolvedParams);
+  console.log(products);
 
   // Plain query string forwarded to client for load-more pagination
   const filterQueryString = buildQueryParams(resolvedParams).toString();
@@ -92,7 +93,11 @@ export default async function Products({ searchParams }) {
           <DesktopSidebar initialFilters={resolvedParams} />
 
           <div className="col-span-1 lg:col-span-4">
-            <MobileFilterToggle totalResults={meta.total} searchTerm="Mator" initialFilters={resolvedParams} />
+            <MobileFilterToggle
+              totalResults={meta.total}
+              searchTerm="Mator"
+              initialFilters={resolvedParams}
+            />
 
             <ProductsList
               initialProducts={products}
