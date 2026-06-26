@@ -6,6 +6,7 @@ import Image from "next/image";
 import { api } from "@/lib/axios/api";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { AccountDetailLoading } from "@/components/account/account-loading";
 
 const getDeliveryStatusClass = (status) => {
   switch (status) {
@@ -117,9 +118,7 @@ export default function OrderPage({ params }) {
     return (
       <div className="container">
         <div className="flex flex-col gap-10 py-10">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg">{t("loading")}</div>
-          </div>
+          <AccountDetailLoading />
         </div>
       </div>
     );

@@ -5,6 +5,7 @@ import { Monitor, Smartphone, LogOut } from "lucide-react";
 import { api } from "@/lib/axios/api";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { AccountListLoading } from "@/components/account/account-loading";
 
 function getDeviceIcon(deviceName) {
   const name = (deviceName || "").toLowerCase();
@@ -96,31 +97,7 @@ export default function SettingsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="h-7 bg-gray-200 rounded w-40 animate-pulse" />
-          <div className="h-9 bg-gray-200 rounded-full w-20 animate-pulse" />
-        </div>
-        <div className="h-4 bg-gray-200 rounded w-56 animate-pulse mb-4" />
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4 animate-pulse"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 bg-gray-200 rounded" />
-              <div className="flex flex-col gap-2">
-                <div className="h-4 bg-gray-200 rounded w-24" />
-                <div className="h-3 bg-gray-200 rounded w-36" />
-                <div className="h-3 bg-gray-200 rounded w-32" />
-              </div>
-            </div>
-            <div className="h-9 bg-gray-200 rounded-full w-20" />
-          </div>
-        ))}
-      </div>
-    );
+    return <AccountListLoading count={3} showTitle />;
   }
 
   return (

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
+import { formatAzPhoneForDisplay } from "@/lib/utils";
 
 export default async function AccountPage() {
   const t = await getTranslations("account");
@@ -67,14 +68,8 @@ export default async function AccountPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6 text-sm text-gray-600">
                 <span>{user?.email}</span>
-                <span>{user?.phone}</span>
+                <span>{formatAzPhoneForDisplay(user?.phone)}</span>
               </div>
-              <Link
-                href="/account/change-password"
-                className="inline-flex items-center text-sm text-[#00569C] hover:text-[#004580] font-medium transition-colors whitespace-nowrap"
-              >
-                {t("change_password")}
-              </Link>
             </div>
           </div>
         </div>

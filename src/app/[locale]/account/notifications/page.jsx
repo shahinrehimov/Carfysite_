@@ -13,23 +13,11 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { notificationsService } from "@/lib/notificationsService";
+import { AccountListLoading } from "@/components/account/account-loading";
 
 function dispatchNotificationRead(count = 1) {
   window.dispatchEvent(
     new CustomEvent("notificationRead", { detail: { count } })
-  );
-}
-
-function NotificationSkeleton() {
-  return (
-    <div className="flex gap-3 p-4 animate-pulse">
-      <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
-      <div className="flex-1 space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-2/3" />
-        <div className="h-3 bg-gray-200 rounded w-full" />
-        <div className="h-3 bg-gray-200 rounded w-1/3" />
-      </div>
-    </div>
   );
 }
 
@@ -220,11 +208,7 @@ export default function NotificationsPage() {
 
           {/* Content */}
           {loading ? (
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <NotificationSkeleton key={i} />
-              ))}
-            </div>
+            <AccountListLoading count={5} contained />
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4 text-gray-400">
               <BellOff className="w-14 h-14 text-gray-300" />

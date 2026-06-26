@@ -17,6 +17,7 @@ import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/axios/api";
 import { Button } from "@/components/ui/button";
+import { AccountListLoading } from "@/components/account/account-loading";
 
 const PAGE_LIMIT = 15;
 
@@ -62,10 +63,6 @@ const EARNING_STATUS_STYLES = {
   cancelled: "text-red-600 bg-red-100",
   fraud_hold: "text-orange-700 bg-orange-100",
 };
-
-function SkeletonBlock({ className }) {
-  return <div className={`bg-gray-200 rounded animate-pulse ${className}`} />;
-}
 
 export default function ReferralsPanel() {
   const t = useTranslations();
@@ -207,24 +204,7 @@ export default function ReferralsPanel() {
     balance?.available_balance ?? referralData?.available_balance ?? 0;
 
   if (loading) {
-    return (
-      <div className="flex flex-col gap-6 py-6">
-        <SkeletonBlock className="h-8 w-52" />
-        <SkeletonBlock className="h-28 w-full" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 flex flex-col gap-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <SkeletonBlock key={i} className="h-16" />
-            ))}
-          </div>
-          <div className="flex flex-col gap-3">
-            <SkeletonBlock className="h-36 rounded-xl" />
-            <SkeletonBlock className="h-12 rounded-full" />
-            <SkeletonBlock className="h-40 rounded-xl" />
-          </div>
-        </div>
-      </div>
-    );
+    return <AccountListLoading count={5} showTitle />;
   }
 
   return (

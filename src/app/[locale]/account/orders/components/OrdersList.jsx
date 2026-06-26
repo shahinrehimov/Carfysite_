@@ -6,6 +6,7 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { api } from "@/lib/axios/api";
 import { useTranslations } from "next-intl";
+import { AccountListLoading } from "@/components/account/account-loading";
 
 const PAGE_LIMIT = 15;
 
@@ -146,33 +147,7 @@ const OrdersList = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-col gap-4">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="border border-gray-200 rounded-lg overflow-hidden animate-pulse"
-          >
-            <div className="p-4 lg:p-6 bg-white">
-              <div className="flex flex-row lg:items-center justify-between gap-4">
-                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="h-6 bg-gray-200 rounded w-24"></div>
-                    <div className="h-4 bg-gray-200 rounded w-20"></div>
-                    <div className="h-4 bg-gray-200 rounded w-28"></div>
-                  </div>
-                  <div className="h-8 bg-gray-200 rounded-full w-20"></div>
-                </div>
-                <div className="flex gap-2">
-                  <div className="h-10 bg-gray-200 rounded w-20"></div>
-                  <div className="h-11 w-11 bg-gray-200 rounded"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <AccountListLoading count={3} />;
   }
 
   return (

@@ -10,6 +10,7 @@ import {
   mapApiCarToUi,
   buildCarFormData,
 } from "@/lib/profileCarsService";
+import { AccountListLoading } from "@/components/account/account-loading";
 
 function mergeCosmeticFromForm(apiUi, form) {
   if (!apiUi) return apiUi;
@@ -128,12 +129,10 @@ export default function MyCarsPage() {
       ) : null}
 
       {loading ? (
-        <p className="text-sm text-gray-500">{t("cars_loading")}</p>
-      ) : null}
-
-      <div className="grid grid-cols-1 gap-6">
-        {!loading &&
-          cars.map((car) => (
+        <AccountListLoading count={2} />
+      ) : (
+        <div className="grid grid-cols-1 gap-6">
+          {cars.map((car) => (
             <CarCard
               key={car.id}
               car={car}
@@ -144,9 +143,9 @@ export default function MyCarsPage() {
               onError={setLoadError}
             />
           ))}
-
-        {!loading && <AddCarCard onClick={() => setIsModalOpen(true)} />}
-      </div>
+          <AddCarCard onClick={() => setIsModalOpen(true)} />
+        </div>
+      )}
 
       <CarModal
         isOpen={isModalOpen}

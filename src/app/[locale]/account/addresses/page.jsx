@@ -11,6 +11,7 @@ import { addressService } from "@/lib/addressService";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/axios/api";
 import Map from "@/components/ui/map";
+import { AccountGridLoading } from "@/components/account/account-loading";
 
 // Validation schema for address
 const addressSchema = yup.object().shape({
@@ -284,13 +285,7 @@ export default function AddressesPage() {
   };
 
   if (isDataLoading) {
-    return (
-      <div className="w-full  p-4 lg:p-8">
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00569C]"></div>
-        </div>
-      </div>
-    );
+    return <AccountGridLoading count={6} showTitle />;
   }
 
   return (
@@ -304,9 +299,7 @@ export default function AddressesPage() {
 
         {/* Loading State */}
         {isLoading ? (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00569C]"></div>
-          </div>
+          <AccountGridLoading count={6} />
         ) : (
           <>
             {/* Address List */}
