@@ -129,11 +129,14 @@ export function PhoneStep({ onSubmit, loading, error }) {
 
         <p className="text-center text-xs text-gray-500 leading-relaxed">
           {t("register_terms_text")}{" "}
-          <Link href="/terms" className="text-blue-600 underline">
+          <Link href="/pages/terms_of_use" className="text-blue-600 underline">
             {t("terms_of_use")}
           </Link>{" "}
           {t("and")}{" "}
-          <Link href="/privacy" className="text-blue-600 underline">
+          <Link
+            href="/pages/privacy_policy"
+            className="text-blue-600 underline"
+          >
             {t("privacy_policy")}
           </Link>{" "}
           {t("agree_with")}.
@@ -142,6 +145,3 @@ export function PhoneStep({ onSubmit, loading, error }) {
     </div>
   );
 }
-
-
-
