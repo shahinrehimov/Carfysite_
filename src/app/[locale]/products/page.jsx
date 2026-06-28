@@ -6,6 +6,7 @@ import DesktopSidebar from "@/components/product/DesktopSidebar";
 import { serverApi } from "@/lib/axios";
 
 const FILTER_KEYS = [
+  "search",
   "brands[]",
   "models[]",
   "min_year",
@@ -13,11 +14,16 @@ const FILTER_KEYS = [
   "min_price",
   "max_price",
   "city_id",
-  "color_id",
+  "color_ids[]",
   "statuses[]",
+  "conditions[]",
+  "ratings[]",
   "categories[]",
   "sub_categories[]",
-  "sort_option",
+  "is_set",
+  "seller_store_code",
+  "user_car_id",
+  "sort",
   "sort_type",
 ];
 

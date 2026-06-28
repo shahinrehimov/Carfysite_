@@ -131,7 +131,7 @@ export default function CartDropdown() {
           />
           <div
             ref={dropdownRef}
-            className="absolute right-0 top-full mt-2 rounded-2xl shadow-xl border border-gray-200 w-[400px] max-h-[600px] flex flex-col z-50"
+            className="absolute right-0 top-full mt-2 rounded-2xl shadow-xl border border-gray-200 w-[400px] max-h-[600px] flex flex-col z-50 bg-white"
           >
             {cartItems.length === 0 ? (
               <div className="p-8 text-center">

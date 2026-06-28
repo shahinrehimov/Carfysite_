@@ -69,6 +69,26 @@ export const profileCarsService = {
     }
   },
 
+  /** Lightweight list for product search-by-car selector (login required). */
+  async listCars() {
+    try {
+      const response = await api.get("/profile/cars/list");
+      const body = response.data;
+      const rows = Array.isArray(body) ? body : body?.data ?? [];
+      return { success: true, data: rows };
+    } catch (error) {
+      console.error("List cars error:", error);
+      return {
+        success: false,
+        error:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to load cars",
+        data: [],
+      };
+    }
+  },
+
   async showCar(carId) {
     try {
       const response = await api.get(`/profile/cars/show/${carId}`);

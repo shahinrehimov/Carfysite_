@@ -198,9 +198,10 @@ export default function SidebarFilter({ isOpen, onClose, initialFilters, mode = 
     if (maxYear) params.set("max_year", maxYear);
     if (sortOption) {
       const [opt, type] = sortOption.split("_");
-      params.set("sort_option", opt);
+      params.set("sort", opt);
       params.set("sort_type", type);
     }
+    if (selectedRating) params.append("ratings[]", selectedRating);
     return params;
   };
 

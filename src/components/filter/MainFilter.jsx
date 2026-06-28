@@ -4,10 +4,19 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
-import { ChevronRight, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ChevronRight, X, Car } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, Link } from "@/i18n/routing";
 import { useProductFilters } from "@/hooks/useProductFilters";
+import { isAuthenticated } from "@/lib/auth";
+import { profileCarsService } from "@/lib/profileCarsService";
 import {
   brandOptionsFromBrands,
   categoriesForUi,
@@ -25,6 +34,13 @@ function arrayParam(searchParams, key) {
   return Array.isArray(val) ? val : [val];
 }
 
+function formatCarLabel(car) {
+  const brand = car.brand?.title ?? "";
+  const model = car.brand_model?.title ?? "";
+  const year = car.year != null ? ` (${car.year})` : "";
+  return `${brand} ${model}${year}`.trim();
+}
+
 export default function MainFilter({ type = "default", initialFilters }) {
   const t = useTranslations();
   const router = useRouter();
@@ -35,24 +51,32 @@ export default function MainFilter({ type = "default", initialFilters }) {
   const [marka, setMarka] = useState(() => firstParam(initialFilters, "brands[]"));
   const [model, setModel] = useState(() => arrayParam(initialFilters, "models[]"));
   const [city, setCity] = useState(() => firstParam(initialFilters, "city_id"));
-  const [color, setColor] = useState(() => firstParam(initialFilters, "color_id"));
+  const [color, setColor] = useState(() => firstParam(initialFilters, "color_ids[]"));
   const [status, setStatus] = useState(() => firstParam(initialFilters, "statuses[]"));
   const [minYear, setMinYear] = useState(() => firstParam(initialFilters, "min_year"));
   const [maxYear, setMaxYear] = useState(() => firstParam(initialFilters, "max_year"));
   const [minPrice, setMinPrice] = useState(() => firstParam(initialFilters, "min_price"));
   const [maxPrice, setMaxPrice] = useState(() => firstParam(initialFilters, "max_price"));
   const [currency, setCurrency] = useState("AZN");
+  const [isCarSearchOpen, setIsCarSearchOpen] = useState(false);
+  const [userCars, setUserCars] = useState([]);
+  const [carsLoading, setCarsLoading] = useState(false);
+  const [carsLoadError, setCarsLoadError] = useState(null);
+  const [selectedUserCarId, setSelectedUserCarId] = useState(() =>
+    firstParam(initialFilters, "user_car_id")
+  );
 
   // Sync state when URL params change (e.g. after SidebarFilter submits)
   const pMarka   = firstParam(initialFilters, "brands[]");
   const pCity    = firstParam(initialFilters, "city_id");
-  const pColor   = firstParam(initialFilters, "color_id");
+  const pColor   = firstParam(initialFilters, "color_ids[]");
   const pStatus  = firstParam(initialFilters, "statuses[]");
   const pMinYear = firstParam(initialFilters, "min_year");
   const pMaxYear = firstParam(initialFilters, "max_year");
   const pMinPrice = firstParam(initialFilters, "min_price");
   const pMaxPrice = firstParam(initialFilters, "max_price");
   const pModels  = arrayParam(initialFilters, "models[]").join(",");
+  const pUserCarId = firstParam(initialFilters, "user_car_id");
 
   useEffect(() => {
     setMarka(pMarka);
@@ -64,8 +88,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
     setMaxYear(pMaxYear);
     setMinPrice(pMinPrice);
     setMaxPrice(pMaxPrice);
+    setSelectedUserCarId(pUserCarId);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pMarka, pModels, pCity, pColor, pStatus, pMinYear, pMaxYear, pMinPrice, pMaxPrice]);
+  }, [pMarka, pModels, pCity, pColor, pStatus, pMinYear, pMaxYear, pMinPrice, pMaxPrice, pUserCarId]);
 
   const brands = filterData?.brands ?? [];
   const yearRange = filterData?.yearRange ?? null;
@@ -126,6 +151,29 @@ export default function MainFilter({ type = "default", initialFilters }) {
     }
   }, [categories]);
 
+  useEffect(() => {
+    if (!isCarSearchOpen) return;
+
+    let cancelled = false;
+    (async () => {
+      setCarsLoading(true);
+      setCarsLoadError(null);
+      const res = await profileCarsService.listCars();
+      if (cancelled) return;
+      if (res.success) {
+        setUserCars(res.data);
+      } else {
+        setUserCars([]);
+        setCarsLoadError(res.error);
+      }
+      setCarsLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isCarSearchOpen]);
+
   const buildFilterParams = () => {
     const params = new URLSearchParams();
     if (marka) params.append("brands[]", marka);
@@ -135,8 +183,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
     if (minPrice) params.set("min_price", minPrice);
     if (maxPrice) params.set("max_price", maxPrice);
     if (city) params.set("city_id", city);
-    if (color) params.set("color_id", color);
+    if (color) params.append("color_ids[]", color);
     if (status) params.append("statuses[]", status);
+    if (selectedUserCarId) params.set("user_car_id", selectedUserCarId);
     return params;
   };
 
@@ -172,6 +221,23 @@ export default function MainFilter({ type = "default", initialFilters }) {
     setMaxYear("");
     setMinPrice("");
     setMaxPrice("");
+    setSelectedUserCarId("");
+  };
+
+  const handleCarSearchClick = () => {
+    if (!isAuthenticated()) {
+      router.push("/auth/login");
+      return;
+    }
+    setIsCarSearchOpen(true);
+  };
+
+  const handleCarSearchSubmit = () => {
+    if (!selectedUserCarId) return;
+    const params = buildFilterParams();
+    params.set("user_car_id", selectedUserCarId);
+    setIsCarSearchOpen(false);
+    router.push(`/products?${params.toString()}`);
   };
 
   return (
@@ -250,6 +316,8 @@ export default function MainFilter({ type = "default", initialFilters }) {
             <Button
               variant="primary"
               size="lg"
+              type="button"
+              onClick={handleCarSearchClick}
               className=" h-[48px] lg:h-[60px] cursor-pointer w-full"
             >
               <Image src="/icons/car.svg" alt="car" width={20} height={20} />
@@ -671,6 +739,89 @@ export default function MainFilter({ type = "default", initialFilters }) {
           </div>
         </div>
       </div>
+
+      <Dialog open={isCarSearchOpen} onOpenChange={setIsCarSearchOpen}>
+        <DialogContent className="sm:max-w-lg" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>{t("search_by_car")}</DialogTitle>
+            <DialogDescription>
+              {t("search_by_car_description")}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 max-h-[360px] overflow-y-auto">
+            {carsLoading && (
+              <p className="text-sm text-gray-500 py-4 text-center">{t("loading")}</p>
+            )}
+
+            {!carsLoading && carsLoadError && (
+              <p className="text-sm text-red-600 py-2">{carsLoadError}</p>
+            )}
+
+            {!carsLoading && !carsLoadError && userCars.length === 0 && (
+              <div className="py-4 text-center space-y-3">
+                <p className="text-sm text-gray-600">{t("cars_garage_empty")}</p>
+                <Link
+                  href="/account/cars"
+                  className="text-sm text-[#3696E7] font-medium hover:underline"
+                  onClick={() => setIsCarSearchOpen(false)}
+                >
+                  {t("cars_add_card")} →
+                </Link>
+              </div>
+            )}
+
+            {!carsLoading &&
+              userCars.map((car) => {
+                const carId = String(car.id);
+                const isSelected = selectedUserCarId === carId;
+                return (
+                  <button
+                    key={car.id}
+                    type="button"
+                    onClick={() => setSelectedUserCarId(carId)}
+                    className={cn(
+                      "w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-colors cursor-pointer",
+                      isSelected
+                        ? "border-[#00569C] bg-[#00569C]/5"
+                        : "border-gray-200 hover:border-[#00569C]/40"
+                    )}
+                  >
+                    <div className="w-14 h-14 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
+                      {car.photo ? (
+                        <Image
+                          src={car.photo}
+                          alt={formatCarLabel(car)}
+                          width={56}
+                          height={56}
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Car className="w-6 h-6 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">
+                      {formatCarLabel(car)}
+                    </span>
+                  </button>
+                );
+              })}
+          </div>
+
+          <Button
+            variant="primary"
+            size="lg"
+            type="button"
+            disabled={!selectedUserCarId || carsLoading || userCars.length === 0}
+            onClick={handleCarSearchSubmit}
+            className="w-full h-12 cursor-pointer"
+          >
+            {t("show")}
+          </Button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
