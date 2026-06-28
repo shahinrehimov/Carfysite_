@@ -9,7 +9,7 @@ export default function PaymentMethod({
   onPaymentMethodSelect,
   className = "",
 }) {
-  const t = useTranslations("");
+  const t = useTranslations();
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,11 +37,11 @@ export default function PaymentMethod({
       if (result.success) {
         setPaymentMethods(result.data.data || []);
       } else {
-        setError(result.error || "Failed to load payment methods");
+        setError(result.error || t("payment_methods_load_failed"));
         console.error("Failed to load payment methods:", result.error);
       }
     } catch (error) {
-      setError("An error occurred while loading payment methods");
+      setError(t("payment_methods_load_error"));
       console.error("Error loading payment methods:", error);
     } finally {
       setIsLoading(false);

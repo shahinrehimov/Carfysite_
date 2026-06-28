@@ -5,7 +5,7 @@ import { Link } from "@/i18n/routing";
 import { formatAzPhoneForDisplay } from "@/lib/utils";
 
 export default async function AccountPage() {
-  const t = await getTranslations("account");
+  const t = await getTranslations();
 
   const cookieStore = await cookies();
   const userDataCookie = cookieStore.get("user_data");

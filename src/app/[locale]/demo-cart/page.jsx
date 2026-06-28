@@ -43,10 +43,10 @@ export default function DemoCartPage() {
   return (
     <div className="container py-8">
       <h1 className="text-2xl lg:text-3xl font-semibold text-[#1A1A1A] mb-2">
-        Cart Demo Page
+        {t("demo_cart_title")}
       </h1>
       <p className="text-gray-600 mb-8">
-        Click "Add to Cart" to test the cart functionality
+        {t("demo_cart_description")}
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -97,11 +97,11 @@ export default function DemoCartPage() {
 
       <div className="mt-12 p-6 bg-blue-50 rounded-xl">
         <h2 className="text-xl font-semibold text-[#1A1A1A] mb-4">
-          How to Use Redux Cart
+          {t("demo_cart_howto_title")}
         </h2>
         <div className="space-y-4 text-sm text-gray-700">
           <div>
-            <h3 className="font-semibold mb-2">1. Add items to cart:</h3>
+            <h3 className="font-semibold mb-2">{t("demo_cart_step_add")}</h3>
             <pre className="bg-white p-3 rounded-lg overflow-x-auto">
               {`import { useDispatch } from "react-redux";
 import { basketService } from "@/lib/basketService";
@@ -115,7 +115,7 @@ dispatch(addItem(response));`}
           </div>
 
           <div>
-            <h3 className="font-semibold mb-2">2. Remove items:</h3>
+            <h3 className="font-semibold mb-2">{t("demo_cart_step_remove")}</h3>
             <pre className="bg-white p-3 rounded-lg overflow-x-auto">
               {`import { basketService } from "@/lib/basketService";
 import { removeItem } from "@/store/cart";
@@ -126,7 +126,7 @@ dispatch(removeItem(response));`}
           </div>
 
           <div>
-            <h3 className="font-semibold mb-2">3. Get cart info:</h3>
+            <h3 className="font-semibold mb-2">{t("demo_cart_step_get")}</h3>
             <pre className="bg-white p-3 rounded-lg overflow-x-auto">
               {`import { useSelector } from "react-redux";
 import { selectCartItems, selectBasketData, selectTotalItems } from "@/store/cart";

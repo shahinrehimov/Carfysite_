@@ -245,11 +245,11 @@ export default function AddressesPage() {
         closeModal();
       } else {
         console.error("Address save error:", result.error);
-        alert(result.error || "Failed to save address");
+        alert(result.error || t("address_save_failed"));
       }
     } catch (error) {
       console.error("Address save error:", error);
-      alert("An error occurred while saving the address");
+      alert(t("address_save_error"));
     }
   };
 
@@ -260,11 +260,11 @@ export default function AddressesPage() {
         await loadAddresses();
       } else {
         console.error("Set default address error:", result.error);
-        alert(result.error || "Failed to set default address");
+        alert(result.error || t("address_set_default_failed"));
       }
     } catch (error) {
       console.error("Set default address error:", error);
-      alert("An error occurred while setting default address");
+      alert(t("address_set_default_error"));
     }
   };
 
@@ -276,11 +276,11 @@ export default function AddressesPage() {
         closeDeleteModal();
       } else {
         console.error("Delete address error:", result.error);
-        alert(result.error || "Failed to delete address");
+        alert(result.error || t("address_delete_failed"));
       }
     } catch (error) {
       console.error("Delete address error:", error);
-      alert("An error occurred while deleting the address");
+      alert(t("address_delete_error"));
     }
   };
 
@@ -293,7 +293,7 @@ export default function AddressesPage() {
       <div className="w-full  ">
         <div className="w-full mb-6 hidden lg:block">
           <h2 className="text-xl lg:text-2xl font-semibold text-gray-900">
-            {t("address") || "Ünvanlarım"}
+            {t("address")}
           </h2>
         </div>
 
@@ -333,22 +333,22 @@ export default function AddressesPage() {
                   <div className="pr-16">
                     <div className="flex items-center gap-2 mb-3">
                       <h3 className="font-semibold text-lg text-gray-900">
-                        {address.address_type?.title || "Address"}
+                        {address.address_type?.title || t("address")}
                       </h3>
                     </div>
 
                     <div className="text-gray-600 space-y-3 border-b border-gray-200 pb-4 mb-3">
                       <div>
                         <span className="text-sm text-gray-500">
-                          {t("city") || "Şəhər"}:
+                          {t("city")}:
                         </span>
                         <div className="font-medium text-gray-900">
-                          {address.city?.title || "N/A"}
+                          {address.city?.title || t("not_available")}
                         </div>
                       </div>
                       <div>
                         <span className="text-sm text-gray-500">
-                          {t("address_line_1") || "Küçə"}:
+                          {t("address_line_1")}:
                         </span>
                         <div className="font-medium text-gray-900">
                           {address.address_line_1}
@@ -357,7 +357,7 @@ export default function AddressesPage() {
                       {address.address_line_2 && (
                         <div>
                           <span className="text-sm text-gray-500">
-                            {t("address_line_2") || "Bina/Ev"}:
+                            {t("address_line_2")}:
                           </span>
                           <div className="font-medium text-gray-900">
                             {address.address_line_2}
@@ -366,7 +366,7 @@ export default function AddressesPage() {
                       )}
                       <div>
                         <span className="text-sm text-gray-500">
-                          {t("phone") || "Mobil nömrə"}:
+                          {t("phone")}:
                         </span>
                         <div className="font-medium text-gray-900">
                           {address.phone}
@@ -378,7 +378,7 @@ export default function AddressesPage() {
                       onClick={() => openModal(address)}
                       className="text-[#00569C] hover:text-[#004580] text-sm font-medium cursor-pointer transition-colors"
                     >
-                      {t("edit_address") || "Düzəliş et"}
+                      {t("edit_address")}
                     </button>
                   </div>
                 </div>
@@ -389,7 +389,7 @@ export default function AddressesPage() {
             {addresses.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-gray-500 mb-4">
-                  {t("no_addresses_found") || "Ünvan tapılmadı"}
+                  {t("no_addresses_found")}
                 </p>
               </div>
             )}
@@ -403,7 +403,7 @@ export default function AddressesPage() {
           size="lg"
           className="w-full max-w-md"
         >
-          {t("add_address") || "Yadda saxla"}
+          {t("add_address")}
         </Button>
       </div>
 
@@ -433,8 +433,8 @@ export default function AddressesPage() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">
                   {editingAddress
-                    ? t("edit_address") || "Ünvanı düzəlt"
-                    : t("add_address") || "Yeni ünvan"}
+                    ? t("edit_address")
+                    : t("add_address")}
                 </h2>
                 <button
                   onClick={closeModal}
@@ -452,7 +452,7 @@ export default function AddressesPage() {
                 {/* Address Type */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t("address_type") || "Ünvan adı"}
+                    {t("address_type")}
                   </label>
                   <Controller
                     name="address_type_id"
@@ -478,7 +478,7 @@ export default function AddressesPage() {
                               ? addressTypes.find(
                                   (type) => type.id === field.value
                                 )?.title
-                              : "Seçin"}
+                              : t("select")}
                           </span>
                           <ChevronDown
                             className={`w-5 h-5 text-gray-400 transition-transform ${
@@ -517,7 +517,7 @@ export default function AddressesPage() {
                 {/* City */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t("city") || "Şəhər"}
+                    {t("city")}
                   </label>
                   <Controller
                     name="city_id"
@@ -542,7 +542,7 @@ export default function AddressesPage() {
                             {field.value
                               ? cities.find((city) => city.id === field.value)
                                   ?.title
-                              : "Seçin"}
+                              : t("select")}
                           </span>
                           <ChevronDown
                             className={`w-5 h-5 text-gray-400 transition-transform ${
@@ -582,7 +582,7 @@ export default function AddressesPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">
-                      {t("address_line_1") || "Rayon"}
+                      {t("address_line_1")}
                     </label>
                     <Controller
                       name="address_line_1"
@@ -591,7 +591,7 @@ export default function AddressesPage() {
                         <Input
                           {...field}
                           placeholder={
-                            t("street_address") || "Nərimanov rayonu"
+                            t("street_address")
                           }
                           className={`h-12 lg:h-14 text-base rounded-lg ${
                             errors.address_line_1 ? "border-red-500" : ""
@@ -608,7 +608,7 @@ export default function AddressesPage() {
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">
-                      {t("address_line_2") || "Küçə"}
+                      {t("address_line_2")}
                     </label>
                     <Controller
                       name="address_line_2"
@@ -617,7 +617,7 @@ export default function AddressesPage() {
                         <Input
                           {...field}
                           placeholder={
-                            t("apartment_suite_etc") || "Rashid behbudov 24A"
+                            t("apartment_suite_etc")
                           }
                           className={`h-12 lg:h-14 text-base rounded-lg ${
                             errors.address_line_2 ? "border-red-500" : ""
@@ -636,7 +636,7 @@ export default function AddressesPage() {
                 {/* Map Location Selector */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t("select_location_on_map") || "Xəritədən yer seçin"}
+                    {t("select_location_on_map")}
                   </label>
                   <div className="space-y-2">
                     <Map
@@ -650,8 +650,7 @@ export default function AddressesPage() {
                       }}
                     />
                     <div className="text-sm text-gray-500">
-                      {t("click_on_map_to_select_location") ||
-                        "Yer seçmək üçün xəritəyə klikləyin"}
+                      {t("click_on_map_to_select_location")}
                     </div>
                   </div>
                 </div>
@@ -659,7 +658,7 @@ export default function AddressesPage() {
                 {/* Phone */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t("phone") || "Mobil nömrə"}
+                    {t("phone")}
                   </label>
                   <Controller
                     name="phone"
@@ -674,7 +673,7 @@ export default function AddressesPage() {
                           +994
                         </span>
                         <input
-                          placeholder="xx xxxx xx xx"
+                          placeholder={t("phone_placeholder")}
                           maxLength={9}
                           className="flex-1 px-3 text-base outline-none bg-white"
                           onChange={(e) => {
@@ -708,11 +707,11 @@ export default function AddressesPage() {
                   >
                     {isSubmitting
                       ? editingAddress
-                        ? t("updating") || "Yenilənir..."
-                        : t("adding") || "Əlavə edilir..."
+                        ? t("updating")
+                        : t("adding")
                       : editingAddress
-                        ? t("update") || "Yenilə"
-                        : t("add") || "Yadda saxla"}
+                        ? t("update")
+                        : t("add")}
                   </Button>
                 </div>
               </form>
@@ -746,7 +745,7 @@ export default function AddressesPage() {
               {/* Modal Header */}
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">
-                  {t("delete_address") || "Ünvanı sil"}
+                  {t("delete_address")}
                 </h2>
                 <button
                   onClick={closeDeleteModal}
@@ -759,14 +758,13 @@ export default function AddressesPage() {
               {/* Modal Body */}
               <div className="mb-6">
                 <p className="text-gray-600 mb-4">
-                  {t("are_you_sure_delete_address") ||
-                    "Bu ünvanı silmək istədiyinizdən əminsiniz?"}
+                  {t("are_you_sure_delete_address")}
                 </p>
                 {deletingAddress && (
                   <div className="bg-gray-50 rounded-lg p-4 border">
                     <div className="text-sm">
                       <div className="font-medium text-gray-900 mb-1">
-                        {deletingAddress.address_type?.title || "Address"}
+                        {deletingAddress.address_type?.title || t("address")}
                       </div>
                       <div className="text-gray-600">
                         {deletingAddress.city?.title && (
@@ -781,8 +779,7 @@ export default function AddressesPage() {
                   </div>
                 )}
                 <p className="text-sm text-red-600 mt-3">
-                  {t("this_action_cannot_be_undone") ||
-                    "Bu əməliyyat geri qaytarıla bilməz."}
+                  {t("this_action_cannot_be_undone")}
                 </p>
               </div>
 
@@ -793,13 +790,13 @@ export default function AddressesPage() {
                   variant="outline"
                   className="flex-1 h-12 text-base"
                 >
-                  {t("cancel") || "Ləğv et"}
+                  {t("cancel")}
                 </Button>
                 <Button
                   onClick={() => deleteAddress(deletingAddress?.id)}
                   className="flex-1 h-12 text-base bg-red-600 hover:bg-red-700 text-white rounded-lg"
                 >
-                  {t("delete") || "Sil"}
+                  {t("delete")}
                 </Button>
               </div>
             </div>

@@ -1,36 +1,48 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { X, ChevronRight, ChevronLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
+
+const CATEGORY_DEFINITIONS = [
+  {
+    id: 1,
+    nameKey: "category_engine_parts",
+    subcategoryKeys: [
+      "subcategory_engine_kits",
+      "subcategory_piston_valve_rod_crank",
+      "subcategory_chain_belt_kits",
+      "subcategory_turbo_compressors",
+      "subcategory_sensors",
+    ],
+  },
+  { id: 2, nameKey: "category_cooling_heating", subcategoryKeys: [] },
+  { id: 3, nameKey: "category_transmission", subcategoryKeys: [] },
+  { id: 4, nameKey: "category_suspension_steering", subcategoryKeys: [] },
+  { id: 5, nameKey: "category_brake_system", subcategoryKeys: [] },
+  { id: 6, nameKey: "category_electrical_electronics", subcategoryKeys: [] },
+  { id: 7, nameKey: "category_body", subcategoryKeys: [] },
+  { id: 8, nameKey: "category_interior_comfort", subcategoryKeys: [] },
+  { id: 9, nameKey: "category_filters_fluids", subcategoryKeys: [] },
+  { id: 10, nameKey: "category_wheels_accessories", subcategoryKeys: [] },
+  { id: 11, nameKey: "category_accessories_other", subcategoryKeys: [] },
+];
 
 export default function MobileCategoriesModal({ isOpen, onClose }) {
+  const t = useTranslations();
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showSubcategories, setShowSubcategories] = useState(false);
 
-  const categories = [
-    {
-      id: 1,
-      name: "Mühərrik hissələri",
-      subcategories: [
-        "Mühərrik komplektləri",
-        "Piston, klapan, şatun, krank",
-        "Zəncir və qayış dəstləri",
-        "Turbin və kompressorlar",
-        "Sensorlar (MAP, MAF, oksigen və s.)",
-      ],
-    },
-    { id: 2, name: "Soyutma və İsitmə Sistemi", subcategories: [] },
-    { id: 3, name: "Ötürücü Sistemi", subcategories: [] },
-    { id: 4, name: "Asqı və Sükan", subcategories: [] },
-    { id: 5, name: "Əyləc Sistemi", subcategories: [] },
-    { id: 6, name: "Elektrik və Elektronika", subcategories: [] },
-    { id: 7, name: "Kuzov", subcategories: [] },
-    { id: 8, name: "Salon və Komfort", subcategories: [] },
-    { id: 9, name: "Filtrlər və Mayeler", subcategories: [] },
-    { id: 10, name: "Teker və Aksesuarlar", subcategories: [] },
-    { id: 11, name: "Aksesuar və Digər Məhsullar", subcategories: [] },
-  ];
+  const categories = useMemo(
+    () =>
+      CATEGORY_DEFINITIONS.map((category) => ({
+        id: category.id,
+        name: t(category.nameKey),
+        subcategories: category.subcategoryKeys.map((key) => t(key)),
+      })),
+    [t]
+  );
 
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
@@ -93,7 +105,7 @@ export default function MobileCategoriesModal({ isOpen, onClose }) {
                 />
               )}
               <h2 className="text-lg font-semibold text-[#1A1A1A]">
-                {showSubcategories ? selectedCategory?.name : "Kateqoriyalar"}
+                {showSubcategories ? selectedCategory?.name : t("categories")}
               </h2>
               <button
                 onClick={handleClose}
@@ -146,7 +158,7 @@ export default function MobileCategoriesModal({ isOpen, onClose }) {
                       )
                     ) : (
                       <p className="text-gray-500 text-sm text-center py-8">
-                        Alt kateqoriya yoxdur
+                        {t("no_subcategories")}
                       </p>
                     )}
                   </div>

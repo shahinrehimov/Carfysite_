@@ -23,11 +23,10 @@ export function SuccessStep() {
       </div>
 
       <h2 className="text-3xl font-bold mb-4">
-        {t("password_reset_success") || "Şifrə yeniləndi"}
+        {t("password_reset_success")}
       </h2>
       <p className="text-gray-600 text-sm mb-8">
-        {t("password_reset_success_description") ||
-          "Yeni şifrənizlə hesabınıza daxil ola bilərsiniz."}
+        {t("password_reset_success_description")}
       </p>
 
       <Button variant="primary" size="lg" className="w-full" asChild>

@@ -29,8 +29,7 @@ export default function ForgotPasswordPage() {
         err.response?.data?.message ||
           err.response?.data?.error ||
           err.message ||
-          t("forgot_password_failed") ||
-          "Şifrə bərpa sorğusu göndərilmədi"
+          t("forgot_password_failed")
       );
     } finally {
       setLoading(false);

@@ -86,7 +86,7 @@ export function EmailVerificationProvider({ children }) {
       await axiosInstance.post("/send-verification-email", {}, { [SKIP_FLAG]: true });
       setStep("otp");
     } catch (err) {
-      setError(err.response?.data?.message || "E-poçt göndərilə bilmədi.");
+      setError(err.response?.data?.message || t("email_send_failed"));
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ export function EmailVerificationProvider({ children }) {
 
   const handleVerifyOtp = async () => {
     if (!otp || otp.length < 4) {
-      setError("Düzgün kodu daxil edin.");
+      setError(t("invalid_otp_format"));
       return;
     }
     setLoading(true);
@@ -125,7 +125,7 @@ export function EmailVerificationProvider({ children }) {
             </DialogTitle>
             <DialogDescription className="text-center text-sm mt-1">
               {step === "send"
-                ? "E-poçt ünvanınız hələ təsdiqlənməyib. Doğrulama kodu göndərmək üçün aşağıdakı düyməyə basın."
+                ? t("email_verification_prompt")
                 : `${maskEmail(email)} ${t("email_verification_code_sent")}`}
             </DialogDescription>
           </DialogHeader>
@@ -145,7 +145,7 @@ export function EmailVerificationProvider({ children }) {
                 size="lg"
                 className="w-full"
               >
-                {loading ? "Göndərilir..." : "Doğrulama kodu göndər"}
+                {loading ? t("sending") : t("send_verification_code")}
               </Button>
               <Button
                 onClick={handleClose}

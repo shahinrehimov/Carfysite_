@@ -20,7 +20,7 @@ const formatPrice = (value) =>
   value != null ? Number(value).toFixed(2) : "0.00";
 
 export default function CheckoutPage() {
-  const t = useTranslations("");
+  const t = useTranslations();
 
   const checkoutSchema = yup.object().shape({
     address_id: yup
@@ -90,7 +90,8 @@ export default function CheckoutPage() {
 
     const fetchPreview = async () => {
       setPreviewLoading(true);
-      const result = await checkoutService.getCheckoutPreview(selectedAddressId);
+      const result =
+        await checkoutService.getCheckoutPreview(selectedAddressId);
       if (result.success) {
         setCheckoutPreview(result.data);
       }
@@ -113,7 +114,8 @@ export default function CheckoutPage() {
   }, [selectedPaymentMethod, watchedPaymentMethod, setValue]);
 
   const handleAddressSelect = (addressId) => setSelectedAddressId(addressId);
-  const handlePaymentMethodSelect = (method) => setSelectedPaymentMethod(method);
+  const handlePaymentMethodSelect = (method) =>
+    setSelectedPaymentMethod(method);
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -252,7 +254,9 @@ export default function CheckoutPage() {
 
             {/* Order Summary */}
             <div className="col-span-12 lg:col-span-4 border border-gray-200 rounded-lg px-2 py-3 lg:px-10 lg:py-8 h-fit">
-              <h3 className="text-lg font-semibold mb-4">{t("order_summary")}</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                {t("order_summary")}
+              </h3>
 
               {previewLoading ? (
                 <div className="space-y-3 animate-pulse">
@@ -267,7 +271,10 @@ export default function CheckoutPage() {
                 <div className="flex flex-col gap-4">
                   {/* Sellers breakdown */}
                   {checkoutPreview.sellers?.map((seller) => (
-                    <div key={seller.company_id} className="flex flex-col gap-2">
+                    <div
+                      key={seller.company_id}
+                      className="flex flex-col gap-2"
+                    >
                       <p className="text-sm font-semibold text-gray-700">
                         {seller.store_code}
                       </p>
@@ -287,10 +294,15 @@ export default function CheckoutPage() {
                       )}
 
                       {seller.items?.map((item, idx) => (
-                        <div key={idx} className="flex gap-2 items-start text-sm">
+                        <div
+                          key={idx}
+                          className="flex gap-2 items-start text-sm"
+                        >
                           <span className="flex-1 text-gray-600">
                             {item.title}{" "}
-                            <span className="text-gray-400">x{item.quantity}</span>
+                            <span className="text-gray-400">
+                              x{item.quantity}
+                            </span>
                           </span>
                           <span className="font-medium shrink-0">
                             {formatPrice(item.price)} ₼
@@ -299,7 +311,9 @@ export default function CheckoutPage() {
                       ))}
 
                       <div className="flex gap-2 items-center text-sm">
-                        <span className="flex-1 text-gray-500">{t("shipping")}</span>
+                        <span className="flex-1 text-gray-500">
+                          {t("shipping")}
+                        </span>
                         <div className="flex-1 border-b border-dashed border-gray-300"></div>
                         <div className="flex items-center gap-1 shrink-0">
                           <span className="text-gray-600">
@@ -329,21 +343,24 @@ export default function CheckoutPage() {
                   ))}
 
                   {/* Referral perks banner */}
-                  {checkoutPreview.referral && (
-                    checkoutPreview.referral.free_delivery_applied ||
-                    checkoutPreview.referral.discount_applied
-                  ) && (
-                    <div className="flex flex-col gap-1.5 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
-                      {checkoutPreview.referral.free_delivery_applied && (
-                        <span>🚚 {t("free_delivery_applied") || "Pulsuz çatdırılma tətbiq edildi"}</span>
-                      )}
-                      {checkoutPreview.referral.discount_applied && (
-                        <span>
-                          🏷️ {t("referral_discount_applied") || "Referral endirimi"}: −{formatPrice(checkoutPreview.referral.discount_amount)} ₼
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  {checkoutPreview.referral &&
+                    (checkoutPreview.referral.free_delivery_applied ||
+                      checkoutPreview.referral.discount_applied) && (
+                      <div className="flex flex-col gap-1.5 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
+                        {checkoutPreview.referral.free_delivery_applied && (
+                          <span>🚚 {t("free_delivery_applied")}</span>
+                        )}
+                        {checkoutPreview.referral.discount_applied && (
+                          <span>
+                            🏷️ {t("referral_discount_applied")}: −
+                            {formatPrice(
+                              checkoutPreview.referral.discount_amount
+                            )}{" "}
+                            ₼
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                   {/* Totals */}
                   <div className="flex flex-col gap-3 mt-1">
@@ -353,8 +370,9 @@ export default function CheckoutPage() {
                       <span className="text-base font-medium text-gray-primary">
                         {formatPrice(
                           checkoutPreview.referral?.subtotal_after_discount ??
-                          checkoutPreview.subtotal
-                        )} ₼
+                            checkoutPreview.subtotal
+                        )}{" "}
+                        ₼
                       </span>
                     </div>
 
@@ -362,7 +380,8 @@ export default function CheckoutPage() {
                       <span className="text-base">{t("shipping")}</span>
                       <div className="flex-1 border-b border-gray-500 border-dashed"></div>
                       <span className="text-base font-medium text-gray-primary">
-                        {(checkoutPreview.referral?.shipping_after_perk ?? checkoutPreview.total_shipping) === 0
+                        {(checkoutPreview.referral?.shipping_after_perk ??
+                          checkoutPreview.total_shipping) === 0
                           ? t("free")
                           : `${formatPrice(checkoutPreview.referral?.shipping_after_perk ?? checkoutPreview.total_shipping)} ₼`}
                       </span>
@@ -374,8 +393,9 @@ export default function CheckoutPage() {
                       <span className="text-base font-bold text-green-primary">
                         {formatPrice(
                           checkoutPreview.referral?.grand_total_after_perks ??
-                          checkoutPreview.grand_total
-                        )} ₼
+                            checkoutPreview.grand_total
+                        )}{" "}
+                        ₼
                       </span>
                     </div>
                   </div>
@@ -386,15 +406,21 @@ export default function CheckoutPage() {
                       <input
                         type="checkbox"
                         checked={useReferralBalance}
-                        onChange={(e) => setUseReferralBalance(e.target.checked)}
+                        onChange={(e) =>
+                          setUseReferralBalance(e.target.checked)
+                        }
                         className="mt-0.5 w-4 h-4 accent-[#3696E7] shrink-0"
                       />
                       <div className="flex flex-col gap-0.5">
                         <span className="text-sm font-medium text-[#00569C]">
-                          {t("use_referral_balance") || "Bonus balansı ilə ödə"}
+                          {t("use_referral_balance")}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {t("available_balance") || "Mövcud"}: {formatPrice(checkoutPreview.referral.available_balance)} ₼
+                          {t("available_balance")}:{" "}
+                          {formatPrice(
+                            checkoutPreview.referral.available_balance
+                          )}{" "}
+                          ₼
                         </span>
                       </div>
                     </label>

@@ -169,7 +169,7 @@ export default function TableList() {
                 item.hover_image ||
                 itemData.hover_image ||
                 "/images/product-placeholder.png";
-              const title = item.title || itemData.title || "Product";
+              const title = item.title || itemData.title || t("product");
               const quantity = item.basket_quantity || item.quantity || 1;
               const price = item.price_final || item.price || 0;
               const oldPrice = item.price || price;

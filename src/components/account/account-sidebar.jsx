@@ -104,7 +104,7 @@ export default function AccountSidebar() {
               >
                 <span className="text-lg font-light text-gray-700 group-hover:text-danger cursor-pointer">
                   {isLoggingOut
-                    ? t("logging_out") || "Logging out..."
+                    ? t("logging_out")
                     : item.label}
                 </span>
               </button>

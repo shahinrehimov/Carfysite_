@@ -44,7 +44,7 @@ export default async function ProductDetail({ params, searchParams }) {
         <div className="py-4">
           <BreadcrumbView
             data={[
-              { id: 1, type: "link", href: "/", title: "Ana səhifə" },
+              { id: 1, type: "link", href: "/", title: t("home") },
               ...(data.product.main_category
                 ? [
                     {

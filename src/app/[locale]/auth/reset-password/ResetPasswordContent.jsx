@@ -11,8 +11,8 @@ import { SuccessStep } from "./SuccessStep";
 export function ResetPasswordContent() {
   const t = useTranslations();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token") || "";
-  const email = searchParams.get("email") || "";
+  const token = searchParams.get("token");
+  const email = searchParams.get("email");
 
   const [step, setStep] = useState("form");
   const [loading, setLoading] = useState(false);
@@ -43,8 +43,7 @@ export function ResetPasswordContent() {
         err.response?.data?.message ||
           err.response?.data?.error ||
           err.message ||
-          t("reset_password_failed") ||
-          "Şifrə yenilənmədi"
+          t("reset_password_failed")
       );
     } finally {
       setLoading(false);
@@ -57,7 +56,7 @@ export function ResetPasswordContent() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
       <div className="w-full max-w-2xl min-h-[600px] bg-[#E8F1FC] rounded-[80px] shadow-[0px_1px_8px_0px_#00000029] overflow-hidden flex flex-col">
         <div className="py-5 text-center font-semibold text-[#4A7FBF] rounded-t-[80px]">
-          {t("reset_password") || "Yeni şifrə"}
+          {t("reset_password")}
         </div>
 
         <div className="flex-1 bg-white w-full flex items-center justify-center">
@@ -65,11 +64,10 @@ export function ResetPasswordContent() {
             {isInvalidLink ? (
               <div className="text-center">
                 <h2 className="text-3xl font-bold mb-4">
-                  {t("invalid_reset_link") || "Keçid etibarsızdır"}
+                  {t("invalid_reset_link")}
                 </h2>
                 <p className="text-gray-600 text-sm mb-8">
-                  {t("invalid_reset_link_description") ||
-                    "Şifrə bərpa linki etibarsızdır və ya vaxtı keçib."}
+                  {t("invalid_reset_link_description")}
                 </p>
                 <Link
                   href="/auth/forgot-password"

@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { serverApi as axiosServerApi } from "@/lib/axios";
 import { generateServiceUrl } from "@/lib/generateServiceUrl";
+import { getTranslations } from "next-intl/server";
 
 const services = [
   {
@@ -20,25 +21,25 @@ const getServices = async () => {
     };
   }
 };
-export default async function Footer({ translations = {} }) {
+export default async function Footer() {
+  const t = await getTranslations();
   const services = await getServices();
   const socialLinks = services.social;
-  const t = (key) => translations[key] || key;
 
   const footerLinks = [
-    { href: "/about", label: t("aboutUs") || "Hüquqi məlumat" },
+    { href: "/about", label: t("aboutUs") },
     {
       href: "/pages/privacy-policy",
-      label: t("privacy_policy") || "Məxfilik siyasəti",
+      label: t("privacy_policy"),
     },
-    { href: "/pages/warranty", label: t("warranty") || "Zəmanət" },
-    { href: "/pages/returns", label: t("returns") || "Qaytarılma" },
+    { href: "/pages/warranty", label: t("warranty") },
+    { href: "/pages/returns", label: t("returns") },
     {
       href: "/pages/delivery",
-      label: t("delivery") || "Çatdırılma və ödəmə",
+      label: t("delivery"),
     },
-    { href: "/pages/faq", label: t("faq") || "Ən çox verilən suallar" },
-    { href: "/contact", label: t("contact") || "Əlaqə" },
+    { href: "/pages/faq", label: t("faq") },
+    { href: "/contact", label: t("contact") },
   ];
 
   return (
@@ -56,14 +57,13 @@ export default async function Footer({ translations = {} }) {
               />
             </Link>
             <p className="text-sm text-gray-600 leading-relaxed max-w-xs">
-              {t("description") ||
-                "Burada istənilən marka və model üçün orijinal ehtiyat hissələrinin elanlarını tapın, satıcı ilə birbaşa əlaqə saxlayın və lazım olan hissəni sürətlə əldə edin."}
+              {t("description")}
             </p>
           </div>
 
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <h3 className="text-base font-semibold text-gray-900 mb-4">
-              {t("about") || "Haqqımızda"}
+              {t("about")}
             </h3>
             <ul className="space-y-3">
               {footerLinks.map((link, index) => (
@@ -81,12 +81,12 @@ export default async function Footer({ translations = {} }) {
 
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <h3 className="text-base font-semibold text-gray-900 mb-4">
-              {t("callCenter") || "Çağrı mərkəzi"}
+              {t("callCenter")}
             </h3>
             <div className="space-y-3">
               <div>
                 <p className="text-sm text-gray-600 mb-1">
-                  {t("hotline") || "Qaynar xətt:"}
+                  {t("hotline")}
                   <a
                     href="tel:991"
                     className="text-blue-600 font-semibold ml-1 hover:text-blue-700"
@@ -97,10 +97,10 @@ export default async function Footer({ translations = {} }) {
               </div>
               <div>
                 <p className="text-sm text-gray-600 mb-1">
-                  {t("workingHours") || "Çağrı mərkəzinin iş saatları:"}
+                  {t("workingHours")}
                 </p>
                 <p className="text-sm text-gray-900 font-medium">
-                  {t("hours") || "Hər gün:08:00 - 01:00"}
+                  {t("hours")}
                 </p>
               </div>
             </div>
@@ -108,7 +108,7 @@ export default async function Footer({ translations = {} }) {
 
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <h3 className="text-base font-semibold text-gray-900 mb-4">
-              {t("followUs") || "Bizi izləyin"}
+              {t("followUs")}
             </h3>
             <ul className="space-y-3 w-full">
               {socialLinks.map((social) => (
@@ -135,7 +135,7 @@ export default async function Footer({ translations = {} }) {
 
         <div className="mt-8 pt-8 border-t border-gray-200">
           <p className="text-center text-sm text-gray-600">
-            {t("copyright") || "© Carfy 2025. Bütün müəllif hüquqları qorunur"}
+            {t("copyright")}
           </p>
         </div>
       </div>

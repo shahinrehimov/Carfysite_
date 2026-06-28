@@ -12,7 +12,7 @@ import { notificationsService } from "@/lib/notificationsService";
 export default function DesktopNav() {
   const t = useTranslations();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedCity, setSelectedCity] = useState("Bakı");
+  const [selectedCity] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -116,7 +116,7 @@ export default function DesktopNav() {
           />
           <span className="text-sm">{t("city")}:</span>
           <button className="flex items-center gap-1 font-medium ">
-            <span className="text-sm">{selectedCity}</span>
+            <span className="text-sm">{selectedCity ?? t("default_city")}</span>
             <ChevronDown size={16} />
           </button>
         </div>

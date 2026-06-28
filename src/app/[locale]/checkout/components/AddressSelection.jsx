@@ -38,7 +38,7 @@ export default function AddressSelection({
   onAddressSelect,
   className = "",
 }) {
-  const t = useTranslations("");
+  const t = useTranslations();
   const [addresses, setAddresses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -229,11 +229,11 @@ export default function AddressSelection({
         closeModal();
       } else {
         console.error("Address save error:", result.error);
-        alert(result.error || "Failed to save address");
+        alert(result.error || t("address_save_failed"));
       }
     } catch (error) {
       console.error("Address save error:", error);
-      alert("An error occurred while saving the address");
+      alert(t("address_save_error"));
     }
   };
 
@@ -249,11 +249,11 @@ export default function AddressSelection({
         }
       } else {
         console.error("Delete address error:", result.error);
-        alert(result.error || "Failed to delete address");
+        alert(result.error || t("address_delete_failed"));
       }
     } catch (error) {
       console.error("Delete address error:", error);
-      alert("An error occurred while deleting the address");
+      alert(t("address_delete_error"));
     }
   };
 
@@ -340,7 +340,7 @@ export default function AddressSelection({
                   <div className="pr-24">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="font-semibold text-lg">
-                        {address.address_type?.title || "Address"}
+                        {address.address_type?.title || t("address")}
                       </h3>
                       {address.is_default && (
                         <span className="bg-[#3696E73D] text-[#00569C] text-xs px-2 py-1 rounded-full">
@@ -574,7 +574,7 @@ export default function AddressSelection({
                       render={({ field }) => (
                         <Input
                           {...field}
-                          placeholder="Street address"
+                          placeholder={t("street_address")}
                           className={`h-12 lg:h-14 text-base ${
                             errors.address_line_1 ? "border-red-500" : ""
                           }`}
@@ -649,7 +649,7 @@ export default function AddressSelection({
                           +994
                         </span>
                         <input
-                          placeholder="xx xxxx xx xx"
+                          placeholder={t("phone_placeholder")}
                           maxLength={9}
                           className="flex-1 px-3 text-base outline-none bg-white"
                           onChange={(e) => {
@@ -741,7 +741,7 @@ export default function AddressSelection({
                   <div className="bg-gray-50 rounded-lg p-4 border">
                     <div className="text-sm">
                       <div className="font-medium text-gray-900 mb-1">
-                        {deletingAddress.address_type?.title || "Address"}
+                        {deletingAddress.address_type?.title || t("address")}
                       </div>
                       <div className="text-gray-600">
                         {deletingAddress.city?.title && (

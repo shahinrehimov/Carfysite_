@@ -41,7 +41,7 @@ const ProductCard = ({
     product.hover_image ||
     itemData.hover_image ||
     "/images/product-placeholder.png";
-  const title = product.title || itemData.title || "Product";
+  const title = product.title || itemData.title || t("product");
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat("az-AZ", {

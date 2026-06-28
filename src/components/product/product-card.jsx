@@ -10,8 +10,10 @@ import { basketService } from "@/lib/basketService";
 import { wishlistService } from "@/lib/wishlistService";
 import { setBasketData, setLoading, setError } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
+import { useTranslations } from "next-intl";
 
 export default function ProductCard({ product }) {
+  const t = useTranslations();
   const [isLiked, setIsLiked] = useState(product.in_wishlist || false);
   const [inBasket, setInBasket] = useState(product.in_basket || false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -21,7 +23,7 @@ export default function ProductCard({ product }) {
   // Extract data from API structure
   const productData = product.product || product;
   const imageUrl = productData.hover_image || "/images/product-placeholder.png";
-  const title = product.title || productData.title || "Product";
+  const title = product.title || productData.title || t("product");
   const slug = product.slug || productData.slug;
   const price = product.price_final || product.price || 0;
   const oldPrice = product.has_discount ? product.price : price;
@@ -41,24 +43,24 @@ export default function ProductCard({ product }) {
         await wishlistService.remove(product.uuid);
         setIsLiked(false);
         toast({
-          title: "Removed from wishlist",
-          description: "Product removed from your wishlist",
+          title: t("wishlist_product_removed"),
+          description: t("wishlist_product_removed_description"),
           variant: "info",
         });
       } else {
         await wishlistService.add(product.uuid);
         setIsLiked(true);
         toast({
-          title: "Added to wishlist",
-          description: "Product added to your wishlist",
+          title: t("wishlist_product_added"),
+          description: t("wishlist_product_added_description"),
           variant: "success",
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
+        title: t("error"),
         description:
-          error?.response?.data?.message || "Failed to update wishlist",
+          error?.response?.data?.message || t("wishlist_update_failed"),
         variant: "error",
       });
     }
@@ -84,15 +86,15 @@ export default function ProductCard({ product }) {
       setInBasket(true);
 
       toast({
-        title: "Added to cart",
-        description: "Product successfully added to your cart",
+        title: t("product_added_to_cart"),
+        description: t("product_added_to_cart_description"),
         variant: "success",
       });
     } catch (error) {
       toast({
-        title: "Cannot add to cart",
+        title: t("failed_to_add_to_cart"),
         description:
-          error?.response?.data?.message || "Failed to add product to cart",
+          error?.response?.data?.message || t("failed_to_add_to_cart_description"),
         variant: "error",
       });
       dispatch(setError(error.message));
@@ -175,7 +177,7 @@ export default function ProductCard({ product }) {
           ))}
         </div>
         <span className="text-[11px] lg:text-[13px] text-gray-600">
-          (0 reytinq)
+          ({t("zero_ratings")})
         </span>
       </div>
 
@@ -195,10 +197,10 @@ export default function ProductCard({ product }) {
         >
           <ShoppingCart className="w-4 h-4" />
           {isAddingToCart
-            ? "Əlavə olunur..."
+            ? t("adding")
             : inBasket
-              ? "Səbətdə"
-              : "Səbətə əlavə et"}
+              ? t("in_cart")
+              : t("add_to_cart")}
         </Button>
       </div>
     </div>

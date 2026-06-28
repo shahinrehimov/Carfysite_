@@ -187,7 +187,7 @@ export default function NotificationsPage() {
                     ) : (
                       <CheckCheck className="w-4 h-4" />
                     )}
-                    {t("mark_all_read") || "Hamısını oxu"}
+                    {t("mark_all_read")}
                   </button>
                 )}
                 <button
@@ -200,7 +200,7 @@ export default function NotificationsPage() {
                   ) : (
                     <Trash2 className="w-4 h-4" />
                   )}
-                  {t("delete_all") || "Hamısını sil"}
+                  {t("delete_all")}
                 </button>
               </div>
             )}
@@ -213,7 +213,7 @@ export default function NotificationsPage() {
             <div className="flex flex-col items-center justify-center py-20 gap-4 text-gray-400">
               <BellOff className="w-14 h-14 text-gray-300" />
               <p className="text-lg font-medium">
-                {t("no_notifications") || "Bildiriş yoxdur"}
+                {t("no_notifications")}
               </p>
             </div>
           ) : (
@@ -244,7 +244,7 @@ export default function NotificationsPage() {
                     {t("loading")}
                   </>
                 ) : (
-                  t("load_more") || "Daha çox göstər"
+                  t("load_more")
                 )}
               </button>
             </div>
@@ -323,7 +323,7 @@ function NotificationItem({ notification, actionLoading, onDelete, onClick }) {
         onClick={(e) => onDelete(e, notification.id)}
         disabled={actionLoading}
         className="shrink-0 p-1.5 rounded-md text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-30 mt-0.5"
-        title="Sil"
+        title={t("delete")}
       >
         {actionLoading ? (
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -417,7 +417,7 @@ function NotificationModal({ notification, onClose, onNavigate, t }) {
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#3696E7] text-white text-sm font-medium rounded-xl hover:bg-blue-600 transition-colors"
             >
               <ExternalLink className="w-4 h-4" />
-              {t("view_details") || "Ətraflı bax"}
+              {t("view_details")}
             </button>
           )}
         </div>

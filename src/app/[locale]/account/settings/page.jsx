@@ -53,7 +53,7 @@ function SessionCard({ session, onLogout, isLoggingOut }) {
         disabled={isLoggingOut}
         className="shrink-0 text-blue-500 border-blue-200 hover:bg-blue-50 hover:text-blue-600 rounded-full px-4"
       >
-        {isLoggingOut ? t("loading") || "..." : t("logout") || "Çıxış et"}
+        {isLoggingOut ? t("loading") : t("logout")}
       </Button>
     </div>
   );
@@ -106,10 +106,10 @@ export default function SettingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-gray-900">
-            {t("active_sessions") || "Aktiv Seanslar"}
+            {t("active_sessions")}
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {t("current_device_description") || "Hal hazırda daxil olduğunuz cihaz"}
+            {t("current_device_description")}
           </p>
         </div>
         <Button
@@ -118,7 +118,7 @@ export default function SettingsPage() {
           onClick={() => router.back()}
           className="rounded-full px-4"
         >
-          {t("back") || "Geriyə"}
+          {t("back")}
         </Button>
       </div>
 
@@ -137,7 +137,7 @@ export default function SettingsPage() {
       {otherSessions.length > 0 && (
         <div className="flex flex-col gap-3">
           <h2 className="text-sm font-medium text-gray-700">
-            {t("other_devices") || "Digər cihazlar"}
+            {t("other_devices")}
           </h2>
           <div className="flex flex-col gap-3">
             {otherSessions.map((session) => (
@@ -154,7 +154,7 @@ export default function SettingsPage() {
 
       {otherSessions.length === 0 && !loading && (
         <p className="text-sm text-gray-400">
-          {t("no_other_sessions") || "Digər aktiv seans yoxdur."}
+          {t("no_other_sessions")}
         </p>
       )}
     </div>

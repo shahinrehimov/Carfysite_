@@ -22,11 +22,10 @@ export function ResetPasswordStep({ onSubmit, loading, error, email }) {
   return (
     <div>
       <h2 className="text-3xl font-bold text-center mb-4">
-        {t("reset_password") || "Yeni şifrə"}
+        {t("reset_password")}
       </h2>
       <p className="text-center text-gray-600 text-sm mb-8">
-        {t("reset_password_description") ||
-          "Hesabınız üçün yeni şifrə təyin edin."}
+        {t("reset_password_description")}
         {email && (
           <>
             <br />
@@ -95,12 +94,12 @@ export function ResetPasswordStep({ onSubmit, loading, error, email }) {
           size="lg"
           className="w-full"
         >
-          {loading ? t("saving") || t("processing") : t("proceed")}
+          {loading ? t("saving") : t("proceed")}
         </Button>
 
         <p className="text-center text-gray-600 text-sm">
           <Link href="/auth/login" className="text-blue-600 font-semibold">
-            {t("back_to_login") || t("login")}
+            {t("back_to_login")}
           </Link>
         </p>
       </form>

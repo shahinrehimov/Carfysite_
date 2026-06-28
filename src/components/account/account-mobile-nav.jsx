@@ -173,7 +173,7 @@ export default function AccountMobileNav() {
                   >
                     <span className="text-sm font-medium">
                       {isLoggingOut
-                        ? t("logging_out") || "Logging out..."
+                        ? t("logging_out")
                         : t("logout")}
                     </span>
                   </button>

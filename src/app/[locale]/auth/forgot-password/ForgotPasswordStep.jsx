@@ -21,8 +21,7 @@ export function ForgotPasswordStep({ onSubmit, loading, error }) {
         {t("forgot_password")}
       </h2>
       <p className="text-center text-gray-600 text-sm mb-8">
-        {t("forgot_password_description") ||
-          "Elektron poçt ünvanınızı daxil edin, şifrə bərpa linki göndərək."}
+        {t("forgot_password_description")}
       </p>
 
       {error && (
@@ -58,7 +57,7 @@ export function ForgotPasswordStep({ onSubmit, loading, error }) {
 
         <p className="text-center text-gray-600 text-sm">
           <Link href="/auth/login" className="text-blue-600 font-semibold">
-            {t("back_to_login") || t("login")}
+            {t("back_to_login")}
           </Link>
         </p>
       </form>

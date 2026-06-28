@@ -219,7 +219,7 @@ export default function LoginPage() {
                 : "text-[#4A7FBF] rounded-tl-3xl rounded-tr-[80px]"
             }`}
           >
-            Nömrə ilə
+            {t("login_with_phone")}
           </button>
 
           {/* Email Tab */}
@@ -231,7 +231,7 @@ export default function LoginPage() {
                 : "bg-[#E8F1FC] text-[#4A7FBF] rounded-tr-[80px]"
             }`}
           >
-            Elektron poçt ilə
+            {t("login_with_email")}
           </button>
         </div>
 

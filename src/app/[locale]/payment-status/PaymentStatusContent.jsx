@@ -10,7 +10,7 @@ import { Link } from "@/i18n/routing";
 
 export default function PaymentStatusContent() {
   const searchParams = useSearchParams();
-  const t = useTranslations("");
+  const t = useTranslations();
 
   const [loading, setLoading] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState(null);
@@ -46,7 +46,9 @@ export default function PaymentStatusContent() {
         }
       } catch (err) {
         if (err.response?.status === 400) {
-          setError(err.response.data.message || t("payment_invalid_information"));
+          setError(
+            err.response.data.message || t("payment_invalid_information")
+          );
         } else {
           setError(t("payment_status_check_failed"));
         }
@@ -142,9 +144,7 @@ export default function PaymentStatusContent() {
                 className="w-full rounded-full font-semibold"
                 asChild
               >
-                <Link href="/account/orders">
-                  {t("payment_view_orders")}
-                </Link>
+                <Link href="/account/orders">{t("payment_view_orders")}</Link>
               </Button>
               <Button
                 variant="outline"
@@ -152,9 +152,7 @@ export default function PaymentStatusContent() {
                 className="w-full rounded-full font-semibold"
                 asChild
               >
-                <Link href="/">
-                  {t("payment_continue_shopping")}
-                </Link>
+                <Link href="/">{t("payment_continue_shopping")}</Link>
               </Button>
             </div>
           </div>

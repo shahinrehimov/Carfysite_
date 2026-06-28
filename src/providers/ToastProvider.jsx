@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useCallback, useState } from "react";
 import { Toast, ToastContainer } from "@/components/ui/toast";
+import { useTranslations } from "next-intl";
 
 const ToastContext = createContext(undefined);
 
@@ -78,34 +79,35 @@ export function useToast() {
   }
 
   const { addToast, removeToast, removeAllToasts } = context;
+  const t = useTranslations();
 
   return {
     toast: addToast,
     success: (message, options = {}) => 
       addToast({ 
         variant: "success", 
-        title: options.title || "Success",
+        title: options.title || t("success"),
         description: message,
         ...options 
       }),
     error: (message, options = {}) => 
       addToast({ 
         variant: "error", 
-        title: options.title || "Error",
+        title: options.title || t("error"),
         description: message,
         ...options 
       }),
     warning: (message, options = {}) => 
       addToast({ 
         variant: "warning", 
-        title: options.title || "Warning",
+        title: options.title || t("warning"),
         description: message,
         ...options 
       }),
     info: (message, options = {}) => 
       addToast({ 
         variant: "info", 
-        title: options.title || "Info",
+        title: options.title || t("info"),
         description: message,
         ...options 
       }),

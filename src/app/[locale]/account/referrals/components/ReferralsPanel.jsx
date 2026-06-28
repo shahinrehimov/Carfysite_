@@ -40,19 +40,19 @@ const formatDate = (isoString) => {
 const TIER_STYLES = {
   bronze: {
     badge: "text-amber-700 bg-amber-50 border-amber-300",
-    label: "Bronze",
+    labelKey: "tier_bronze",
   },
   silver: {
     badge: "text-gray-600 bg-gray-100 border-gray-300",
-    label: "Silver",
+    labelKey: "tier_silver",
   },
   gold: {
     badge: "text-yellow-700 bg-yellow-50 border-yellow-400",
-    label: "Gold",
+    labelKey: "tier_gold",
   },
   platinum: {
     badge: "text-purple-700 bg-purple-50 border-purple-300",
-    label: "Platinum",
+    labelKey: "tier_platinum",
   },
 };
 
@@ -167,7 +167,7 @@ export default function ReferralsPanel() {
       setNewCode("");
     } catch (err) {
       setCodeError(
-        err.response?.data?.message || t("error_occurred") || "Xəta baş verdi"
+        err.response?.data?.message || t("error_occurred")
       );
     } finally {
       setSavingCode(false);
@@ -190,7 +190,7 @@ export default function ReferralsPanel() {
       fetchAll();
     } catch (err) {
       setWithdrawError(
-        err.response?.data?.message || t("error_occurred") || "Xəta baş verdi"
+        err.response?.data?.message || t("error_occurred")
       );
     } finally {
       setSubmittingWithdrawal(false);
@@ -211,7 +211,7 @@ export default function ReferralsPanel() {
     <div className="flex flex-col gap-6 py-6">
       {/* Page title */}
       <h1 className="text-2xl font-semibold text-gray-900">
-        {t("referrals_bonuses") || "Referallar və bonuslar"}
+        {t("referrals_bonuses")}
       </h1>
 
       {/* Referral Code Card */}
@@ -226,11 +226,11 @@ export default function ReferralsPanel() {
                   className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full border ${tierStyle.badge}`}
                 >
                   <Award className="w-3.5 h-3.5" />
-                  {tierStyle.label} · {referralData.rate}
+                  {t(tierStyle.labelKey)} · {referralData.rate}
                 </span>
                 {!referralData.is_active && (
                   <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600 border border-red-300">
-                    {t("inactive") || "Qeyri-aktiv"}
+                    {t("inactive")}
                   </span>
                 )}
               </div>
@@ -238,7 +238,7 @@ export default function ReferralsPanel() {
               {/* Referral code row */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm text-gray-500 shrink-0">
-                  {t("your_referral_code") || "Referral kodunuz"}:
+                  {t("your_referral_code")}:
                 </span>
                 {editingCode ? (
                   <div className="flex items-center gap-2 flex-wrap">
@@ -262,7 +262,7 @@ export default function ReferralsPanel() {
                       {savingCode ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
-                        t("save") || "Saxla"
+                        t("save")
                       )}
                     </button>
                     <button
@@ -289,7 +289,7 @@ export default function ReferralsPanel() {
                     <button
                       onClick={() => copyToClipboard(referralData.code, "code")}
                       className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-                      title={t("copy") || "Kopyala"}
+                      title={t("copy")}
                     >
                       {copiedCode ? (
                         <Check className="w-4 h-4 text-green-500" />
@@ -303,7 +303,7 @@ export default function ReferralsPanel() {
                         setNewCode(referralData.code);
                       }}
                       className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-                      title={t("change") || "Dəyiş"}
+                      title={t("change")}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
@@ -314,7 +314,7 @@ export default function ReferralsPanel() {
               {/* Referral link row */}
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500 shrink-0">
-                  {t("referral_link") || "Link"}:
+                  {t("referral_link")}:
                 </span>
                 <span className="text-sm text-gray-600 truncate max-w-xs">
                   {referralData.link}
@@ -322,7 +322,7 @@ export default function ReferralsPanel() {
                 <button
                   onClick={() => copyToClipboard(referralData.link, "link")}
                   className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0"
-                  title={t("copy") || "Kopyala"}
+                  title={t("copy")}
                 >
                   {copiedLink ? (
                     <Check className="w-4 h-4 text-green-500" />
@@ -340,7 +340,7 @@ export default function ReferralsPanel() {
                   {referralData.total_referrals}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {t("total_referrals") || "Ümumi"}
+                  {t("total_referrals")}
                 </p>
               </div>
               <div className="text-center">
@@ -348,7 +348,7 @@ export default function ReferralsPanel() {
                   {referralData.active_referrals}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {t("active") || "Aktiv"}
+                  {t("active")}
                 </p>
               </div>
               <div className="text-center">
@@ -356,7 +356,7 @@ export default function ReferralsPanel() {
                   {referralData.pending_referrals}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {t("pending") || "Gözləyir"}
+                  {t("pending")}
                 </p>
               </div>
             </div>
@@ -369,8 +369,7 @@ export default function ReferralsPanel() {
         <div className="bg-red-50 border border-red-200 rounded-xl p-4">
           <p className="text-sm text-red-700">
             ⚠️{" "}
-            {t("referral_inactive_warning") ||
-              "Son 30 gündə aktiv deyilsiniz — yeni earning dayandırılıb. Aktiv qalmaq üçün sifariş verin və ya yeni dəvətlər göndərin."}
+            {t("referral_inactive_warning")}
           </p>
         </div>
       )}
@@ -383,16 +382,14 @@ export default function ReferralsPanel() {
             {perks.free_delivery_remaining > 0 && (
               <span className="text-sm text-blue-800">
                 🚚{" "}
-                {t("free_delivery_remaining") ||
-                  "Pulsuz çatdırılma hüquqlarınız var"}
+                {t("free_delivery_remaining")}
                 : <strong>{perks.free_delivery_remaining}</strong>
               </span>
             )}
             {perks.discount_orders_remaining > 0 && (
               <span className="text-sm text-blue-800">
                 🏷️{" "}
-                {t("discount_orders_remaining") ||
-                  "Endirimli sifariş hüquqları"}
+                {t("discount_orders_remaining")}
                 :{" "}
                 <strong>
                   {perks.discount_orders_remaining} × {perks.discount_rate}
@@ -412,7 +409,7 @@ export default function ReferralsPanel() {
               <div className="flex flex-col items-center justify-center py-16 gap-3 text-gray-400">
                 <Wallet className="w-12 h-12 text-gray-300" />
                 <p className="text-sm font-medium">
-                  {t("no_earnings_yet") || "Hələ earning yoxdur"}
+                  {t("no_earnings_yet")}
                 </p>
               </div>
             ) : (
@@ -430,8 +427,7 @@ export default function ReferralsPanel() {
                     {/* Description + date */}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 leading-snug">
-                        {t("referral_earning_label") ||
-                          "Referral üzrə bonus qazandınız!"}
+                        {t("referral_earning_label")}
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         {formatDate(item.delivered_at || item.credited_at)}
@@ -475,7 +471,7 @@ export default function ReferralsPanel() {
                   ) : (
                     <ChevronDown className="w-4 h-4" />
                   )}
-                  {t("load_more") || "Daha çox göstər"}
+                  {t("load_more")}
                 </button>
               </div>
             )}
@@ -494,7 +490,7 @@ export default function ReferralsPanel() {
             <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-white/10 pointer-events-none" />
             <div className="absolute right-2 bottom-2 w-28 h-28 rounded-full bg-white/10 pointer-events-none" />
             <p className="text-xs font-semibold uppercase tracking-widest text-white/70 mb-3">
-              {t("bonuses") || "BONUSLAR"}
+              {t("bonuses")}
             </p>
             <p className="text-4xl font-bold tracking-tight leading-none">
               {Number(availableBalance).toFixed(2).replace(".", ",")}
@@ -506,12 +502,12 @@ export default function ReferralsPanel() {
           {balance && (
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <p className="text-sm font-semibold text-gray-700 mb-3">
-                {t("balance_details") || "Balans detalları"}
+                {t("balance_details")}
               </p>
               <div className="flex flex-col gap-2 text-sm">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-500">
-                    {t("pending_balance") || "Gözləyir"}
+                    {t("pending_balance")}
                   </span>
                   <span className="font-medium text-amber-600">
                     {formatPrice(balance.pending_balance)}
@@ -519,7 +515,7 @@ export default function ReferralsPanel() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-500">
-                    {t("available_balance") || "Mövcud"}
+                    {t("available_balance")}
                   </span>
                   <span className="font-medium text-green-600">
                     {formatPrice(balance.available_balance)}
@@ -527,7 +523,7 @@ export default function ReferralsPanel() {
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                   <span className="text-gray-500">
-                    {t("lifetime_earned") || "Ümumi qazanc"}
+                    {t("lifetime_earned")}
                   </span>
                   <span className="font-medium">
                     {formatPrice(balance.lifetime_earned)}
@@ -541,11 +537,11 @@ export default function ReferralsPanel() {
                 disabled={balance.available_balance < 50}
                 className="mt-4 w-full py-2.5 text-sm font-medium text-[#3696E7] border border-[#3696E7] rounded-lg hover:bg-[#3696E7] hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {t("withdraw") || "Çıxarış et"}
+                {t("withdraw")}
               </button>
               {balance.available_balance < 50 && (
                 <p className="text-xs text-gray-400 text-center mt-1.5">
-                  {t("minimum_withdrawal_50") || "Minimum 50 ₼ tələb olunur"}
+                  {t("minimum_withdrawal_50")}
                 </p>
               )}
 
@@ -556,7 +552,7 @@ export default function ReferralsPanel() {
                     type="number"
                     value={withdrawAmount}
                     onChange={(e) => setWithdrawAmount(e.target.value)}
-                    placeholder={`${t("amount") || "Məbləğ"} (min. 50 ₼)`}
+                    placeholder={t("withdrawal_amount_placeholder")}
                     className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:border-[#3696E7]"
                     min={50}
                     max={balance.available_balance}
@@ -569,7 +565,7 @@ export default function ReferralsPanel() {
                         e.target.value.replace(/\D/g, "").slice(0, 4)
                       )
                     }
-                    placeholder={t("card_last4") || "Kartın son 4 rəqəmi"}
+                    placeholder={t("card_last4")}
                     className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:border-[#3696E7]"
                     maxLength={4}
                   />
@@ -579,7 +575,7 @@ export default function ReferralsPanel() {
                     onChange={(e) =>
                       setWithdrawCardHolder(e.target.value.toUpperCase())
                     }
-                    placeholder={t("card_holder_name") || "Kart sahibinin adı"}
+                    placeholder={t("card_holder_name")}
                     className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:border-[#3696E7]"
                   />
                   {withdrawError && (
@@ -598,7 +594,7 @@ export default function ReferralsPanel() {
                     {submittingWithdrawal ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      t("send_withdrawal_request") || "Sorğu göndər"
+                      t("send_withdrawal_request")
                     )}
                   </button>
                 </div>

@@ -134,9 +134,9 @@ export default function ProductActions({ data }) {
           />
           <span>
             {isAddingToCart
-              ? "Əlavə olunur..."
+              ? t("adding")
               : inBasket
-                ? "Səbətdə"
+                ? t("in_cart")
                 : t("add_to_cart")}
           </span>
         </button>

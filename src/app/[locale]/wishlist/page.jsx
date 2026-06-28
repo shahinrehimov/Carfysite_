@@ -15,7 +15,7 @@ const getWishlistData = async () => {
 export default async function WishlistPage() {
   const wishlistResponse = await getWishlistData();
   const favoriteProducts = wishlistResponse.data || [];
-  const t = await getTranslations("wishlist");
+  const t = await getTranslations();
 
   return (
     <div className="container mx-auto px-4 py-6 lg:py-10">

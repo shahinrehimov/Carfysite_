@@ -3,12 +3,14 @@ import React, { useMemo, useState } from "react";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useProductFilters } from "@/hooks/useProductFilters";
+import { useTranslations } from "next-intl";
 
 export default function ProductsHeader({
   totalResults,
   searchTerm,
   onFilterOpen,
 }) {
+  const t = useTranslations();
   const [sortOpen, setSortOpen] = useState(false);
   const [selectedSort, setSelectedSort] = useState(null);
   const router = useRouter();
@@ -32,7 +34,7 @@ export default function ProductsHeader({
     return combined;
   }, [filterData]);
 
-  const selectedLabel = selectedSort?.label ?? "Sıralama";
+  const selectedLabel = selectedSort?.label ?? t("sort");
 
   const handleSortSelect = (option) => {
     setSelectedSort(option);
@@ -47,15 +49,11 @@ export default function ProductsHeader({
 
   return (
     <div className="flex items-center justify-end mb-6">
-      {/* <h1 className="text-lg lg:text-xl font-medium text-gray-900">
-        <span className="text-[#00569C]">"{searchTerm}"</span> üzrə {totalResults} nəticə
-      </h1> */}
-
       <button
         onClick={onFilterOpen}
         className="lg:hidden flex items-center gap-2 text-gray-600 text-sm font-medium cursor-pointer"
       >
-        <span>Filter</span>
+        <span>{t("filter")}</span>
         <SlidersHorizontal className="w-5 h-5" />
       </button>
 
@@ -80,7 +78,7 @@ export default function ProductsHeader({
             />
             <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[180px] py-1">
               {sortOptions.length === 0 ? (
-                <p className="px-4 py-2 text-sm text-gray-400">Yüklənir...</p>
+                <p className="px-4 py-2 text-sm text-gray-400">{t("loading")}</p>
               ) : (
                 sortOptions.map((option) => (
                   <button

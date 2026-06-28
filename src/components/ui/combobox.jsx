@@ -4,6 +4,7 @@ import * as React from "react";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import {
   Command,
   CommandEmpty,
@@ -18,20 +19,23 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-// Single-select combobox
 function SingleCombobox({
   options = [],
   value,
   onValueChange,
-  placeholder = "Select...",
-  searchPlaceholder = "Search...",
-  emptyText = "No results found.",
+  placeholder,
+  searchPlaceholder,
+  emptyText,
   className,
   triggerClassName,
   disabled = false,
 }) {
+  const t = useTranslations();
   const [open, setOpen] = React.useState(false);
   const selectedOption = options.find((option) => option.value === value);
+  const resolvedPlaceholder = placeholder ?? t("select");
+  const resolvedSearchPlaceholder = searchPlaceholder ?? t("search");
+  const resolvedEmptyText = emptyText ?? t("no_results_found");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -48,7 +52,7 @@ function SingleCombobox({
           )}
         >
           <span className={cn("text-left truncate", !value && "text-[#00569C80]")}>
-            {selectedOption ? selectedOption.label : placeholder}
+            {selectedOption ? selectedOption.label : resolvedPlaceholder}
           </span>
           {open ? (
             <ChevronUp className="ml-2 h-5 w-5 shrink-0 text-[#3696E7]" />
@@ -59,9 +63,9 @@ function SingleCombobox({
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} className="h-9" />
+          <CommandInput placeholder={resolvedSearchPlaceholder} className="h-9" />
           <CommandList>
-            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandEmpty>{resolvedEmptyText}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
@@ -89,20 +93,24 @@ function SingleCombobox({
   );
 }
 
-// Multi-select combobox
 function MultiCombobox({
   options = [],
   value = [],
   onValueChange,
-  placeholder = "Select...",
-  searchPlaceholder = "Search...",
-  emptyText = "No results found.",
+  placeholder,
+  searchPlaceholder,
+  emptyText,
   className,
   triggerClassName,
   disabled = false,
-  selectedCountLabel = "seçilib",
+  selectedCountLabel,
 }) {
+  const t = useTranslations();
   const [open, setOpen] = React.useState(false);
+  const resolvedPlaceholder = placeholder ?? t("select");
+  const resolvedSearchPlaceholder = searchPlaceholder ?? t("search");
+  const resolvedEmptyText = emptyText ?? t("no_results_found");
+  const resolvedSelectedCountLabel = selectedCountLabel ?? t("selected_count_suffix");
 
   const toggle = (optionValue) => {
     if (value.includes(optionValue)) {
@@ -117,8 +125,8 @@ function MultiCombobox({
     if (value.length === 1) {
       return options.find((o) => o.value === value[0])?.label ?? value[0];
     }
-    return `${value.length} ${selectedCountLabel}`;
-  }, [value, options, selectedCountLabel]);
+    return `${value.length} ${resolvedSelectedCountLabel}`;
+  }, [value, options, resolvedSelectedCountLabel]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -135,7 +143,7 @@ function MultiCombobox({
           )}
         >
           <span className={cn("text-left truncate", !triggerLabel && "text-[#00569C80]")}>
-            {triggerLabel ?? placeholder}
+            {triggerLabel ?? resolvedPlaceholder}
           </span>
           {open ? (
             <ChevronUp className="ml-2 h-5 w-5 shrink-0 text-[#3696E7]" />
@@ -146,9 +154,9 @@ function MultiCombobox({
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} className="h-9" />
+          <CommandInput placeholder={resolvedSearchPlaceholder} className="h-9" />
           <CommandList>
-            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandEmpty>{resolvedEmptyText}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem

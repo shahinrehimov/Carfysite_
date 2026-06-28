@@ -10,7 +10,6 @@
     "build": "rm -rf .next && next build && npm run copy-static-files",
     "start": "next start",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
     "copy-static-files": "cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static"
   },
   "dependencies": {

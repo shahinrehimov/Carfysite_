@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { SkeletonBlock } from "@/components/account/account-loading";
+import { getTranslations } from "next-intl/server";
 
 export function ProductCardSkeleton() {
   return (
@@ -53,9 +54,10 @@ export function ProductGridSkeleton({ count = 8, className }) {
   );
 }
 
-export function ProductsPageLoading() {
+export async function ProductsPageLoading() {
+  const t = await getTranslations();
   return (
-    <div aria-busy="true" aria-label="Yüklənir">
+    <div aria-busy="true" aria-label={t("loading")}>
       <div className="bg-[#F8F8F8]">
         <FilterBarSkeleton />
       </div>
@@ -75,9 +77,10 @@ export function ProductsPageLoading() {
   );
 }
 
-export function ProductDetailLoading() {
+export async function ProductDetailLoading() {
+  const t = await getTranslations();
   return (
-    <div aria-busy="true" aria-label="Yüklənir">
+    <div aria-busy="true" aria-label={t("loading")}>
       <div className="bg-[#F8F8F8]">
         <FilterBarSkeleton />
       </div>
@@ -119,12 +122,13 @@ export function ProductDetailLoading() {
   );
 }
 
-export function CartPageLoading() {
+export async function CartPageLoading() {
+  const t = await getTranslations();
   return (
     <div
       className="container py-6 lg:py-10 animate-pulse"
       aria-busy="true"
-      aria-label="Yüklənir"
+      aria-label={t("loading")}
     >
       <SkeletonBlock className="h-10 w-48 mb-10" />
       <div className="space-y-4">
@@ -147,12 +151,13 @@ export function CartPageLoading() {
   );
 }
 
-export function WishlistPageLoading() {
+export async function WishlistPageLoading() {
+  const t = await getTranslations();
   return (
     <div
       className="container mx-auto px-4 py-6 lg:py-10"
       aria-busy="true"
-      aria-label="Yüklənir"
+      aria-label={t("loading")}
     >
       <SkeletonBlock className="h-10 w-48 mb-6 lg:mb-10 animate-pulse" />
       <ProductGridSkeleton count={4} />
@@ -194,9 +199,10 @@ export function CategoryCardsSkeleton({ count = 12 }) {
   );
 }
 
-export function HomePageLoading() {
+export async function HomePageLoading() {
+  const t = await getTranslations();
   return (
-    <div className="w-full" aria-busy="true" aria-label="Yüklənir">
+    <div className="w-full" aria-busy="true" aria-label={t("loading")}>
       <HomeBannerSkeleton />
       <CategoryCardsSkeleton />
 

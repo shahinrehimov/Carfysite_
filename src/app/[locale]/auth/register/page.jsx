@@ -19,7 +19,7 @@ export default function RegisterPage() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const refCode = searchParams.get("ref") || "";
+  const refCode = searchParams.get("ref");
 
   // Steps: phone, otp, register, success for phone flow
   // Steps: email-check, email-register, email-verify, success for email flow
@@ -245,7 +245,7 @@ export default function RegisterPage() {
                 : "text-[#4A7FBF] rounded-tl-3xl rounded-tr-[80px]"
             }`}
           >
-            Nömrə ilə
+            {t("register_with_phone")}
           </button>
 
           {/* Email Tab */}
@@ -257,7 +257,7 @@ export default function RegisterPage() {
                 : "bg-[#E8F1FC] text-[#4A7FBF] rounded-tr-[80px]"
             }`}
           >
-            Elektron poçt ilə
+            {t("register_with_email")}
           </button>
         </div>
 

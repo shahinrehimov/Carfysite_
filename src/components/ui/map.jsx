@@ -8,7 +8,7 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useTranslations } from "next-intl";
 
 // Fix for default markers in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -93,6 +93,7 @@ export default function Map({
   height = "300px",
   className = "",
 }) {
+  const t = useTranslations();
   const [isClient, setIsClient] = useState(false);
   const [position, setPosition] = useState([
     parseFloat(latitude),
@@ -117,7 +118,7 @@ export default function Map({
         className={`bg-gray-100 rounded-md flex items-center justify-center ${className}`}
         style={{ height }}
       >
-        <div className="text-gray-500">Loading map...</div>
+        <div className="text-gray-500">{t("loading_map")}</div>
       </div>
     );
   }

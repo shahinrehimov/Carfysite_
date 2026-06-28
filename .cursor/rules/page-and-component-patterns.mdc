@@ -12,7 +12,7 @@ alwaysApply: false
 // SERVER KOMPONENTİ — default (async, serverApi işlədir)
 export default async function ProductsPage({ params, searchParams }) {
   const { locale } = await params;
-  const t = await getTranslations("products");
+  const t = await getTranslations();
   const res = await serverApi.get(`/products/load`);
   return <ProductsList data={res.data} />;
 }
@@ -43,12 +43,12 @@ export async function generateMetadata({ params }) {
 ## Lazımlı Import-lar
 
 ```jsx
-import { useTranslations } from "next-intl";           // Client komponent
-import { getTranslations } from "next-intl/server";    // Server komponent
+import { useTranslations } from "next-intl"; // Client komponent
+import { getTranslations } from "next-intl/server"; // Server komponent
 import { useRouter, usePathname } from "next/navigation"; // Navigasiya
-import { Link } from "@/i18n/routing";                   // Locale-aware link (next-intl)
-import serverApi from "@/lib/serverApi";                // Server-side API
-import { api } from "@/lib/axios/api";                  // Client-side API
+import { Link } from "@/i18n/routing"; // Locale-aware link (next-intl)
+import serverApi from "@/lib/serverApi"; // Server-side API
+import { api } from "@/lib/axios/api"; // Client-side API
 ```
 
 ## Account Səhifəsi Şablonu
@@ -60,7 +60,7 @@ import { api } from "@/lib/axios/api";
 import { useTranslations } from "next-intl";
 
 export default function AccountPage() {
-  const t = useTranslations("account");
+  const t = useTranslations();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (data) => {
@@ -79,6 +79,7 @@ export default function AccountPage() {
 ```
 
 ## Qaydalar
+
 - Forma validasiyası Yup (`yup`) ilə + React Hook Form
 - Auth tələb edən route-lar `src/middleware.js` ilə qorunur
 - Image-lər `next/image` — `priority` prop ilk ekran şəkilləri üçün

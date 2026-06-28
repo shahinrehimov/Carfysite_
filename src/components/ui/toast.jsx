@@ -3,6 +3,7 @@
 import * as React from "react";
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 const toastVariants = {
   success: {
@@ -36,6 +37,7 @@ const Toast = React.forwardRef(({
   action,
   ...props 
 }, ref) => {
+  const t = useTranslations();
   const variantConfig = toastVariants[variant];
   const Icon = variantConfig.icon;
 
@@ -72,7 +74,7 @@ const Toast = React.forwardRef(({
         )}
       >
         <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
+        <span className="sr-only">{t("close")}</span>
       </button>
     </div>
   );

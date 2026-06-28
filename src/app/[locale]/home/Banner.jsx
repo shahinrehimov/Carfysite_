@@ -3,10 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
 
 export default async function Banner({ services }) {
-  const t = await getTranslations("home");
+  const t = await getTranslations();
 
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get("access_token")?.value || cookieStore.get("auth_token")?.value;
+  const accessToken =
+    cookieStore.get("access_token")?.value ||
+    cookieStore.get("auth_token")?.value;
   const userDataRaw = cookieStore.get("user_data")?.value;
 
   let user = null;

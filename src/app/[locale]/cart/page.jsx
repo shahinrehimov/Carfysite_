@@ -5,6 +5,7 @@ import serverApi from "@/lib/serverApi";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
+import { getTranslations } from "next-intl/server";
 
 const getBasketData = async () => {
   try {
@@ -17,6 +18,7 @@ const getBasketData = async () => {
 };
 
 export default async function CartPage() {
+  const t = await getTranslations();
   const basketData = await getBasketData();
 
   if (!basketData || !basketData.data || basketData.data.length === 0) {
@@ -31,13 +33,13 @@ export default async function CartPage() {
             className="mx-auto mb-6 opacity-30"
           />
           <h2 className="text-2xl font-semibold text-[#1A1A1A] mb-4">
-            Səbətiniz boşdur
+            {t("cart-empty")}
           </h2>
           <p className="text-gray-500 mb-8">
-            Məhsulları səbətə əlavə etməyə başlayın
+            {t("cart_empty_description")}
           </p>
           <Button asChild variant="primary" size="lg">
-            <Link href="/">Alış-verişə davam et</Link>
+            <Link href="/">{t("continue_shopping")}</Link>
           </Button>
         </div>
       </div>

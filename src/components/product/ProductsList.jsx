@@ -80,7 +80,7 @@ export default function ProductsList({ initialProducts, initialMeta, filterQuery
             className="inline-flex items-center justify-center gap-2 min-w-[180px] px-8 py-3 bg-[#3696E7] text-white rounded-full hover:bg-[#2a7bc9] transition-interactive disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {loading ? "Yüklənir..." : "Daha çox göstər"}
+            {loading ? t("loading") : t("load_more")}
           </button>
         </div>
       )}

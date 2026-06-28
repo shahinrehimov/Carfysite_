@@ -4,7 +4,7 @@ import { FileText } from "lucide-react";
 import serverApi from "@/lib/serverApi";
 
 const resolveUrl = (item) =>
-  typeof item === "string" ? item : item?.url ?? item?.path ?? null;
+  typeof item === "string" ? item : (item?.url ?? item?.path ?? null);
 
 const getPageData = async (slug) => {
   try {
@@ -37,10 +37,7 @@ export async function generateMetadata({ params }) {
 
 export default async function StaticPage({ params }) {
   const { slug } = await params;
-  const [page, t] = await Promise.all([
-    getPageData(slug),
-    getTranslations("pages"),
-  ]);
+  const [page, t] = await Promise.all([getPageData(slug), getTranslations()]);
 
   if (!page) {
     return (

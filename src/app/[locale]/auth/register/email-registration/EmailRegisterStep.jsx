@@ -149,7 +149,7 @@ export function EmailRegisterStep({ onSubmit, loading, error, defaultRefCode = "
         <div>
           <input
             type="text"
-            placeholder={t("referral_code_optional") || "Referral kodu (isteğe bağlı)"}
+            placeholder={t("referral_code_optional")}
             {...registerForm.register("ref_code")}
             onChange={(e) =>
               registerForm.setValue(
