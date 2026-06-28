@@ -57,6 +57,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
   const [maxYear, setMaxYear] = useState(() => firstParam(initialFilters, "max_year"));
   const [minPrice, setMinPrice] = useState(() => firstParam(initialFilters, "min_price"));
   const [maxPrice, setMaxPrice] = useState(() => firstParam(initialFilters, "max_price"));
+  const [search, setSearch] = useState(() => firstParam(initialFilters, "search"));
   const [currency, setCurrency] = useState("AZN");
   const [isCarSearchOpen, setIsCarSearchOpen] = useState(false);
   const [userCars, setUserCars] = useState([]);
@@ -75,6 +76,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
   const pMaxYear = firstParam(initialFilters, "max_year");
   const pMinPrice = firstParam(initialFilters, "min_price");
   const pMaxPrice = firstParam(initialFilters, "max_price");
+  const pSearch = firstParam(initialFilters, "search");
   const pModels  = arrayParam(initialFilters, "models[]").join(",");
   const pUserCarId = firstParam(initialFilters, "user_car_id");
 
@@ -88,9 +90,10 @@ export default function MainFilter({ type = "default", initialFilters }) {
     setMaxYear(pMaxYear);
     setMinPrice(pMinPrice);
     setMaxPrice(pMaxPrice);
+    setSearch(pSearch);
     setSelectedUserCarId(pUserCarId);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pMarka, pModels, pCity, pColor, pStatus, pMinYear, pMaxYear, pMinPrice, pMaxPrice, pUserCarId]);
+  }, [pMarka, pModels, pCity, pColor, pStatus, pMinYear, pMaxYear, pMinPrice, pMaxPrice, pSearch, pUserCarId]);
 
   const brands = filterData?.brands ?? [];
   const yearRange = filterData?.yearRange ?? null;
@@ -176,6 +179,8 @@ export default function MainFilter({ type = "default", initialFilters }) {
 
   const buildFilterParams = () => {
     const params = new URLSearchParams();
+    const trimmedSearch = search.trim();
+    if (trimmedSearch) params.set("search", trimmedSearch.slice(0, 500));
     if (marka) params.append("brands[]", marka);
     for (const m of model) params.append("models[]", m);
     if (minYear) params.set("min_year", minYear);
@@ -193,6 +198,10 @@ export default function MainFilter({ type = "default", initialFilters }) {
     const params = buildFilterParams();
     const qs = params.toString();
     router.push(qs ? `/products?${qs}` : "/products");
+  };
+
+  const handleFind = () => {
+    handleSubmit();
   };
 
   const handleCategoryClick = (category) => {
@@ -221,6 +230,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
     setMaxYear("");
     setMinPrice("");
     setMaxPrice("");
+    setSearch("");
     setSelectedUserCarId("");
   };
 
@@ -286,8 +296,13 @@ export default function MainFilter({ type = "default", initialFilters }) {
                 />
                 <input
                   type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleFind();
+                  }}
                   placeholder={t("search")}
-                  className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C80] text-sm lg:text-base font-light max-w-fit"
+                  className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C80] text-sm lg:text-base font-light min-w-0"
                 />
               </div>
               <button
@@ -302,10 +317,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
                 />
               </button>
               <button
+                type="button"
                 className="bg-[#3696E7] text-white text-sm lg:text-base font-regular rounded-tl-[8px] rounded-bl-[8px] rounded-tr-[40px] rounded-br-[40px] h-[48px] lg:h-[60px] w-[120px] flex items-center justify-center cursor-pointer"
-                onClick={() => {
-                  router.push("/products");
-                }}
+                onClick={handleFind}
               >
                 {t("find")}
               </button>
