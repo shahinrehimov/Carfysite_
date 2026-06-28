@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import ProductCard from "./product-card";
 import { api } from "@/lib/axios";
-import { SearchX } from "lucide-react";
+import { SearchX, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export default function ProductsList({ initialProducts, initialMeta, filterQueryString = "" }) {
@@ -10,15 +10,18 @@ export default function ProductsList({ initialProducts, initialMeta, filterQuery
   const [products, setProducts] = useState(initialProducts);
   const [meta, setMeta] = useState(initialMeta);
   const [loading, setLoading] = useState(false);
+  const [animateFromIndex, setAnimateFromIndex] = useState(null);
 
   useEffect(() => {
     setProducts(initialProducts);
     setMeta(initialMeta);
+    setAnimateFromIndex(null);
   }, [initialProducts, initialMeta]);
 
   const handleLoadMore = async () => {
     if (loading || meta.current_page >= meta.last_page) return;
 
+    const startIndex = products.length;
     setLoading(true);
     try {
       const nextPage = meta.current_page + 1;
@@ -26,9 +29,10 @@ export default function ProductsList({ initialProducts, initialMeta, filterQuery
       params.set("page", String(nextPage));
       params.set("limit", String(meta.per_page));
       const response = await api.get(`/products/load?${params.toString()}`);
-      
+
       setProducts([...products, ...response.data.data]);
       setMeta(response.data.meta);
+      setAnimateFromIndex(startIndex);
     } catch (error) {
       console.error("Error loading more products:", error);
     } finally {
@@ -53,8 +57,17 @@ export default function ProductsList({ initialProducts, initialMeta, filterQuery
     <>
       {/* Products Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        {products.map((item) => (
-          <ProductCard key={item.uuid} product={item} />
+        {products.map((item, index) => (
+          <div
+            key={item.uuid}
+            className={
+              animateFromIndex !== null && index >= animateFromIndex
+                ? "animate-fade-in"
+                : undefined
+            }
+          >
+            <ProductCard product={item} />
+          </div>
         ))}
       </div>
 
@@ -64,8 +77,9 @@ export default function ProductsList({ initialProducts, initialMeta, filterQuery
           <button
             onClick={handleLoadMore}
             disabled={loading}
-            className="px-8 py-3 bg-[#3696E7] text-white rounded-full hover:bg-[#2a7bc9] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="inline-flex items-center justify-center gap-2 min-w-[180px] px-8 py-3 bg-[#3696E7] text-white rounded-full hover:bg-[#2a7bc9] transition-interactive disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? "Yüklənir..." : "Daha çox göstər"}
           </button>
         </div>

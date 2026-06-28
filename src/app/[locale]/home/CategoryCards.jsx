@@ -10,7 +10,7 @@ function CategoryCards({ categories = [] }) {
           <Link
             key={category.id}
             href={`/products?categories[]=${category.id}`}
-            className="group relative flex flex-col items-center justify-center bg-white rounded-xl md:rounded-2xl p-2 md:p-4 lg:p-6 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-blue/30 hover:-translate-y-1"
+            className="group relative flex flex-col items-center justify-center bg-white rounded-xl md:rounded-2xl p-2 md:p-4 lg:p-6 shadow-sm card-hover border border-gray-100 hover:border-blue/30 hover:-translate-y-0.5"
           >
             <div className="relative w-full aspect-square mb-1.5 md:mb-3 lg:mb-4 flex items-center justify-center">
               <Image
@@ -18,7 +18,7 @@ function CategoryCards({ categories = [] }) {
                 alt={category.title}
                 width={100}
                 height={100}
-                className="w-full max-w-[50px] lg:max-w-[100px] h-full object-contain transition-transform duration-300 group-hover:scale-110"
+                className="w-full max-w-[50px] lg:max-w-[100px] h-full object-contain transition-transform duration-300 ease-out group-hover:scale-105"
               />
             </div>
 

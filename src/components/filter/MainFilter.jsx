@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronRight, X, Car } from "lucide-react";
+import { ChevronRight, ChevronUp, X, Car } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter, Link } from "@/i18n/routing";
 import { useProductFilters } from "@/hooks/useProductFilters";
@@ -132,10 +132,10 @@ export default function MainFilter({ type = "default", initialFilters }) {
   const statusOptions = useMemo(() => {
     const statuses = filterData?.statuses ?? [];
     return [
-      { value: "", label: "Hamısı" },
+      { value: "", label: t("all") },
       ...statuses.map((s) => ({ value: String(s.id), label: s.title })),
     ];
-  }, [filterData]);
+  }, [filterData, t]);
 
   const currencyOptions = [
     { value: "AZN", label: "AZN" },
@@ -250,6 +250,17 @@ export default function MainFilter({ type = "default", initialFilters }) {
     router.push(`/products?${params.toString()}`);
   };
 
+  const isBanner = type === "banner";
+  const actionBtnClass = cn(
+    "text-sm lg:text-base font-light flex items-center justify-center gap-2 cursor-pointer",
+    isBanner ? "text-white" : "text-[#00569C]"
+  );
+  const minYearPlaceholder = yearRange
+    ? `${t("year")}, ${yearRange.min}`
+    : t("year_min");
+  const maxYearPlaceholder = yearRange ? String(yearRange.max) : t("max");
+  const modelPlaceholder = marka ? t("model") : t("first_select_brand");
+
   return (
     <>
       <div
@@ -360,9 +371,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
                 options={markaOptions}
                 value={marka}
                 onValueChange={handleMarkaChange}
-                placeholder="Marka"
-                searchPlaceholder="Marka axtar..."
-                emptyText="Nəticə tapılmadı"
+                placeholder={t("brand")}
+                searchPlaceholder={t("search_brand")}
+                emptyText={t("no_results_found")}
                 triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-sm lg:text-base font-light border-none w-full"
               />
 
@@ -371,25 +382,25 @@ export default function MainFilter({ type = "default", initialFilters }) {
                 options={modelOptions}
                 value={model}
                 onValueChange={setModel}
-                placeholder={marka ? "Model" : "Əvvəlcə marka seçin"}
-                searchPlaceholder="Model axtar..."
-                emptyText="Nəticə tapılmadı"
+                placeholder={modelPlaceholder}
+                searchPlaceholder={t("search_model")}
+                emptyText={t("no_results_found")}
                 disabled={!marka}
-                selectedCountLabel="model seçilib"
+                selectedCountLabel={t("models_selected")}
                 triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-sm lg:text-base font-light border-none w-full"
               />
 
               <div className=" grid grid-cols-2 bg-white rounded-full h-[48px] lg:h-[60px]  items-center  gap-2">
                 <input
                   type="number"
-                  placeholder={yearRange ? `İl, ${yearRange.min}` : "İl, min."}
+                  placeholder={minYearPlaceholder}
                   value={minYear}
                   onChange={(e) => setMinYear(e.target.value)}
                   className="border-r border-gray-200 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-sm lg:text-base font-light px-4"
                 />
                 <input
                   type="number"
-                  placeholder={yearRange ? `${yearRange.max}` : "maks."}
+                  placeholder={maxYearPlaceholder}
                   value={maxYear}
                   onChange={(e) => setMaxYear(e.target.value)}
                   className=" bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-sm lg:text-base font-light px-4"
@@ -401,9 +412,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
                   options={cityOptions}
                   value={city}
                   onValueChange={setCity}
-                  placeholder="Şəhər"
-                  searchPlaceholder="Şəhər axtar..."
-                  emptyText="Nəticə tapılmadı"
+                  placeholder={t("city")}
+                  searchPlaceholder={t("search_city")}
+                  emptyText={t("no_results_found")}
                   triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-sm lg:text-base font-light border-none w-full"
                 />
 
@@ -411,9 +422,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
                   options={colorOptions}
                   value={color}
                   onValueChange={setColor}
-                  placeholder="Rəng"
-                  searchPlaceholder="Rəng axtar..."
-                  emptyText="Nəticə tapılmadı"
+                  placeholder={t("color")}
+                  searchPlaceholder={t("search_color")}
+                  emptyText={t("no_results_found")}
                   triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-sm lg:text-base font-light border-none w-full"
                 />
               </div>
@@ -425,8 +436,8 @@ export default function MainFilter({ type = "default", initialFilters }) {
                   options={statusOptions}
                   value={status}
                   onValueChange={setStatus}
-                  placeholder="Status"
-                  emptyText="Nəticə tapılmadı"
+                  placeholder={t("status")}
+                  emptyText={t("no_results_found")}
                   triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-sm lg:text-base font-light border-none w-full"
                 />
               </div>
@@ -435,60 +446,64 @@ export default function MainFilter({ type = "default", initialFilters }) {
               <div className="col-span-1 grid grid-cols-2 bg-white rounded-full h-[48px] lg:h-[60px]  items-center  gap-2">
                 <input
                   type="number"
-                  placeholder="Qiymət, min."
+                  placeholder={t("price_min")}
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   className=" bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-sm lg:text-base font-light px-4 border-r border-gray-200"
                 />
                 <input
                   type="number"
-                  placeholder="maks."
+                  placeholder={t("price_max")}
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
                   className=" bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-sm lg:text-base font-light px-4"
                 />
               </div>
 
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Combobox
+              <div className="col-span-1 grid grid-cols-2 items-center gap-4">
+                {/* <Combobox
                   options={currencyOptions}
                   value={currency}
                   onValueChange={setCurrency}
                   placeholder="AZN"
-                  searchPlaceholder="Valyuta axtar..."
-                  emptyText="Nəticə tapılmadı"
+                  searchPlaceholder={t("search_currency")}
+                  emptyText={t("no_results_found")}
                   triggerClassName="col-span-2 rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
-                />
+                /> */}
                 <button
                   onClick={handleResetFilters}
-                  className="col-span-1 text-white text-sm lg:text-base font-light flex items-center gap-2 cursor-pointer"
+                  className={actionBtnClass}
                 >
-                  Sıfırla
+                  {t("reset")}
                   <Image
-                    src="/icons/reset.svg"
-                    alt="refresh"
+                    src={isBanner ? "/icons/reset.svg" : "/icons/reset-primary.svg"}
+                    alt={t("reset")}
                     width={20}
                     height={20}
                   />
                 </button>
                 <button
                   onClick={() => setIsFilterOpen(false)}
-                  className="col-span-1 text-white text-sm lg:text-base font-light flex items-center gap-2 cursor-pointer"
+                  className={actionBtnClass}
                 >
-                  Gizlə
-                  <Image
-                    src="/icons/chevron-up.svg"
-                    alt="refresh"
-                    width={20}
-                    height={20}
-                  />
+                  {t("hide")}
+                  {isBanner ? (
+                    <Image
+                      src="/icons/chevron-up.svg"
+                      alt={t("hide")}
+                      width={20}
+                      height={20}
+                    />
+                  ) : (
+                    <ChevronUp className="size-5 text-[#00569C]" strokeWidth={1.5} />
+                  )}
                 </button>
               </div>
               <button
                 onClick={handleSubmit}
                 className="bg-[#3696E7] text-white text-sm lg:text-base font-regular rounded-full h-[48px] lg:h-[60px] px-12 cursor-pointer"
               >
-                Göstər
+                {t("show")}
               </button>
             </div>
           </div>
@@ -512,7 +527,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-[#1A1A1A]">Filter</h2>
+            <h2 className="text-xl font-semibold text-[#1A1A1A]">{t("filter")}</h2>
             <button
               onClick={() => setIsFilterOpen(false)}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
@@ -528,9 +543,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
               options={markaOptions}
               value={marka}
               onValueChange={handleMarkaChange}
-              placeholder="Marka"
-              searchPlaceholder="Marka axtar..."
-              emptyText="Nəticə tapılmadı"
+              placeholder={t("brand")}
+              searchPlaceholder={t("search_brand")}
+              emptyText={t("no_results_found")}
               triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
             />
 
@@ -540,11 +555,11 @@ export default function MainFilter({ type = "default", initialFilters }) {
               options={modelOptions}
               value={model}
               onValueChange={setModel}
-              placeholder={marka ? "Model" : "Əvvəlcə marka seçin"}
-              searchPlaceholder="Model axtar..."
-              emptyText="Nəticə tapılmadı"
+              placeholder={modelPlaceholder}
+              searchPlaceholder={t("search_model")}
+              emptyText={t("no_results_found")}
               disabled={!marka}
-              selectedCountLabel="model seçilib"
+              selectedCountLabel={t("models_selected")}
               triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
             />
 
@@ -553,9 +568,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
               options={cityOptions}
               value={city}
               onValueChange={setCity}
-              placeholder="Şəhər"
-              searchPlaceholder="Şəhər axtar..."
-              emptyText="Nəticə tapılmadı"
+              placeholder={t("city")}
+              searchPlaceholder={t("search_city")}
+              emptyText={t("no_results_found")}
               triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
             />
 
@@ -564,9 +579,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
               options={colorOptions}
               value={color}
               onValueChange={setColor}
-              placeholder="Rəng"
-              searchPlaceholder="Rəng axtar..."
-              emptyText="Nəticə tapılmadı"
+              placeholder={t("color")}
+              searchPlaceholder={t("search_color")}
+              emptyText={t("no_results_found")}
               triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
             />
 
@@ -575,8 +590,8 @@ export default function MainFilter({ type = "default", initialFilters }) {
               options={statusOptions}
               value={status}
               onValueChange={setStatus}
-              placeholder="Status"
-              emptyText="Nəticə tapılmadı"
+              placeholder={t("status")}
+              emptyText={t("no_results_found")}
               triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
             />
 
@@ -584,7 +599,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
             <div className="bg-white rounded-full h-[48px] flex items-center px-2 gap-2 border border-gray-200">
               <input
                 type="number"
-                placeholder={yearRange ? `İl, ${yearRange.min}` : "İl, min."}
+                placeholder={minYearPlaceholder}
                 value={minYear}
                 onChange={(e) => setMinYear(e.target.value)}
                 className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
@@ -592,7 +607,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
               <div className="w-px h-6 bg-gray-300"></div>
               <input
                 type="number"
-                placeholder={yearRange ? `${yearRange.max}` : "maks."}
+                placeholder={maxYearPlaceholder}
                 value={maxYear}
                 onChange={(e) => setMaxYear(e.target.value)}
                 className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
@@ -603,7 +618,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
             <div className="bg-white rounded-full h-[48px] flex items-center px-2 gap-2 border border-gray-200">
               <input
                 type="number"
-                placeholder="Qiymət, min."
+                placeholder={t("price_min")}
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
@@ -611,7 +626,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
               <div className="w-px h-6 bg-gray-300"></div>
               <input
                 type="number"
-                placeholder="maks."
+                placeholder={t("price_max")}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
                 className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
@@ -624,8 +639,8 @@ export default function MainFilter({ type = "default", initialFilters }) {
               value={currency}
               onValueChange={setCurrency}
               placeholder="AZN"
-              searchPlaceholder="Valyuta axtar..."
-              emptyText="Nəticə tapılmadı"
+              searchPlaceholder={t("search_currency")}
+              emptyText={t("no_results_found")}
               triggerClassName="rounded-full h-[48px] lg:h-[60px] px-6 text-base font-light border border-gray-200 w-full"
             />
 
@@ -637,17 +652,17 @@ export default function MainFilter({ type = "default", initialFilters }) {
               }}
               className="w-full bg-[#3696E7] text-white text-base font-regular rounded-full h-[48px] cursor-pointer"
             >
-              Göstər
+              {t("show")}
             </button>
 
             <button
               onClick={handleResetFilters}
               className="w-full text-[#00569C] text-base font-light flex items-center justify-center gap-2 cursor-pointer"
             >
-              Sıfırla
+              {t("reset")}
               <Image
                 src="/icons/reset-primary.svg"
-                alt="refresh"
+                alt={t("reset")}
                 width={20}
                 height={20}
               />
@@ -725,7 +740,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
                     onClick={() => handleCategoryClick(selectedCategory)}
                     className="block w-full text-left text-base text-[#3696E7] font-medium hover:text-[#00569C] transition-colors py-2 cursor-pointer border-b border-gray-100 mb-2"
                   >
-                    Hamısına bax →
+                    {t("view_all")} →
                   </button>
 
                   <div className="space-y-3">
@@ -743,7 +758,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
                       ))
                     ) : (
                       <p className="text-gray-500 text-sm">
-                        Alt kateqoriya yoxdur
+                        {t("no_subcategories")}
                       </p>
                     )}
                   </div>

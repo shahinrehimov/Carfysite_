@@ -1,5 +1,5 @@
-import PageSpinner from "@/components/ui/page-spinner";
+import { ProductsPageLoading } from "@/components/ui/product-skeleton";
 
 export default function CategoryLoading() {
-  return <PageSpinner />;
+  return <ProductsPageLoading />;
 }

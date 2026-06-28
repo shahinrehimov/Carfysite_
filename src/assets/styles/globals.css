@@ -290,4 +290,62 @@
   .animate-spin-slow {
     animation: spin-slow 2s linear infinite;
   }
+
+  .transition-interactive {
+    transition-property: color, background-color, border-color;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  .transition-surface {
+    transition-property: box-shadow, transform, opacity;
+    transition-duration: 200ms;
+    transition-timing-function: ease-out;
+  }
+
+  .card-hover {
+    transition-property: box-shadow, transform, opacity;
+    transition-duration: 200ms;
+    transition-timing-function: ease-out;
+  }
+
+  .card-hover:hover {
+    box-shadow:
+      0 4px 6px -1px rgb(0 0 0 / 0.1),
+      0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  .link-hover {
+    transition-property: color, background-color, border-color;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  .link-hover:hover {
+    color: #00569c;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 200ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }

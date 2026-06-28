@@ -1,5 +1,5 @@
-import PageSpinner from "@/components/ui/page-spinner";
+import { WishlistPageLoading } from "@/components/ui/product-skeleton";
 
 export default function WishlistLoading() {
-  return <PageSpinner />;
+  return <WishlistPageLoading />;
 }

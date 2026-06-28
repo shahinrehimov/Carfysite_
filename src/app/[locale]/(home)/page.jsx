@@ -1,12 +1,12 @@
 import Image from "next/image";
-import Banner from "./home/Banner";
-import CategoryCards from "./home/CategoryCards";
-import BestSeller from "./home/BestSeller";
-import AllProducts from "./home/AllProducts";
-import Promotion from "./home/Promotion";
+import Banner from "../home/Banner";
+import CategoryCards from "../home/CategoryCards";
+import BestSeller from "../home/BestSeller";
+import AllProducts from "../home/AllProducts";
+import Promotion from "../home/Promotion";
 import serverApi from "@/lib/serverApi";
 import { serverApi as axiosServerApi } from "@/lib/axios";
-import { generateServiceUrl } from "../../lib/generateServiceUrl";
+import { generateServiceUrl } from "@/lib/generateServiceUrl";
 
 const getCategories = async () => {
   try {
@@ -65,6 +65,7 @@ const getServices = async () => {
     };
   }
 };
+
 export default async function Home() {
   const [categories, products, bestSellers, homeBanner, services] =
     await Promise.all([

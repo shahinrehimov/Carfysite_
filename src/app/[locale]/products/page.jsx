@@ -71,7 +71,6 @@ async function getProducts(searchParams) {
 export default async function Products({ searchParams }) {
   const resolvedParams = await searchParams;
   const { products, meta } = await getProducts(resolvedParams);
-
   // Plain query string forwarded to client for load-more pagination
   const filterQueryString = buildQueryParams(resolvedParams).toString();
 

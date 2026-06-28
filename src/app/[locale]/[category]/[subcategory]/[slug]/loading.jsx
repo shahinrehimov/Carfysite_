@@ -1,5 +1,5 @@
-import PageSpinner from "@/components/ui/page-spinner";
+import { ProductDetailLoading } from "@/components/ui/product-skeleton";
 
-export default function ProductDetailLoading() {
-  return <PageSpinner />;
+export default function ProductDetailLoadingPage() {
+  return <ProductDetailLoading />;
 }

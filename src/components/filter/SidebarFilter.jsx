@@ -285,9 +285,9 @@ export default function SidebarFilter({ isOpen, onClose, initialFilters, mode = 
 
           {/* Price */}
           <div className="py-4 border-b border-gray-100">
-            <div className="flex items-center justify-between mb-3">
+            <div className="mb-3">
               <span className="text-[15px] text-gray-800 font-medium">{t("price")}</span>
-              <div className="flex rounded-full border border-gray-200 overflow-hidden">
+              {/* <div className="flex rounded-full border border-gray-200 overflow-hidden">
                 <button
                   onClick={() => setCurrency("AZN")}
                   className={cn(
@@ -306,7 +306,7 @@ export default function SidebarFilter({ isOpen, onClose, initialFilters, mode = 
                 >
                   USD
                 </button>
-              </div>
+              </div> */}
             </div>
             <div className="flex gap-2">
               <input
@@ -464,9 +464,9 @@ export default function SidebarFilter({ isOpen, onClose, initialFilters, mode = 
 
       {/* Price */}
       <div className="py-4 border-b border-gray-100">
-        <div className="flex items-center justify-between mb-3">
+        <div className="mb-3">
           <span className="text-[15px] text-gray-800 font-medium">{t("price")}</span>
-          <div className="flex rounded-full border border-gray-200 overflow-hidden">
+          {/* <div className="flex rounded-full border border-gray-200 overflow-hidden">
             <button
               onClick={() => setCurrency("AZN")}
               className={cn(
@@ -485,7 +485,7 @@ export default function SidebarFilter({ isOpen, onClose, initialFilters, mode = 
             >
               USD
             </button>
-          </div>
+          </div> */}
         </div>
         <div className="flex gap-2">
           <input

@@ -20,10 +20,7 @@ export default function ProductCard({ product }) {
   const { toast } = useToast();
   // Extract data from API structure
   const productData = product.product || product;
-  const imageUrl =
-    product.hover_image ||
-    productData.hover_image ||
-    "/images/product-placeholder.png";
+  const imageUrl = productData.hover_image || "/images/product-placeholder.png";
   const title = product.title || productData.title || "Product";
   const slug = product.slug || productData.slug;
   const price = product.price_final || product.price || 0;

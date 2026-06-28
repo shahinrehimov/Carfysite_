@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { serverApi } from "@/lib/axios";
 import { notFound } from "next/navigation";
 import SimilarProductsList from "../../../../components/product/similar-products-list";
-
+import { getTranslations } from "next-intl/server";
 const getProduct = async (category, subcategory, seller, variant) => {
   try {
     const response = await serverApi.get(
@@ -20,7 +20,10 @@ const getProduct = async (category, subcategory, seller, variant) => {
     );
     return response.data.data;
   } catch (error) {
-    console.error("Errorraaaa:", error?.response?.data?.message ?? error.message);
+    console.error(
+      "Errorraaaa:",
+      error?.response?.data?.message ?? error.message
+    );
     return null;
   }
 };
@@ -29,10 +32,9 @@ export default async function ProductDetail({ params, searchParams }) {
   const { category, subcategory } = await params;
   const { seller, variant } = await searchParams;
   const data = await getProduct(category, subcategory, seller, variant);
-
+  const t = await getTranslations();
   if (!data) notFound();
 
-  console.log(data);
   return (
     <div>
       <div className="bg-[#F8F8F8]">
@@ -98,7 +100,7 @@ export default async function ProductDetail({ params, searchParams }) {
               <Image src="/icons/chat.svg" alt="chat" width={64} height={64} />
 
               <p className="text-gray-700 text-center text-sm lg:text-lg font-regular">
-                Daha ətraflı məlumat üçün bizimlə əlaqə qurun.
+                {t("contact_us_for_more_information")}
               </p>
 
               <Button
@@ -106,7 +108,7 @@ export default async function ProductDetail({ params, searchParams }) {
                 size="lg"
                 className="w-full text-[12px] lg:text-[14px] font-medium cursor-pointer h-10 lg:h-11"
               >
-                Carfy’ə yaz
+                {t("write_to_us")}
               </Button>
             </div>
 
@@ -116,7 +118,7 @@ export default async function ProductDetail({ params, searchParams }) {
                 size="lg"
                 className="w-full text-lg font-medium cursor-pointer h-10 lg:h-14 "
               >
-                Carfy’ə zəng et
+                {t("call_us")}
               </Button>
             </div>
 

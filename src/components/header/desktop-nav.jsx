@@ -71,7 +71,7 @@ export default function DesktopNav() {
         <div className="relative">
           <button
             onClick={toggleMenu}
-            className="flex items-center gap-2 text-[#1A1A1A] "
+            className="flex items-center gap-2 text-[#1A1A1A] link-hover"
           >
             <Image
               src="/icons/menu.svg"
@@ -96,7 +96,7 @@ export default function DesktopNav() {
                     key={index}
                     href={item.href}
                     onClick={() => setIsMenuOpen(false)}
-                    className="block px-4 py-2 text-sm text-[#1A1A1A] hover:bg-gray-100 transition-colors"
+                    className="block px-4 py-2 text-sm text-[#1A1A1A] hover:bg-gray-100 transition-interactive"
                   >
                     {item.label}
                   </Link>
@@ -125,7 +125,7 @@ export default function DesktopNav() {
       <div className="flex items-center gap-6">
         <Link
           href="/account/notifications"
-          className="flex items-center gap-2 text-[#1A1A1A]"
+          className="flex items-center gap-2 text-[#1A1A1A] link-hover"
         >
           <div className="relative">
             <Image
@@ -146,7 +146,7 @@ export default function DesktopNav() {
 
         <Link
           href="/messages"
-          className="flex items-center gap-2 text-[#1A1A1A] "
+          className="flex items-center gap-2 text-[#1A1A1A] link-hover"
         >
           <Image
             src="/icons/message.svg"
@@ -160,7 +160,7 @@ export default function DesktopNav() {
 
         <Link
           href="/wishlist"
-          className="flex items-center gap-2 text-[#1A1A1A] "
+          className="flex items-center gap-2 text-[#1A1A1A] link-hover"
         >
           <Image
             src="/icons/heart.svg"
@@ -175,7 +175,7 @@ export default function DesktopNav() {
         {isLoggedIn ? (
           <Link
             href="/account"
-            className="flex items-center gap-2 text-[#1A1A1A] "
+            className="flex items-center gap-2 text-[#1A1A1A] link-hover"
           >
             <Image
               src="/icons/user.svg"
@@ -189,7 +189,7 @@ export default function DesktopNav() {
         ) : (
           <Link
             href="/auth/login"
-            className="flex items-center gap-2 text-[#1A1A1A] "
+            className="flex items-center gap-2 text-[#1A1A1A] link-hover"
           >
             <Image
               src="/icons/user.svg"
