@@ -18,8 +18,8 @@ export default function TopBar({ phone }) {
 
   const menuItems = [
     { label: t("about-us"), href: "/about" },
-    { label: t("legal-information"), href: "/legal" },
-    { label: t("carfy-rules"), href: "/rules" },
+    { label: t("legal-information"), href: "/pages/legal" },
+    { label: t("carfy-rules"), href: "/pages/rules" },
     { label: t("contact"), href: "/contact" },
   ];
 
