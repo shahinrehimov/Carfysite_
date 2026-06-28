@@ -1,10 +1,26 @@
 import React from "react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-
+const services = [
+  {
+    key: "setting",
+    limit: 100,
+  },
+];
+const getServices = async () => {
+  try {
+    const res = await serverApi.get(generateServiceUrl(services));
+    return res.data.data;
+  } catch (error) {
+    return {
+      setting: null,
+    };
+  }
+};
 async function Promotion() {
   const t = await getTranslations();
-
+  const services = await getServices();
+  const setting = services.setting;
   return (
     <section className="w-full bg-[#CEE5F8] ">
       <div className="container mx-auto px-4 py-8 md:py-0 relative">
@@ -31,7 +47,8 @@ async function Promotion() {
             <div className="flex  items-center gap-4 md:gap-6">
               <div className="flex flex-col gap-3 sm:gap-4">
                 <a
-                  href="#"
+                  data-setting-key="setting.google_play_url"
+                  href={setting?.google_play_url ?? "#"}
                   className="block w-[115px] lg:w-[160px] transition-transform hover:scale-105"
                   aria-label={t("download_google_play")}
                 >
@@ -45,7 +62,8 @@ async function Promotion() {
                 </a>
 
                 <a
-                  href="#"
+                  data-setting-key="setting.app_store_url"
+                  href={setting?.app_store_url ?? "#"}
                   className="block w-[115px] lg:w-[160px] transition-transform hover:scale-105"
                   aria-label={t("download_app_store")}
                 >
@@ -60,11 +78,17 @@ async function Promotion() {
               </div>
 
               <div className="shrink-0">
-                <div className="w-[80px] h-[80px] lg:w-[120px] lg:h-[120px] relative">
+                <div
+                  className="w-[80px] h-[80px] lg:w-[120px] lg:h-[120px] relative"
+                  data-setting-key="setting.qr_code_image"
+                >
                   <Image
-                    src="/images/qr.png"
+                    src={setting?.qr_code_image ?? "/images/qr.png"}
+                    asChild
                     alt="QR Code"
-                    fill
+                    data-setting-key="setting.qr_code_image"
+                    width={120}
+                    height={120}
                     className="object-contain"
                   />
                 </div>
