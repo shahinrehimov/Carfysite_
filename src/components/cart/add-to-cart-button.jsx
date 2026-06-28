@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { basketService } from "@/lib/basketService";
-import { addItem, setLoading, setError } from "@/store/cart";
+import { setBasketData, setLoading, setError } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
@@ -29,8 +29,9 @@ export default function AddToCartButton({
 
     try {
       dispatch(setLoading(true));
-      const response = await basketService.add(product.id, 1);
-      dispatch(addItem(response));
+      await basketService.add(product.id, 1);
+      const basketData = await basketService.load();
+      dispatch(setBasketData(basketData));
 
       toast({
         title: t("success"),

@@ -148,7 +148,7 @@ export default function CartDropdown() {
               <>
                 <div className="overflow-y-auto max-h-[400px] p-4 bg-white/50 backdrop-blur-sm rounded-2xl">
                   <div className="space-y-3">
-                    {cartItems.map((item) => {
+                    {cartItems.filter(Boolean).map((item) => {
                       const itemData = item.product || item;
                       const imageUrl =
                         item.hover_image ||

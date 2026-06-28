@@ -33,7 +33,7 @@ export default function ProductSpecifications({ data }) {
       </div>
 
       {data.options.map((option) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col" key={option.value}>
           <div className="text-[#9E9E9E] text-sm mb-1.5">
             {option.option_label}
           </div>

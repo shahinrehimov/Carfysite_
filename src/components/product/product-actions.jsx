@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useDispatch } from "react-redux";
 import { basketService } from "@/lib/basketService";
 import { wishlistService } from "@/lib/wishlistService";
-import { addItem, setLoading, setError } from "@/store/cart";
+import { setBasketData, setLoading, setError } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 import { cn } from "@/lib/utils";
 
@@ -67,15 +67,15 @@ export default function ProductActions({ data }) {
 
     try {
       dispatch(setLoading(true));
-      const response = await basketService.add(data.uuid, 1);
-      dispatch(addItem(response));
+      await basketService.add(data.uuid, 1);
+      const basketData = await basketService.load();
+      dispatch(setBasketData(basketData));
 
       setInBasket(true);
 
       toast({
         title: t("success"),
-        description:
-          response?.data?.message || t("product-added-to-cart"),
+        description: t("product-added-to-cart"),
         variant: "success",
       });
     } catch (error) {

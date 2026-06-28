@@ -34,14 +34,20 @@ export const cartSlice = createSlice({
     },
     addItem: (state, action) => {
       const { data, basket_data } = action.payload;
-      const existingItemIndex = state.items.findIndex(item => item.id === data.id);
-      
+      if (!data?.id && !data?.uuid) {
+        return;
+      }
+
+      const existingItemIndex = state.items.findIndex(
+        (item) => item?.id === data.id || item?.uuid === data.uuid
+      );
+
       if (existingItemIndex >= 0) {
         state.items[existingItemIndex] = data;
       } else {
         state.items.push(data);
       }
-      
+
       if (basket_data) {
         state.basketData = basket_data;
       }
