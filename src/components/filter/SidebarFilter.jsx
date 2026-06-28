@@ -45,17 +45,17 @@ function FilterSection({
       </button>
 
       {isExpanded && (
-        <div className="mt-2 overflow-hidden">
+        <div className="mt-2 overflow-hidden min-w-0">
         {options.length === 0 && emptyHint ? (
           <p className="text-sm text-gray-500 py-1">{emptyHint}</p>
         ) : (
-          <div className="h-[200px] overflow-y-auto overscroll-y-contain contain-strict space-y-2 pr-1">
+          <div className="h-[200px] overflow-y-auto overscroll-y-contain space-y-2 pr-1 min-w-0">
             {options.map((option) => {
               const isChecked = value === option.value;
               return (
                 <label
                   key={option.value}
-                  className="flex items-center gap-2.5 cursor-pointer group"
+                  className="flex items-center gap-2.5 cursor-pointer group min-w-0"
                 >
                   <input
                     type="checkbox"
@@ -79,7 +79,7 @@ function FilterSection({
                       <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                     )}
                   </div>
-                  <span className="text-sm text-gray-600 select-none">
+                  <span className="text-sm text-gray-600 select-none min-w-0 break-words">
                     {option.label}
                   </span>
                 </label>
@@ -229,19 +229,19 @@ export default function SidebarFilter({ isOpen, onClose, initialFilters, mode = 
         />
 
         {/* Modal */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white z-50 rounded-t-[24px] max-h-[90vh] overflow-y-auto">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 w-full max-w-[100vw] bg-white z-50 rounded-t-[24px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
         {/* Header */}
         <div className="sticky top-0 bg-white flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-lg font-semibold text-gray-900">{t("filter")}</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors cursor-pointer shrink-0"
           >
             <X size={24} className="text-gray-600" />
           </button>
         </div>
 
-        <div className="p-5 space-y-1">
+        <div className="p-5 space-y-1 min-w-0">
           <FilterSection
             title={t("city")}
             sectionKey="city"
@@ -308,40 +308,40 @@ export default function SidebarFilter({ isOpen, onClose, initialFilters, mode = 
                 </button>
               </div> */}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 min-w-0">
               <input
                 type="text"
                 placeholder={t("price_min")}
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
-                className="flex-1 h-10 px-3 border border-gray-200 rounded-lg text-sm text-gray-600 placeholder:text-gray-400 outline-none focus:border-[#00569C]"
+                className="flex-1 min-w-0 h-10 px-3 border border-gray-200 rounded-lg text-sm text-gray-600 placeholder:text-gray-400 outline-none focus:border-[#00569C]"
               />
               <input
                 type="text"
                 placeholder={t("price_max")}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                className="flex-1 h-10 px-3 border border-gray-200 rounded-lg text-sm text-gray-600 placeholder:text-gray-400 outline-none focus:border-[#00569C]"
+                className="flex-1 min-w-0 h-10 px-3 border border-gray-200 rounded-lg text-sm text-gray-600 placeholder:text-gray-400 outline-none focus:border-[#00569C]"
               />
             </div>
           </div>
 
           {/* Year */}
           <div className="py-4 border-b border-gray-100">
-            <div className="flex gap-2">
+            <div className="flex gap-2 min-w-0">
               <input
                 type="text"
                 placeholder={t("year_min")}
                 value={minYear}
                 onChange={(e) => setMinYear(e.target.value)}
-                className="flex-1 h-10 px-3 border border-gray-200 rounded-lg text-sm text-gray-600 placeholder:text-gray-400 outline-none focus:border-[#00569C]"
+                className="flex-1 min-w-0 h-10 px-3 border border-gray-200 rounded-lg text-sm text-gray-600 placeholder:text-gray-400 outline-none focus:border-[#00569C]"
               />
               <input
                 type="text"
                 placeholder={t("max")}
                 value={maxYear}
                 onChange={(e) => setMaxYear(e.target.value)}
-                className="flex-1 h-10 px-3 border border-gray-200 rounded-lg text-sm text-gray-600 placeholder:text-gray-400 outline-none focus:border-[#00569C]"
+                className="flex-1 min-w-0 h-10 px-3 border border-gray-200 rounded-lg text-sm text-gray-600 placeholder:text-gray-400 outline-none focus:border-[#00569C]"
               />
             </div>
           </div>

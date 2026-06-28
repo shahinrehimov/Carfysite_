@@ -265,13 +265,13 @@ export default function MainFilter({ type = "default", initialFilters }) {
     <>
       <div
         className={cn(
-          "container   bg-[#FFFFFF52] rounded-[24px] lg:rounded-[40px] backdrop-blur-lg box-shadow-[0px_2px_16px_0px_#0000001F] p-4",
+          "w-full max-w-full min-w-0 overflow-x-hidden bg-[#FFFFFF52] rounded-[24px] lg:rounded-[40px] backdrop-blur-lg box-shadow-[0px_2px_16px_0px_#0000001F] p-4",
           type == "banner"
-            ? "absolute bottom-[-30px] left-0 right-0 mx-auto"
-            : ""
+            ? "absolute bottom-[-30px] left-0 right-0 mx-auto px-4 lg:container"
+            : "container"
         )}
       >
-        <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="w-full min-w-0 grid grid-cols-1 lg:grid-cols-4 gap-4">
           <button
             onClick={() => setIsCategoryMenuOpen(true)}
             className={cn(
@@ -290,20 +290,20 @@ export default function MainFilter({ type = "default", initialFilters }) {
             </span>
           </button>
 
-          <div className="col-span-1 lg:col-span-2 relative">
+          <div className="col-span-1 lg:col-span-2 relative min-w-0">
             <div
               className={cn(
-                "bg-white rounded-full h-[48px] lg:h-[60px] flex items-center justify-between pl-6 gap-3",
+                "bg-white rounded-full h-[48px] lg:h-[60px] flex items-center min-w-0 overflow-hidden pl-4 lg:pl-6 gap-2 lg:gap-3",
                 type == "default" ? "border border-gray-200" : ""
               )}
             >
-              <div className="flex items-center gap-3 w-full">
+              <div className="flex items-center gap-2 lg:gap-3 flex-1 min-w-0">
                 <Image
                   src="/icons/search.svg"
                   alt="search"
                   width={20}
                   height={20}
-                  className="opacity-40"
+                  className="opacity-40 shrink-0"
                 />
                 <input
                   type="text"
@@ -313,12 +313,12 @@ export default function MainFilter({ type = "default", initialFilters }) {
                     if (e.key === "Enter") handleFind();
                   }}
                   placeholder={t("search")}
-                  className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C80] text-sm lg:text-base font-light min-w-0"
+                  className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C80] text-sm lg:text-base font-light min-w-0 w-0"
                 />
               </div>
               <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className="cursor-pointer px-1 flex items-center justify-center border rounded-[8px] w-[36px] lg:w-[42px] h-[36px] lg:h-[42px] border-[#00569C]"
+                className="cursor-pointer px-1 shrink-0 flex items-center justify-center border rounded-[8px] w-[36px] lg:w-[42px] h-[36px] lg:h-[42px] border-[#00569C]"
               >
                 <Image
                   src="/icons/filter.svg"
@@ -329,7 +329,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
               </button>
               <button
                 type="button"
-                className="bg-[#3696E7] text-white text-sm lg:text-base font-regular rounded-tl-[8px] rounded-bl-[8px] rounded-tr-[40px] rounded-br-[40px] h-[48px] lg:h-[60px] w-[120px] flex items-center justify-center cursor-pointer"
+                className="bg-[#3696E7] text-white text-xs lg:text-base font-regular rounded-tl-[8px] rounded-bl-[8px] rounded-tr-[40px] rounded-br-[40px] h-[48px] lg:h-[60px] w-[72px] sm:w-[88px] lg:w-[120px] shrink-0 flex items-center justify-center cursor-pointer"
                 onClick={handleFind}
               >
                 {t("find")}
@@ -521,23 +521,23 @@ export default function MainFilter({ type = "default", initialFilters }) {
           onClick={() => setIsFilterOpen(false)}
         />
         <div
-          className={`lg:hidden fixed bottom-0 left-0 right-0 bg-white z-50 rounded-t-[24px] p-6 max-h-[90vh] overflow-y-auto transition-transform duration-500 ease-out ${
+          className={`lg:hidden fixed bottom-0 left-0 right-0 w-full max-w-[100vw] bg-white z-50 rounded-t-[24px] p-6 max-h-[90vh] overflow-y-auto overflow-x-hidden transition-transform duration-500 ease-out ${
             isFilterOpen ? "translate-y-0" : "translate-y-full"
           }`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 min-w-0">
             <h2 className="text-xl font-semibold text-[#1A1A1A]">{t("filter")}</h2>
             <button
               onClick={() => setIsFilterOpen(false)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer shrink-0"
             >
               <X size={24} className="text-gray-600" />
             </button>
           </div>
 
           {/* Filter Content */}
-          <div className="space-y-4">
+          <div className="space-y-4 min-w-0">
             {/* Marka */}
             <Combobox
               options={markaOptions}
@@ -596,40 +596,40 @@ export default function MainFilter({ type = "default", initialFilters }) {
             />
 
             {/* Year Range */}
-            <div className="bg-white rounded-full h-[48px] flex items-center px-2 gap-2 border border-gray-200">
+            <div className="bg-white rounded-full h-[48px] flex items-center px-2 gap-2 border border-gray-200 min-w-0 overflow-hidden">
               <input
                 type="number"
                 placeholder={minYearPlaceholder}
                 value={minYear}
                 onChange={(e) => setMinYear(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
+                className="flex-1 min-w-0 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-2 sm:px-4"
               />
-              <div className="w-px h-6 bg-gray-300"></div>
+              <div className="w-px h-6 bg-gray-300 shrink-0"></div>
               <input
                 type="number"
                 placeholder={maxYearPlaceholder}
                 value={maxYear}
                 onChange={(e) => setMaxYear(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
+                className="flex-1 min-w-0 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-2 sm:px-4"
               />
             </div>
 
             {/* Price Range */}
-            <div className="bg-white rounded-full h-[48px] flex items-center px-2 gap-2 border border-gray-200">
+            <div className="bg-white rounded-full h-[48px] flex items-center px-2 gap-2 border border-gray-200 min-w-0 overflow-hidden">
               <input
                 type="number"
                 placeholder={t("price_min")}
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
+                className="flex-1 min-w-0 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-2 sm:px-4"
               />
-              <div className="w-px h-6 bg-gray-300"></div>
+              <div className="w-px h-6 bg-gray-300 shrink-0"></div>
               <input
                 type="number"
                 placeholder={t("price_max")}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-4"
+                className="flex-1 min-w-0 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C] text-base font-light px-2 sm:px-4"
               />
             </div>
 
@@ -671,9 +671,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
         </div>
       </>
 
-      {/* Category Menu Modal */}
+      {/* Category Menu Modal — desktop only */}
       <div
-        className={`fixed inset-0 bg-[#00000066] z-40 transition-opacity duration-300 ${
+        className={`hidden lg:block fixed inset-0 bg-[#00000066] z-40 transition-opacity duration-300 ${
           isCategoryMenuOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -681,9 +681,9 @@ export default function MainFilter({ type = "default", initialFilters }) {
         onClick={() => setIsCategoryMenuOpen(false)}
       />
 
-      {/* Sidebar Menu */}
+      {/* Sidebar Menu — desktop only */}
       <div
-        className={`fixed top-0 left-0 h-full w-full max-w-[900px] bg-white z-50 shadow-2xl rounded-r-[40px] overflow-hidden transition-transform duration-500 ease-out ${
+        className={`hidden lg:block fixed top-0 left-0 h-full w-full max-w-[900px] bg-white z-50 shadow-2xl rounded-r-[40px] overflow-hidden transition-transform duration-500 ease-out ${
           isCategoryMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

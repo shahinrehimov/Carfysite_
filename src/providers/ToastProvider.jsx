@@ -54,19 +54,21 @@ export function ToastProvider({ children }) {
       toasts
     }}>
       {children}
-      <ToastContainer>
-        {toasts.map((toast) => (
-          <Toast
-            key={toast.id}
-            variant={toast.variant}
-            title={toast.title}
-            description={toast.description}
-            action={toast.action}
-            onClose={() => removeToast(toast.id)}
-            className="mb-2"
-          />
-        ))}
-      </ToastContainer>
+      {toasts.length > 0 && (
+        <ToastContainer>
+          {toasts.map((toast) => (
+            <Toast
+              key={toast.id}
+              variant={toast.variant}
+              title={toast.title}
+              description={toast.description}
+              action={toast.action}
+              onClose={() => removeToast(toast.id)}
+              className="mb-2"
+            />
+          ))}
+        </ToastContainer>
+      )}
     </ToastContext.Provider>
   );
 }

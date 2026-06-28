@@ -9,6 +9,10 @@ const services = [
     key: "social",
     limit: 100,
   },
+  {
+    key: "setting",
+    limit: 100,
+  },
 ];
 
 const getServices = async () => {
@@ -18,6 +22,7 @@ const getServices = async () => {
   } catch (error) {
     return {
       social: [],
+      setting: null,
     };
   }
 };
@@ -25,7 +30,7 @@ export default async function Footer() {
   const t = await getTranslations();
   const services = await getServices();
   const socialLinks = services.social;
-
+  const setting = services.setting;
   const footerLinks = [
     { href: "/about", label: t("aboutUs") },
     {
@@ -88,10 +93,10 @@ export default async function Footer() {
                 <p className="text-sm text-gray-600 mb-1">
                   {t("hotline")}
                   <a
-                    href="tel:991"
+                    href={`tel:${setting?.phone ?? ""}`}
                     className="text-blue-600 font-semibold ml-1 hover:text-blue-700"
                   >
-                    991
+                    {setting?.phone}
                   </a>
                 </p>
               </div>
@@ -134,9 +139,7 @@ export default async function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-gray-200">
-          <p className="text-center text-sm text-gray-600">
-            {t("copyright")}
-          </p>
+          <p className="text-center text-sm text-gray-600">{t("copyright")}</p>
         </div>
       </div>
     </footer>

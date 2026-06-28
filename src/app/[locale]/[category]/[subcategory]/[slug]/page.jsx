@@ -13,6 +13,7 @@ import { serverApi } from "@/lib/axios";
 import { notFound } from "next/navigation";
 import SimilarProductsList from "../../../../../components/product/similar-products-list";
 import { getTranslations } from "next-intl/server";
+import { generateServiceUrl } from "@/lib/generateServiceUrl";
 const getProduct = async (category, subcategory, slug, seller, variant) => {
   try {
     const response = await serverApi.get(
@@ -27,12 +28,29 @@ const getProduct = async (category, subcategory, slug, seller, variant) => {
     return null;
   }
 };
+const services = [
+  {
+    key: "setting",
+    limit: 100,
+  },
+];
+const getServices = async () => {
+  try {
+    const res = await serverApi.get(generateServiceUrl(services));
 
+    return res.data.data;
+  } catch (error) {
+    return {
+      setting: null,
+    };
+  }
+};
 export default async function ProductDetail({ params, searchParams }) {
   const { category, subcategory, slug } = await params;
   const { seller, variant } = await searchParams;
   const data = await getProduct(category, subcategory, slug, seller, variant);
-
+  const services = await getServices();
+  const setting = services.setting;
   if (!data) notFound();
 
   const t = await getTranslations();
@@ -115,8 +133,11 @@ export default async function ProductDetail({ params, searchParams }) {
                 variant="outline"
                 size="lg"
                 className="w-full text-[12px] lg:text-[14px] font-medium cursor-pointer h-10 lg:h-11"
+                asChild
               >
-                {t("write_to_us")}
+                <a href={`mailto:${setting?.email ?? ""}`}>
+                  {t("write_to_us")}
+                </a>
               </Button>
             </div>
 
@@ -125,8 +146,9 @@ export default async function ProductDetail({ params, searchParams }) {
                 variant="primary"
                 size="lg"
                 className="w-full text-lg font-medium cursor-pointer h-10 lg:h-14 "
+                asChild
               >
-                {t("call_us")}
+                <a href={`tel:${setting?.phone ?? ""}`}>{t("call_us")}</a>
               </Button>
             </div>
 

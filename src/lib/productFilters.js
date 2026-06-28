@@ -89,15 +89,51 @@ export function modelOptionsForBrandSlug(brands, brandSlug) {
   }));
 }
 
+function normalizeSubcategories(cat) {
+  const rawSubs = cat.subs ?? cat.sub_categories ?? cat.subcategories ?? [];
+  if (!Array.isArray(rawSubs)) return [];
+  return rawSubs
+    .map((s) => ({
+      id: s.id,
+      slug: s.slug ?? "",
+      name: s.title ?? s.name ?? "",
+    }))
+    .filter((s) => s.name);
+}
+
 export function categoriesForUi(brandsPayloadCategories) {
   return brandsPayloadCategories.map((cat) => ({
     id: cat.id,
     slug: cat.slug ?? "",
-    name: cat.title ?? "",
-    subcategories: Array.isArray(cat.subs)
-      ? cat.subs
-          .map((s) => ({ id: s.id, slug: s.slug ?? "", name: s.title ?? "" }))
-          .filter((s) => s.name)
-      : [],
+    name: cat.title ?? cat.name ?? "",
+    subcategories: normalizeSubcategories(cat),
   }));
+}
+
+let categoriesCache = null;
+let categoriesInflight = null;
+
+export function getCachedCategoriesWithSubs() {
+  return categoriesCache;
+}
+
+/** Deduplicated fetch for category navigation (includes nested subs). */
+export function fetchCategoriesWithSubs() {
+  if (categoriesCache) {
+    return Promise.resolve(categoriesCache);
+  }
+  if (categoriesInflight) {
+    return categoriesInflight;
+  }
+  categoriesInflight = api
+    .get("/categories/list?with_subs=yes")
+    .then((res) => {
+      const raw = res.data?.data ?? res.data;
+      categoriesCache = Array.isArray(raw) ? categoriesForUi(raw) : [];
+      return categoriesCache;
+    })
+    .finally(() => {
+      categoriesInflight = null;
+    });
+  return categoriesInflight;
 }

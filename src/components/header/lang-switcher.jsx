@@ -44,9 +44,11 @@ export default function LangSwitcher() {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 lg:gap-3 bg-white rounded-full px-2 lg:px-6 py-1 lg:py-4 hover:bg-white/90 transition-colors lg:min-w-[140px]"
+        className="flex items-center gap-2 lg:gap-3 bg-white rounded-full px-2 lg:px-6 py-1 lg:py-4 hover:bg-white/90 transition-colors lg:min-w-[140px] cursor-pointer"
         aria-label="Select language"
+        aria-expanded={isOpen}
       >
         <Image
           src="/icons/globe.svg"
@@ -64,12 +66,13 @@ export default function LangSwitcher() {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-2 right-0 bg-white rounded-2xl shadow-lg overflow-hidden z-50 min-w-[160px] border border-gray-100">
+        <div className="absolute top-full mt-2 right-0 bg-white rounded-2xl shadow-lg overflow-hidden z-[60] min-w-[160px] border border-gray-100">
           {routing.locales.map((loc) => (
             <button
               key={loc}
+              type="button"
               onClick={() => handleLanguageChange(loc)}
-              className={`w-full px-4 py-3 text-left hover:bg-light-blue transition-colors flex items-center gap-3 ${
+              className={`w-full px-4 py-3 text-left hover:bg-light-blue transition-colors flex items-center gap-3 cursor-pointer ${
                 locale === loc ? "bg-light-blue/50" : ""
               }`}
             >

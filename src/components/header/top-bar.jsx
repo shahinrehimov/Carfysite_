@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import LangSwitcher from "./lang-switcher";
 import { X } from "lucide-react";
 
-export default function TopBar() {
+export default function TopBar({ phone }) {
   const t = useTranslations();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -25,10 +25,10 @@ export default function TopBar() {
 
   return (
     <>
-      <div className="bg-light-blue w-full py-2 rounded-b-[40px] lg:rounded-b-[200px] relative z-10">
+      <div className="bg-light-blue w-full py-2 rounded-b-[40px] lg:rounded-b-[200px] relative z-20">
         <div className="container">
           <div className="flex items-center justify-between">
-            <div className="w-[70px] lg:w-[140px]">
+            <div className="w-[70px] lg:w-[140px] shrink-0">
               <Link href="/">
                 <Image
                   src="/images/logo.svg"
@@ -40,9 +40,9 @@ export default function TopBar() {
               </Link>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="block lg:hidden">
-                <Link href="/" className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <div className="block lg:hidden shrink-0">
+                <Link href={`tel:${phone}`} className="flex items-center gap-2">
                   <Image
                     src="/icons/phone-primary.svg"
                     alt="phone"
@@ -56,7 +56,7 @@ export default function TopBar() {
                 </Link>
               </div>
               <LangSwitcher />
-              <div className="hidden lg:block">
+              <div className="hidden lg:block shrink-0">
                 <Button
                   asChild
                   variant="primary"
@@ -77,8 +77,15 @@ export default function TopBar() {
                   </Link>
                 </Button>
               </div>
-              <div className="block lg:hidden">
-                <Button variant="ghost" size="icon" onClick={toggleMenu}>
+              <div className="block lg:hidden shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleMenu}
+                  className="cursor-pointer"
+                  aria-label={t("menu")}
+                  aria-expanded={isMenuOpen}
+                >
                   <Image
                     src="/icons/menu.svg"
                     alt="menu"
@@ -94,15 +101,20 @@ export default function TopBar() {
       </div>
 
       <div
-        className={`fixed top-0 left-0 right-0 bottom-0 bg-white z-40 transition-transform duration-300 ease-in-out lg:hidden ${
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-0 left-0 right-0 bottom-0 bg-white z-50 transition-transform duration-300 ease-in-out lg:hidden ${
+          isMenuOpen
+            ? "translate-x-0 pointer-events-auto"
+            : "translate-x-full pointer-events-none"
         }`}
+        aria-hidden={!isMenuOpen}
       >
         <div className="container pt-6 px-6 h-full flex items-center">
-          <div className="flex flex-col">
+          <div className="flex flex-col w-full">
             <button
+              type="button"
               onClick={toggleMenu}
-              className="absolute top-6 right-6 text-[#00569C]"
+              className="absolute top-6 right-6 text-[#00569C] cursor-pointer p-2"
+              aria-label={t("close")}
             >
               <X size={28} strokeWidth={1.5} />
             </button>
