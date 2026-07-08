@@ -103,7 +103,7 @@ export default function CartDropdown() {
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 text-[#1A1A1A] relative hover:text-[#00569C] transition-colors"
+        className="flex items-center gap-2 text-[#1A1A1A] relative hover:text-[#00569C] transition-colors cursor-pointer"
       >
         <div className="relative">
           <Image
@@ -154,7 +154,8 @@ export default function CartDropdown() {
                         item.hover_image ||
                         itemData.hover_image ||
                         "/images/product-placeholder.png";
-                      const title = item.title || itemData.title || t("product");
+                      const title =
+                        item.title || itemData.title || t("product");
                       const quantity =
                         item.basket_quantity || item.quantity || 1;
                       const price = item.price_final || item.price || 0;

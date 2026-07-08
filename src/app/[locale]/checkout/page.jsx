@@ -438,7 +438,7 @@ export default function CheckoutPage() {
                 disabled={
                   isSubmitting || !selectedAddressId || !selectedPaymentMethod
                 }
-                className="w-full h-12 lg:h-14 text-white rounded-full mt-6 font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full h-12 lg:h-14 text-white rounded-full mt-6 font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
                 {isSubmitting ? t("processing") : t("place_order")}
               </Button>

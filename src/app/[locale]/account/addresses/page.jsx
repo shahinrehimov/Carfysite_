@@ -19,10 +19,7 @@ const addressSchema = yup.object().shape({
     .number()
     .required("address_type_required")
     .positive("address_type_required"),
-  city_id: yup
-    .number()
-    .required("city_required")
-    .positive("city_required"),
+  city_id: yup.number().required("city_required").positive("city_required"),
   address_line_1: yup
     .string()
     .required("address_line_1_required")
@@ -388,9 +385,7 @@ export default function AddressesPage() {
             {/* Empty State */}
             {addresses.length === 0 && (
               <div className="text-center py-8">
-                <p className="text-gray-500 mb-4">
-                  {t("no_addresses_found")}
-                </p>
+                <p className="text-gray-500 mb-4">{t("no_addresses_found")}</p>
               </div>
             )}
           </>
@@ -401,7 +396,7 @@ export default function AddressesPage() {
           onClick={() => openModal()}
           variant="primary"
           size="lg"
-          className="w-full max-w-md"
+          className="w-full max-w-md cursor-pointer"
         >
           {t("add_address")}
         </Button>
@@ -432,9 +427,7 @@ export default function AddressesPage() {
               {/* Modal Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">
-                  {editingAddress
-                    ? t("edit_address")
-                    : t("add_address")}
+                  {editingAddress ? t("edit_address") : t("add_address")}
                 </h2>
                 <button
                   onClick={closeModal}
@@ -590,9 +583,7 @@ export default function AddressesPage() {
                       render={({ field }) => (
                         <Input
                           {...field}
-                          placeholder={
-                            t("street_address")
-                          }
+                          placeholder={t("street_address")}
                           className={`h-12 lg:h-14 text-base rounded-lg ${
                             errors.address_line_1 ? "border-red-500" : ""
                           }`}
@@ -616,9 +607,7 @@ export default function AddressesPage() {
                       render={({ field }) => (
                         <Input
                           {...field}
-                          placeholder={
-                            t("apartment_suite_etc")
-                          }
+                          placeholder={t("apartment_suite_etc")}
                           className={`h-12 lg:h-14 text-base rounded-lg ${
                             errors.address_line_2 ? "border-red-500" : ""
                           }`}
@@ -677,13 +666,13 @@ export default function AddressesPage() {
                           maxLength={9}
                           className="flex-1 px-3 text-base outline-none bg-white"
                           onChange={(e) => {
-                            const raw = e.target.value.replace(/\D/g, "").slice(0, 9);
+                            const raw = e.target.value
+                              .replace(/\D/g, "")
+                              .slice(0, 9);
                             field.onChange(raw ? "+994" + raw : "");
                           }}
                           value={
-                            field.value
-                              ? field.value.replace(/^\+994/, "")
-                              : ""
+                            field.value ? field.value.replace(/^\+994/, "") : ""
                           }
                         />
                       </div>

@@ -309,7 +309,7 @@ export default function AddressSelection({
                         openDeleteModal(address);
                       }}
                       type="button"
-                      className="w-5 h-5 text-red-500 hover:text-red-700 transition-colors"
+                      className="w-5 h-5 text-red-500 hover:text-red-700 transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -319,7 +319,7 @@ export default function AddressSelection({
                         openModal(address);
                       }}
                       type="button"
-                      className="text-gray-500 hover:text-gray-700 transition-colors text-sm"
+                      className="text-gray-500 hover:text-gray-700 transition-colors text-sm cursor-pointer"
                     >
                       {t("edit")}
                     </button>
@@ -380,7 +380,7 @@ export default function AddressSelection({
           onClick={() => openModal()}
           type="button"
           variant="outline"
-          className="w-full h-12 lg:h-14 px-8 lg:px-12 text-base  rounded-full font-medium flex items-center justify-center gap-2"
+          className="w-full h-12 lg:h-14 px-8 lg:px-12 text-base  rounded-full font-medium flex items-center justify-center gap-2 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           {t("add_new_address")}
