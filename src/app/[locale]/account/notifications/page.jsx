@@ -212,9 +212,7 @@ export default function NotificationsPage() {
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4 text-gray-400">
               <BellOff className="w-14 h-14 text-gray-300" />
-              <p className="text-lg font-medium">
-                {t("no_notifications")}
-              </p>
+              <p className="text-lg font-medium">{t("no_notifications")}</p>
             </div>
           ) : (
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
@@ -225,6 +223,7 @@ export default function NotificationsPage() {
                   actionLoading={actionLoading[notification.id]}
                   onDelete={handleDelete}
                   onClick={handleNotificationClick}
+                  t={t}
                 />
               ))}
             </div>
@@ -265,7 +264,13 @@ export default function NotificationsPage() {
   );
 }
 
-function NotificationItem({ notification, actionLoading, onDelete, onClick }) {
+function NotificationItem({
+  notification,
+  actionLoading,
+  onDelete,
+  onClick,
+  t,
+}) {
   return (
     <div
       className={`flex items-start gap-3 p-4 transition-colors group cursor-pointer ${
