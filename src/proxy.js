@@ -60,7 +60,8 @@ export default async function middleware(request) {
   const currentLocale = isValidLocale ? pathnameLocale : defaultLocale;
 
   // Get the access token from cookies
-  const accessToken = request.cookies.get("access_token");
+  const accessToken =
+    request.cookies.get("access_token") ?? request.cookies.get("auth_token");
   const isAuthenticated = !!accessToken;
 
   // Get guest identifier from cookies
@@ -79,8 +80,9 @@ export default async function middleware(request) {
   // Check if the route should prevent authenticated users
   if (isAuthPreventedRoute(pathname)) {
     if (isAuthenticated) {
-      // Redirect authenticated users to account page
-      return NextResponse.redirect(new URL("/account", request.url));
+      const redirectTo =
+        request.nextUrl.searchParams.get("redirect") || "/account";
+      return NextResponse.redirect(new URL(redirectTo, request.url));
     }
   }
 

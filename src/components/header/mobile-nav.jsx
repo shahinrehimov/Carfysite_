@@ -27,9 +27,11 @@ export default function MobileNav() {
     };
 
     window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("authChange", handleStorageChange);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("authChange", handleStorageChange);
     };
   }, []);
 

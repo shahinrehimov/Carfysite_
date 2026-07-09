@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Link } from "@/i18n/routing";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { api } from "@/lib/axios";
@@ -60,9 +59,9 @@ export default function AccountMobileNav() {
 
   const isActive = (href) => {
     if (href === "/account") {
-      return pathname === href || pathname.endsWith("/account");
+      return pathname === "/account";
     }
-    return pathname?.includes(href);
+    return pathname === href || pathname?.startsWith(`${href}/`);
   };
 
   const getCurrentPageTitle = () => {

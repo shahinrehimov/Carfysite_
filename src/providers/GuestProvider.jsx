@@ -34,6 +34,9 @@ export function GuestProvider({ children }) {
 
       if (result.success && result.identifier) {
         setGuestIdentifier(result.identifier);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("guestReady"));
+        }
       }
     } catch (error) {
       console.error("Error initializing guest identifier:", error);
@@ -59,11 +62,12 @@ export function GuestProvider({ children }) {
       }
     };
 
-    // Listen for storage events (login/logout in other tabs)
     window.addEventListener("storage", handleAuthChange);
+    window.addEventListener("authChange", handleAuthChange);
 
     return () => {
       window.removeEventListener("storage", handleAuthChange);
+      window.removeEventListener("authChange", handleAuthChange);
     };
   }, []);
 

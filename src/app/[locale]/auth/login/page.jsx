@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { api } from "@/lib/axios";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { initiateAppleLogin, saveAuthSession } from "@/lib/authService";
+import { getPostLoginRedirect } from "@/lib/authRedirect";
 
 // Phone login components
 import { PhoneStep } from "./phone-login/PhoneStep";
@@ -16,6 +18,8 @@ import { EmailStep } from "./email-login/EmailStep";
 export default function LoginPage() {
   const t = useTranslations();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const postLoginRedirect = getPostLoginRedirect(searchParams);
 
   // Steps: phone, otp for phone flow
   // Steps: email for email flow
@@ -93,7 +97,7 @@ export default function LoginPage() {
       });
 
       if (saveAuthSession(response.data)) {
-        router.push("/");
+        router.push(postLoginRedirect);
       }
     } catch (err) {
       console.log(err);
@@ -145,7 +149,7 @@ export default function LoginPage() {
       });
 
       if (saveAuthSession(response.data)) {
-        router.push("/");
+        router.push(postLoginRedirect);
       }
     } catch (err) {
       setError(

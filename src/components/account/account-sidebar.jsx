@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
@@ -65,9 +65,9 @@ export default function AccountSidebar() {
 
   const isActive = (href) => {
     if (href === "/account") {
-      return pathname === href || pathname.endsWith("/account");
+      return pathname === "/account";
     }
-    return pathname?.includes(href);
+    return pathname === href || pathname?.startsWith(`${href}/`);
   };
 
   const handleLogout = async () => {

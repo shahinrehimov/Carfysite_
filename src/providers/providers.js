@@ -5,6 +5,7 @@ import { store } from "@/store";
 import { GuestProvider } from "./GuestProvider";
 import { ToastProvider } from "./ToastProvider";
 import { EmailVerificationProvider } from "./EmailVerificationProvider";
+import CartAuthSync from "@/components/cart/cart-auth-sync";
 
 export function Providers({ children, locale, messages }) {
   function onError(error) {
@@ -19,6 +20,7 @@ export function Providers({ children, locale, messages }) {
       timeZone="Asia/Baku"
     >
       <Provider store={store}>
+        <CartAuthSync />
         <GuestProvider>
           <ToastProvider>
             <EmailVerificationProvider>
