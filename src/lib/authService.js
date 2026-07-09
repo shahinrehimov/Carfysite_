@@ -35,18 +35,29 @@ export function saveAuthSession(data) {
   return true;
 }
 
-/**
- * Start Apple web redirect flow (GET /auth/apple → redirect to Apple).
- */
-export async function initiateAppleLogin() {
-  const response = await api.get("/auth/apple");
+async function initiateOAuthLogin(provider) {
+  const response = await api.get(`/auth/${provider}`);
 
   if (response.data?.step === "redirect" && response.data?.url) {
     window.location.href = response.data.url;
     return;
   }
 
-  throw new Error("Invalid Apple login response");
+  throw new Error(`Invalid ${provider} login response`);
+}
+
+/**
+ * Start Apple web redirect flow (GET /auth/apple → redirect to Apple).
+ */
+export async function initiateAppleLogin() {
+  return initiateOAuthLogin("apple");
+}
+
+/**
+ * Start Google web redirect flow (GET /auth/google → redirect to Google).
+ */
+export async function initiateGoogleLogin() {
+  return initiateOAuthLogin("google");
 }
 
 /**

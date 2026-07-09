@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/axios";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
+import { initiateAppleLogin, initiateGoogleLogin } from "@/lib/authService";
 
 // Phone registration components
 import { PhoneStep } from "./phone-registration/PhoneStep";
@@ -158,6 +159,21 @@ export default function RegisterPage() {
     }
   };
 
+  const handleThirdPartySignIn = async (initiateLogin) => {
+    setError("");
+    setLoading(true);
+
+    try {
+      await initiateLogin();
+    } catch (err) {
+      setError(err.response?.data?.message || t("login_failed"));
+      setLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = () => handleThirdPartySignIn(initiateAppleLogin);
+  const handleGoogleSignIn = () => handleThirdPartySignIn(initiateGoogleLogin);
+
   // ========== EMAIL REGISTRATION HANDLERS ==========
   const handleEmailCheckSubmit = async (data) => {
     setError("");
@@ -297,6 +313,8 @@ export default function RegisterPage() {
             {step === "email-check" && activeTab === "email" && (
               <EmailCheckStep
                 onSubmit={handleEmailCheckSubmit}
+                onAppleSignIn={handleAppleSignIn}
+                onGoogleSignIn={handleGoogleSignIn}
                 loading={loading}
                 error={error}
               />

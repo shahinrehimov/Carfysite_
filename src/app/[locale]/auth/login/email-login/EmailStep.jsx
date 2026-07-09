@@ -9,7 +9,7 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useState } from "react";
 
-export function EmailStep({ onSubmit, onAppleSignIn, loading, error }) {
+export function EmailStep({ onSubmit, onAppleSignIn, onGoogleSignIn, loading, error }) {
   const t = useTranslations();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -19,8 +19,7 @@ export function EmailStep({ onSubmit, onAppleSignIn, loading, error }) {
   });
 
   const handleGoogleSignIn = () => {
-    // TODO: Implement Google OAuth
-    console.log("Google sign in");
+    onGoogleSignIn?.();
   };
 
   const handleAppleSignIn = () => {
@@ -149,7 +148,8 @@ export function EmailStep({ onSubmit, onAppleSignIn, loading, error }) {
         <button
           type="button"
           onClick={handleGoogleSignIn}
-          className="w-full px-6 py-4 rounded-full border-2 border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 font-semibold text-gray-900"
+          disabled={loading}
+          className="w-full px-6 py-4 rounded-full border-2 border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 font-semibold text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Image
             src="/icons/google-icon.svg"

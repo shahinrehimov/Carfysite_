@@ -43,7 +43,7 @@ export default async function Footer() {
       href: "/pages/delivery",
       label: t("delivery"),
     },
-    { href: "/pages/faq", label: t("faq") },
+    { href: "/faq", label: t("faq") },
     { href: "/contact", label: t("contact") },
   ];
 

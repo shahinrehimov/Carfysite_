@@ -8,7 +8,13 @@ import { emailCheckSchema } from "../validation-schemas";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 
-export function EmailCheckStep({ onSubmit, loading, error }) {
+export function EmailCheckStep({
+  onSubmit,
+  onAppleSignIn,
+  onGoogleSignIn,
+  loading,
+  error,
+}) {
   const t = useTranslations();
 
   const emailForm = useForm({
@@ -17,13 +23,11 @@ export function EmailCheckStep({ onSubmit, loading, error }) {
   });
 
   const handleGoogleSignIn = () => {
-    // TODO: Implement Google OAuth
-    console.log("Google sign in");
+    onGoogleSignIn?.();
   };
 
   const handleAppleSignIn = () => {
-    // TODO: Implement Apple OAuth
-    console.log("Apple sign in");
+    onAppleSignIn?.();
   };
 
   return (
@@ -75,7 +79,8 @@ export function EmailCheckStep({ onSubmit, loading, error }) {
         <button
           type="button"
           onClick={handleGoogleSignIn}
-          className="w-full px-6 py-4 rounded-full border-2 border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 font-semibold text-gray-900"
+          disabled={loading}
+          className="w-full px-6 py-4 rounded-full border-2 border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 font-semibold text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Image
             src="/icons/google-icon.svg"
@@ -90,7 +95,8 @@ export function EmailCheckStep({ onSubmit, loading, error }) {
         <button
           type="button"
           onClick={handleAppleSignIn}
-          className="w-full px-6 py-4 rounded-full border-2 border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 font-semibold text-gray-900"
+          disabled={loading}
+          className="w-full px-6 py-4 rounded-full border-2 border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 font-semibold text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Image
             src="/icons/apple-icon.svg"
@@ -110,11 +116,14 @@ export function EmailCheckStep({ onSubmit, loading, error }) {
 
         <p className="text-center text-xs text-gray-500 leading-relaxed">
           {t("register_terms_text")}{" "}
-          <Link href="/terms" className="text-blue-600 underline">
+          <Link href="/pages/terms_of_use" className="text-blue-600 underline">
             {t("terms_of_use")}
           </Link>{" "}
           {t("and")}{" "}
-          <Link href="/privacy" className="text-blue-600 underline">
+          <Link
+            href="/pages/privacy_policy"
+            className="text-blue-600 underline"
+          >
             {t("privacy_policy")}
           </Link>{" "}
           {t("agree_with")}.

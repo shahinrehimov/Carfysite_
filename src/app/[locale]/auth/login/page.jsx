@@ -5,7 +5,11 @@ import { api } from "@/lib/axios";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
-import { initiateAppleLogin, saveAuthSession } from "@/lib/authService";
+import {
+  initiateAppleLogin,
+  initiateGoogleLogin,
+  saveAuthSession,
+} from "@/lib/authService";
 import { getPostLoginRedirect } from "@/lib/authRedirect";
 
 // Phone login components
@@ -124,17 +128,20 @@ export default function LoginPage() {
     }
   };
 
-  const handleAppleSignIn = async () => {
+  const handleThirdPartySignIn = async (initiateLogin) => {
     setError("");
     setLoading(true);
 
     try {
-      await initiateAppleLogin();
+      await initiateLogin();
     } catch (err) {
       setError(err.response?.data?.message || t("login_failed"));
       setLoading(false);
     }
   };
+
+  const handleAppleSignIn = () => handleThirdPartySignIn(initiateAppleLogin);
+  const handleGoogleSignIn = () => handleThirdPartySignIn(initiateGoogleLogin);
 
   // ========== EMAIL LOGIN HANDLERS ==========
   const handleEmailSubmit = async (data) => {
@@ -200,6 +207,7 @@ export default function LoginPage() {
               <PhoneStep
                 onSubmit={handlePhoneSubmit}
                 onAppleSignIn={handleAppleSignIn}
+                onGoogleSignIn={handleGoogleSignIn}
                 loading={loading}
                 error={error}
               />
@@ -222,6 +230,7 @@ export default function LoginPage() {
               <EmailStep
                 onSubmit={handleEmailSubmit}
                 onAppleSignIn={handleAppleSignIn}
+                onGoogleSignIn={handleGoogleSignIn}
                 loading={loading}
                 error={error}
               />
