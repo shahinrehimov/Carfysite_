@@ -231,7 +231,7 @@ export default function ProfilePage() {
   const handleDeleteAccount = async () => {
     setDeleteLoading(true);
     try {
-      await api.post("/profile/delete-account");
+      await api.delete("/profile/delete-account");
       logout();
       router.replace("/");
     } catch (err) {
