@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/axios";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { setCookie, deleteCookie } from "cookies-next";
+import { initiateAppleLogin, saveAuthSession } from "@/lib/authService";
 
 // Phone login components
 import { PhoneStep } from "./phone-login/PhoneStep";
@@ -92,36 +92,7 @@ export default function LoginPage() {
         otp: parseInt(data.otp),
       });
 
-      if (response.data.token) {
-        // Store token in cookies (using both access_token and auth_token for compatibility)
-        setCookie("access_token", response.data.token, {
-          maxAge: 30 * 24 * 60 * 60, // 30 days
-          secure: process.env.NODE_ENV === "production",
-          httpOnly: false, // Allow client-side access for axios interceptor
-          sameSite: "lax",
-        });
-
-        setCookie("auth_token", response.data.token, {
-          maxAge: 30 * 24 * 60 * 60, // 30 days
-          secure: process.env.NODE_ENV === "production",
-          httpOnly: false,
-          sameSite: "lax",
-        });
-
-        // Store user data in cookies
-        setCookie("user_data", JSON.stringify(response.data.data), {
-          maxAge: 30 * 24 * 60 * 60, // 30 days
-          secure: process.env.NODE_ENV === "production",
-          httpOnly: false,
-          sameSite: "lax",
-        });
-
-        // Clear guest identifier when user logs in
-        deleteCookie("guest_identifier");
-
-        window.dispatchEvent(new Event("authChange"));
-
-        // Redirect to home or dashboard
+      if (saveAuthSession(response.data)) {
         router.push("/");
       }
     } catch (err) {
@@ -149,6 +120,18 @@ export default function LoginPage() {
     }
   };
 
+  const handleAppleSignIn = async () => {
+    setError("");
+    setLoading(true);
+
+    try {
+      await initiateAppleLogin();
+    } catch (err) {
+      setError(err.response?.data?.message || t("login_failed"));
+      setLoading(false);
+    }
+  };
+
   // ========== EMAIL LOGIN HANDLERS ==========
   const handleEmailSubmit = async (data) => {
     setError("");
@@ -161,36 +144,7 @@ export default function LoginPage() {
         password: data.password,
       });
 
-      if (response.data.token) {
-        // Store token in cookies (using both access_token and auth_token for compatibility)
-        setCookie("access_token", response.data.token, {
-          maxAge: 30 * 24 * 60 * 60, // 30 days
-          secure: process.env.NODE_ENV === "production",
-          httpOnly: false, // Allow client-side access for axios interceptor
-          sameSite: "lax",
-        });
-
-        setCookie("auth_token", response.data.token, {
-          maxAge: 30 * 24 * 60 * 60, // 30 days
-          secure: process.env.NODE_ENV === "production",
-          httpOnly: false,
-          sameSite: "lax",
-        });
-
-        // Store user data in cookies
-        setCookie("user_data", JSON.stringify(response.data.data), {
-          maxAge: 30 * 24 * 60 * 60, // 30 days
-          secure: process.env.NODE_ENV === "production",
-          httpOnly: false,
-          sameSite: "lax",
-        });
-
-        // Clear guest identifier when user logs in
-        deleteCookie("guest_identifier");
-
-        window.dispatchEvent(new Event("authChange"));
-
-        // Redirect to home or dashboard
+      if (saveAuthSession(response.data)) {
         router.push("/");
       }
     } catch (err) {
@@ -241,6 +195,7 @@ export default function LoginPage() {
             {step === "phone" && activeTab === "phone" && (
               <PhoneStep
                 onSubmit={handlePhoneSubmit}
+                onAppleSignIn={handleAppleSignIn}
                 loading={loading}
                 error={error}
               />
@@ -262,6 +217,7 @@ export default function LoginPage() {
             {step === "email" && activeTab === "email" && (
               <EmailStep
                 onSubmit={handleEmailSubmit}
+                onAppleSignIn={handleAppleSignIn}
                 loading={loading}
                 error={error}
               />

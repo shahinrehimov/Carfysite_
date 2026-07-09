@@ -9,7 +9,7 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useState } from "react";
 
-export function EmailStep({ onSubmit, loading, error }) {
+export function EmailStep({ onSubmit, onAppleSignIn, loading, error }) {
   const t = useTranslations();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -24,8 +24,7 @@ export function EmailStep({ onSubmit, loading, error }) {
   };
 
   const handleAppleSignIn = () => {
-    // TODO: Implement Apple OAuth
-    console.log("Apple sign in");
+    onAppleSignIn?.();
   };
 
   return (
@@ -165,7 +164,8 @@ export function EmailStep({ onSubmit, loading, error }) {
         <button
           type="button"
           onClick={handleAppleSignIn}
-          className="w-full px-6 py-4 rounded-full border-2 border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 font-semibold text-gray-900"
+          disabled={loading}
+          className="w-full px-6 py-4 rounded-full border-2 border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 font-semibold text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Image
             src="/icons/apple-icon.svg"
