@@ -5,24 +5,24 @@ import Link from "next/link";
 function CategoryCards({ categories = [] }) {
   return (
     <section className="container py-12 md:py-16 lg:py-20">
-      <div className="grid grid-cols-4 md:grid-cols-6 gap-3 md:gap-4 lg:gap-6">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4 lg:gap-6">
         {categories.map((category) => (
           <Link
             key={category.id}
             href={`/products?categories[]=${category.id}`}
-            className="group relative flex flex-col items-center justify-center bg-white rounded-xl md:rounded-2xl p-2 md:p-4 lg:p-6 shadow-sm card-hover border border-gray-100 hover:border-blue/30 hover:-translate-y-0.5"
+            className="group relative flex h-full flex-col items-center justify-start bg-white rounded-xl md:rounded-2xl p-2 md:p-4 lg:p-6 shadow-sm card-hover border border-gray-100 hover:border-blue/30 hover:-translate-y-0.5"
           >
-            <div className="relative w-full aspect-square mb-1.5 md:mb-3 lg:mb-4 flex items-center justify-center">
+            <div className="relative w-[50px] h-[50px] md:w-[70px] md:h-[70px] lg:w-[100px] lg:h-[100px] mb-1.5 md:mb-3 lg:mb-4 flex items-center justify-center shrink-0">
               <Image
                 src={category.image}
                 alt={category.title}
                 width={100}
                 height={100}
-                className="w-full max-w-[50px] lg:max-w-[100px] h-full object-contain transition-transform duration-300 ease-out group-hover:scale-105"
+                className="w-full h-full object-contain transition-transform duration-300 ease-out group-hover:scale-105"
               />
             </div>
 
-            <h3 className="text-center text-[10px] md:text-sm lg:text-base font-medium text-gray-800 leading-tight">
+            <h3 className="w-full text-center text-[10px] md:text-sm lg:text-base font-medium text-gray-800 leading-tight">
               {category.title}
             </h3>
           </Link>
