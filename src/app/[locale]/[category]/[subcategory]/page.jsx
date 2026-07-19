@@ -16,14 +16,10 @@ import { generateServiceUrl } from "@/lib/generateServiceUrl";
 const getProduct = async (category, subcategory, seller, variant) => {
   try {
     const response = await serverApi.get(
-      `/products/show/${category}/${subcategory}?seller=${seller}&variant=${variant}&with_related=yes`
+      `/products/show/${category}/${subcategory}?seller=${seller}${variant ? `&variant=${variant}` : ""}&with_related=yes`
     );
     return response.data.data;
   } catch (error) {
-    console.error(
-      "Errorraaaa:",
-      error?.response?.data?.message ?? error.message
-    );
     return null;
   }
 };

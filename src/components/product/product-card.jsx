@@ -11,6 +11,7 @@ import { wishlistService } from "@/lib/wishlistService";
 import { setBasketData, setLoading, setError } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 import { useTranslations } from "next-intl";
+import { getProductUrl } from "@/lib/getProductUrl";
 
 export default function ProductCard({ product }) {
   const t = useTranslations();
@@ -24,7 +25,6 @@ export default function ProductCard({ product }) {
   const productData = product.product || product;
   const imageUrl = productData.hover_image || "/images/product-placeholder.png";
   const title = product.title || productData.title || t("product");
-  const slug = product.slug || productData.slug;
   const price = product.price_final || product.price || 0;
   const oldPrice = product.has_discount ? product.price : price;
   const hasDiscount = product.has_discount && oldPrice > price;
@@ -94,7 +94,8 @@ export default function ProductCard({ product }) {
       toast({
         title: t("failed_to_add_to_cart"),
         description:
-          error?.response?.data?.message || t("failed_to_add_to_cart_description"),
+          error?.response?.data?.message ||
+          t("failed_to_add_to_cart_description"),
         variant: "error",
       });
       dispatch(setError(error.message));
@@ -107,13 +108,10 @@ export default function ProductCard({ product }) {
   return (
     <div
       className=" cursor-pointer bg-white rounded-[20px] p-3 lg:p-5 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col"
-      onClick={() =>
-        router.push(
-          product.product.category_slugs.parent_category_slug
-            ? `/${product.product.category_slugs.parent_category_slug}/${product.product.category_slugs.sub_category_slug}/${slug}?seller=${product.seller.store_code}${product.variant_slug ? `&variant=${product.variant_slug}` : ""}`
-            : `/${product.product.category_slugs.sub_category_slug}/${slug}?seller=${product.seller.store_code}${product.variant_slug ? `&variant=${product.variant_slug}` : ""}`
-        )
-      }
+      onClick={() => {
+        const url = getProductUrl(product);
+        if (url) router.push(url);
+      }}
     >
       {/* Image Container */}
       <div className="relative mb-3 lg:mb-4 aspect-square">
