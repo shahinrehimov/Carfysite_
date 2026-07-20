@@ -65,7 +65,7 @@ export default async function ProductDetail({ params, searchParams }) {
                     {
                       id: 2,
                       type: "link",
-                      href: `/${data.product.main_category.slug}`,
+                      href: `/products?categories[]=${data.product.main_category.slug}`,
                       title: data.product.main_category.title,
                     },
                   ]

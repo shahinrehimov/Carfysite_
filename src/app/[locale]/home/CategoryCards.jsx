@@ -9,7 +9,7 @@ function CategoryCards({ categories = [] }) {
         {categories.map((category) => (
           <Link
             key={category.id}
-            href={`/products?categories[]=${category.id}`}
+            href={`/products?categories[]=${category.slug}`}
             className="group relative flex h-full flex-col items-center justify-start bg-white rounded-xl md:rounded-2xl p-2 md:p-4 lg:p-6 shadow-sm card-hover border border-gray-100 hover:border-blue/30 hover:-translate-y-0.5"
           >
             <div className="relative w-[50px] h-[50px] md:w-[70px] md:h-[70px] lg:w-[100px] lg:h-[100px] mb-1.5 md:mb-3 lg:mb-4 flex items-center justify-center shrink-0">
