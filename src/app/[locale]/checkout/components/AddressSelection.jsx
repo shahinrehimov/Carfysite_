@@ -9,15 +9,27 @@ import { ChevronDown, X, Check, Trash2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { addressService } from "@/lib/addressService";
 import { useTranslations } from "next-intl";
-import Map from "@/components/ui/map";
+import dynamic from "next/dynamic";
+
+const Map = dynamic(() => import("@/components/ui/map"), { ssr: false });
+
+const emptyStringToUndefined = (value, originalValue) =>
+  originalValue === "" || originalValue === null ? undefined : value;
 
 // Validation schema for address
 const addressSchema = yup.object().shape({
   address_type_id: yup
     .number()
+    .transform(emptyStringToUndefined)
+    .typeError("address_type_required")
     .required("address_type_required")
     .positive("address_type_required"),
-  city_id: yup.number().required("city_required").positive("city_required"),
+  city_id: yup
+    .number()
+    .transform(emptyStringToUndefined)
+    .typeError("city_required")
+    .required("city_required")
+    .positive("city_required"),
   address_line_1: yup
     .string()
     .required("address_line_1_required")
@@ -456,7 +468,7 @@ export default function AddressSelection({
                               ? addressTypes.find(
                                   (type) => type.id === field.value
                                 )?.title
-                              : "Select address type"}
+                              : t("select")}
                           </span>
                           <ChevronDown
                             className={`w-4 h-4 text-gray-400 transition-transform ${
@@ -524,7 +536,7 @@ export default function AddressSelection({
                             {field.value
                               ? cities.find((city) => city.id === field.value)
                                   ?.title
-                              : "Select city"}
+                              : t("select")}
                           </span>
                           <ChevronDown
                             className={`w-4 h-4 text-gray-400 transition-transform ${

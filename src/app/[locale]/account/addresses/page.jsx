@@ -16,12 +16,22 @@ import { AccountGridLoading } from "@/components/account/account-loading";
 const Map = dynamic(() => import("@/components/ui/map"), { ssr: false });
 
 // Validation schema for address
+const emptyStringToUndefined = (value, originalValue) =>
+  originalValue === "" || originalValue === null ? undefined : value;
+
 const addressSchema = yup.object().shape({
   address_type_id: yup
     .number()
+    .transform(emptyStringToUndefined)
+    .typeError("address_type_required")
     .required("address_type_required")
     .positive("address_type_required"),
-  city_id: yup.number().required("city_required").positive("city_required"),
+  city_id: yup
+    .number()
+    .transform(emptyStringToUndefined)
+    .typeError("city_required")
+    .required("city_required")
+    .positive("city_required"),
   address_line_1: yup
     .string()
     .required("address_line_1_required")
