@@ -10,8 +10,10 @@ import { cn } from "@/lib/utils";
 import { addressService } from "@/lib/addressService";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/axios/api";
-import Map from "@/components/ui/map";
+import dynamic from "next/dynamic";
 import { AccountGridLoading } from "@/components/account/account-loading";
+
+const Map = dynamic(() => import("@/components/ui/map"), { ssr: false });
 
 // Validation schema for address
 const addressSchema = yup.object().shape({
@@ -73,17 +75,13 @@ export default function AddressesPage() {
     },
   });
 
-  // Load initial data (address types and cities)
+  // Load initial data (address types and cities) and addresses on mount.
+  // These run independently so addresses still load even if the services
+  // lookup call fails or returns empty lists.
   useEffect(() => {
     loadInitialData();
+    loadAddresses();
   }, []);
-
-  // Load addresses on component mount
-  useEffect(() => {
-    if (addressTypes.length > 0 && cities.length > 0) {
-      loadAddresses();
-    }
-  }, [addressTypes, cities]);
 
   // Update form defaults when addressTypes are loaded
   useEffect(() => {

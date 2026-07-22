@@ -29,6 +29,8 @@ const NONE = "none";
 export default function CarModal({ isOpen, onClose, onSave, car = null, libraries }) {
   const t = useTranslations();
   const y0 = new Date().getFullYear();
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     brandId: "",
     brandModelId: "",
@@ -49,6 +51,8 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
 
   useEffect(() => {
     if (!isOpen) return;
+    setError("");
+    setSubmitting(false);
     if (car) {
       setFormData({
         brandId: car.brandId != null ? String(car.brandId) : "",
@@ -138,8 +142,16 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
       seats: formData.seats,
     };
 
-    const ok = await onSave(payload);
-    if (ok !== false) onClose();
+    setError("");
+    setSubmitting(true);
+    const res = await onSave(payload);
+    setSubmitting(false);
+
+    if (res && res.success === false) {
+      setError(res.error || t("error_occurred"));
+      return;
+    }
+    onClose();
   };
 
   const handleImageUpload = (e) => {
@@ -469,9 +481,18 @@ export default function CarModal({ isOpen, onClose, onSave, car = null, librarie
           </div>
 
           <div className="mt-6">
+            {error ? (
+              <p
+                className="mb-3 text-sm text-red-600 text-center"
+                role="alert"
+              >
+                {error}
+              </p>
+            ) : null}
             <Button
               type="submit"
-              className="w-full bg-[#4A90E2] hover:bg-[#357ABD] text-white py-6 text-base font-medium rounded-full"
+              disabled={submitting}
+              className="w-full bg-[#4A90E2] hover:bg-[#357ABD] text-white py-6 text-base font-medium rounded-full disabled:opacity-60"
             >
               {t("cars_add_submit")}
             </Button>

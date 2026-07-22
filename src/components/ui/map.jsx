@@ -8,6 +8,7 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { useTranslations } from "next-intl";
 
 // Fix for default markers in React Leaflet
@@ -30,6 +31,32 @@ function MapUpdater({ position }) {
       map.setView(position, map.getZoom());
     }
   }, [map, position]);
+
+  return null;
+}
+
+// Recalculate map size once the container has its final dimensions.
+// Needed because the map is rendered inside an animated modal, so tiles
+// misalign if the size is computed before the animation settles.
+function MapResizer() {
+  const map = useMap();
+
+  useEffect(() => {
+    const invalidate = () => map.invalidateSize();
+
+    // Run after mount and after the modal open animation (~300ms).
+    invalidate();
+    const timers = [
+      setTimeout(invalidate, 100),
+      setTimeout(invalidate, 400),
+    ];
+
+    window.addEventListener("resize", invalidate);
+    return () => {
+      timers.forEach(clearTimeout);
+      window.removeEventListener("resize", invalidate);
+    };
+  }, [map]);
 
   return null;
 }
@@ -133,13 +160,13 @@ export default function Map({
         zoom={13}
         style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={true}
-        key={`${position[0]}-${position[1]}`} // Force re-render when position changes
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        <MapResizer />
         <MapUpdater position={position} />
         <Marker position={position} />
 

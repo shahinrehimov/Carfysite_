@@ -68,8 +68,7 @@ export default function MyCarsPage() {
     const fd = buildCarFormData(formPayload);
     const res = await profileCarsService.addCar(fd);
     if (!res.success) {
-      setLoadError(res.error);
-      return false;
+      return { success: false, error: res.error };
     }
     const mapped = mapApiCarToUi(res.car);
     if (mapped) {
@@ -77,15 +76,14 @@ export default function MyCarsPage() {
     } else {
       await refreshCars();
     }
-    return true;
+    return { success: true };
   };
 
   const handleSaveCar = async (carId, formPayload) => {
     const fd = buildCarFormData(formPayload);
     const res = await profileCarsService.updateCar(carId, fd);
     if (!res.success) {
-      setLoadError(res.error);
-      return false;
+      return { success: false, error: res.error };
     }
     const mapped = mapApiCarToUi(res.car);
     setCars((prev) =>
@@ -95,7 +93,7 @@ export default function MyCarsPage() {
         return mergeCosmeticFromForm({ ...c, ...formPayload }, formPayload);
       })
     );
-    return true;
+    return { success: true };
   };
 
   const handleDeleteCar = async (carId) => {

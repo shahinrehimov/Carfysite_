@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
 import {
   yearOptions,
   profileCarsService,
@@ -40,6 +41,7 @@ export default function CarCard({
   onError,
 }) {
   const t = useTranslations();
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeletePhotoModal, setShowDeletePhotoModal] = useState(false);
@@ -49,6 +51,8 @@ export default function CarCard({
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [editOpenLoading, setEditOpenLoading] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveSubmitting, setSaveSubmitting] = useState(false);
   const fileInputRef = useRef(null);
   const y0 = new Date().getFullYear();
 
@@ -106,8 +110,14 @@ export default function CarCard({
       seats: editData.seats ?? "",
     };
 
+    setSaveError("");
+    setSaveSubmitting(true);
     const saved = await onSave(car.id, payload);
-    if (saved === false) return;
+    setSaveSubmitting(false);
+    if (saved === false || saved?.success === false) {
+      setSaveError(saved?.error || t("error_occurred"));
+      return;
+    }
     setIsEditing(false);
     setPhotoFile(null);
     setPhotoPreview(null);
@@ -117,11 +127,19 @@ export default function CarCard({
     setEditData(car);
     setPhotoFile(null);
     setPhotoPreview(null);
+    setSaveError("");
     setIsEditing(false);
   };
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
+  };
+
+  const handleSearchByCar = () => {
+    if (car.id == null) return;
+    const params = new URLSearchParams();
+    params.set("user_car_id", String(car.id));
+    router.push(`/products?${params.toString()}`);
   };
 
   const mergeListCosmetic = (fromApi, listCar) => ({
@@ -137,6 +155,7 @@ export default function CarCard({
     setEditOpenLoading(false);
     setPhotoFile(null);
     setPhotoPreview(null);
+    setSaveError("");
     if (res.success && res.car) {
       const mapped = mapApiCarToUi(res.car);
       if (mapped) {
@@ -541,9 +560,15 @@ export default function CarCard({
             </Select>
           </div>
           <div className="flex flex-col gap-4 justify-end">
+            {saveError ? (
+              <p className="text-sm text-red-600" role="alert">
+                {saveError}
+              </p>
+            ) : null}
             <Button
               onClick={handleSave}
-              className="w-full bg-[#4A90E2] hover:bg-[#357ABD] text-white py-6 text-base font-medium rounded-full"
+              disabled={saveSubmitting}
+              className="w-full bg-[#4A90E2] hover:bg-[#357ABD] text-white py-6 text-base font-medium rounded-full disabled:opacity-60"
             >
               {t("cars_save")}
             </Button>
@@ -587,6 +612,8 @@ export default function CarCard({
             <Button
               variant="primary"
               size="lg"
+              type="button"
+              onClick={handleSearchByCar}
               className=" h-[48px] lg:h-[60px] cursor-pointer w-[300px]"
             >
               <Image src="/icons/car.svg" alt="car" width={20} height={20} />
@@ -681,6 +708,8 @@ export default function CarCard({
         <Button
           variant="primary"
           size="lg"
+          type="button"
+          onClick={handleSearchByCar}
           className=" h-[48px] lg:h-[60px] cursor-pointer w-full"
         >
           <Image src="/icons/car.svg" alt="car" width={20} height={20} />
