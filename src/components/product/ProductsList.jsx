@@ -5,7 +5,11 @@ import { api } from "@/lib/axios";
 import { SearchX, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-export default function ProductsList({ initialProducts, initialMeta, filterQueryString = "" }) {
+export default function ProductsList({
+  initialProducts,
+  initialMeta,
+  filterQueryString = "",
+}) {
   const t = useTranslations();
   const [products, setProducts] = useState(initialProducts);
   const [meta, setMeta] = useState(initialMeta);
@@ -48,7 +52,9 @@ export default function ProductsList({ initialProducts, initialMeta, filterQuery
         <div className="w-20 h-20 rounded-full bg-[#cee5f8] flex items-center justify-center">
           <SearchX className="w-9 h-9 text-[#3696e7]" strokeWidth={1.5} />
         </div>
-        <p className="text-lg text-gray-500 font-light">{t("no_results_found")}</p>
+        <p className="text-lg text-gray-500 font-light">
+          {t("no_results_found")}
+        </p>
       </div>
     );
   }
@@ -56,7 +62,7 @@ export default function ProductsList({ initialProducts, initialMeta, filterQuery
   return (
     <>
       {/* Products Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
         {products.map((item, index) => (
           <div
             key={item.uuid}
@@ -87,4 +93,3 @@ export default function ProductsList({ initialProducts, initialMeta, filterQuery
     </>
   );
 }
-

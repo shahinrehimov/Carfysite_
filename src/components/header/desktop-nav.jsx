@@ -105,21 +105,6 @@ export default function DesktopNav() {
             </>
           )}
         </div>
-
-        <div className="flex items-center gap-2 text-[#1A1A1A]">
-          <Image
-            src="/icons/location.svg"
-            alt="location"
-            width={20}
-            height={20}
-            className="w-5 h-5"
-          />
-          <span className="text-sm">{t("city")}:</span>
-          <button className="flex items-center gap-1 font-medium ">
-            <span className="text-sm">{selectedCity ?? t("default_city")}</span>
-            <ChevronDown size={16} />
-          </button>
-        </div>
       </div>
 
       <div className="flex items-center gap-6">

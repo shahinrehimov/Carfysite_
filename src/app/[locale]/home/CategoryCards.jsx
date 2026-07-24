@@ -5,7 +5,7 @@ import Link from "next/link";
 function CategoryCards({ categories = [] }) {
   return (
     <section className="container py-12 md:py-16 lg:py-20">
-      <div className="grid grid-cols-4 md:grid-cols-6 gap-3 md:gap-4 lg:gap-6">
+      <div className="grid grid-cols-5 md:grid-cols-6 gap-3 md:gap-4 lg:gap-6">
         {categories.map((category) => (
           <Link
             key={category.id}
@@ -22,7 +22,7 @@ function CategoryCards({ categories = [] }) {
               />
             </div>
 
-            <h3 className="w-full text-center text-[10px] md:text-sm lg:text-base font-medium text-gray-800 leading-tight">
+            <h3 className="w-full text-center text-[8px] md:text-sm lg:text-base font-medium text-gray-800 leading-tight">
               {category.title}
             </h3>
           </Link>

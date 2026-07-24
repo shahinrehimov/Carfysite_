@@ -164,18 +164,23 @@ export default function ProductCard({ product }) {
         </p>
       )}
 
-      {/* Rating - Placeholder for now */}
+      {/* Rating */}
       <div className="flex items-center gap-1 lg:gap-2 mb-3 lg:mb-4">
         <div className="flex gap-0.5">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              className="w-4 h-4 lg:w-5 lg:h-5 fill-[#FF6B35] text-[#FF6B35]"
+              className={cn(
+                "w-3.5 h-3.5 lg:w-4 lg:h-4",
+                i < Math.round(product.ratings?.average || 0)
+                  ? "fill-[#FF6B35] text-[#FF6B35]"
+                  : "fill-gray-200 text-gray-200"
+              )}
             />
           ))}
         </div>
-        <span className="text-[11px] lg:text-[13px] text-gray-600">
-          ({t("zero_ratings")})
+        <span className="text-[8px] lg:text-[12px] text-gray-600">
+          {product.ratings?.count || 0} {t("ratings")}
         </span>
       </div>
 
