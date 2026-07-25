@@ -267,7 +267,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
         className={cn(
           "w-full max-w-full min-w-0 overflow-x-hidden bg-[#FFFFFF52] rounded-[24px] lg:rounded-[40px] backdrop-blur-lg box-shadow-[0px_2px_16px_0px_#0000001F] p-4",
           type == "banner"
-            ? "absolute bottom-[-30px] left-0 right-0 mx-auto px-4 lg:container"
+            ? "absolute bottom-[-30px] left-0 right-0 mx-auto px-4 lg:w-[min(92vw,96rem)]"
             : "container"
         )}
       >

@@ -14,7 +14,7 @@ function AllProducts({ products = [] }) {
     <div className="pt-12 pb-30">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-[24px] font-semibold text-gray-900">
+        <h2 className="lg:text-[24px] font-medium lg:font-semibold text-gray-900">
           {t("all_products")}
         </h2>
       </div>
