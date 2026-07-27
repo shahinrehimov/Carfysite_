@@ -54,8 +54,10 @@ export const cartSlice = createSlice({
     },
     removeItem: (state, action) => {
       const { productId, basket_data } = action.payload;
-      state.items = state.items.filter(item => item.id !== productId);
-      
+      state.items = state.items.filter(
+        (item) => item.uuid !== productId && item.id !== productId
+      );
+
       if (basket_data) {
         state.basketData = basket_data;
       }

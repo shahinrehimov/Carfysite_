@@ -35,9 +35,7 @@ export default async function CartPage() {
           <h2 className="text-2xl font-semibold text-[#1A1A1A] mb-4">
             {t("cart-empty")}
           </h2>
-          <p className="text-gray-500 mb-8">
-            {t("cart_empty_description")}
-          </p>
+          <p className="text-gray-500 mb-8">{t("cart_empty_description")}</p>
           <Button asChild variant="primary" size="lg">
             <Link href="/">{t("continue_shopping")}</Link>
           </Button>

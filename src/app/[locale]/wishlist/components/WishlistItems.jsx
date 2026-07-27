@@ -10,7 +10,9 @@ export default function WishlistItems({ initialProducts }) {
 
   const handleFavoriteToggle = async (productId) => {
     // Remove from the list when unfavorited
-    setFavoriteProducts((prev) => prev.filter((product) => product.id !== productId));
+    setFavoriteProducts((prev) =>
+      prev.filter((product) => product.id !== productId)
+    );
   };
 
   if (favoriteProducts.length === 0) {
@@ -29,7 +31,7 @@ export default function WishlistItems({ initialProducts }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5 pb-10">
       {favoriteProducts.map((product) => (
-        <div key={product.id}>
+        <div key={product.uuid}>
           <ProductCard
             product={product}
             onFavoriteToggle={() => handleFavoriteToggle(product.id)}
@@ -39,4 +41,3 @@ export default function WishlistItems({ initialProducts }) {
     </div>
   );
 }
-

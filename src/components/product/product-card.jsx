@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
@@ -18,6 +18,12 @@ export default function ProductCard({ product }) {
   const [isLiked, setIsLiked] = useState(product.in_wishlist || false);
   const [inBasket, setInBasket] = useState(product.in_basket || false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isUpdatingWishlist, setIsUpdatingWishlist] = useState(false);
+
+  useEffect(() => {
+    setIsLiked(product.in_wishlist || false);
+    setInBasket(product.in_basket || false);
+  }, [product?.uuid, product.in_wishlist, product.in_basket]);
   const router = useRouter();
   const dispatch = useDispatch();
   const { toast } = useToast();
@@ -29,7 +35,7 @@ export default function ProductCard({ product }) {
   const oldPrice = product.has_discount ? product.price : price;
   const hasDiscount = product.has_discount && oldPrice > price;
 
-  // Handle wishlist toggle
+  // Handle wishlist toggle (optimistic UI)
   const handleWishlistToggle = async (e) => {
     e.stopPropagation();
 
@@ -38,10 +44,19 @@ export default function ProductCard({ product }) {
       return;
     }
 
+    if (isUpdatingWishlist) {
+      return;
+    }
+
+    const previousState = isLiked;
+    const nextState = !previousState;
+
+    setIsLiked(nextState);
+    setIsUpdatingWishlist(true);
+
     try {
-      if (isLiked) {
+      if (previousState) {
         await wishlistService.remove(product.uuid);
-        setIsLiked(false);
         toast({
           title: t("wishlist_product_removed"),
           description: t("wishlist_product_removed_description"),
@@ -49,7 +64,6 @@ export default function ProductCard({ product }) {
         });
       } else {
         await wishlistService.add(product.uuid);
-        setIsLiked(true);
         toast({
           title: t("wishlist_product_added"),
           description: t("wishlist_product_added_description"),
@@ -57,12 +71,15 @@ export default function ProductCard({ product }) {
         });
       }
     } catch (error) {
+      setIsLiked(previousState);
       toast({
         title: t("error"),
         description:
           error?.response?.data?.message || t("wishlist_update_failed"),
         variant: "error",
       });
+    } finally {
+      setIsUpdatingWishlist(false);
     }
   };
 
@@ -118,9 +135,13 @@ export default function ProductCard({ product }) {
         <Image src={imageUrl} alt={title} fill className="object-contain" />
         {/* Heart Icon */}
         <button
+          type="button"
           onClick={handleWishlistToggle}
+          disabled={isUpdatingWishlist}
+          aria-pressed={isLiked}
           className={cn(
-            "absolute top-2 right-2 w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer",
+            "absolute top-2 right-2 w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center transition-colors",
+
             isLiked
               ? "bg-[#3696E7] hover:bg-[#2a7bc9]"
               : "bg-white hover:bg-gray-50 border border-gray-100"

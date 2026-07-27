@@ -13,8 +13,8 @@ import {
   selectCartLoading,
   setLoading,
   setError,
-  removeItem as removeItemAction,
   updateItemQuantity,
+  setBasketData,
 } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 import { useTranslations } from "next-intl";
@@ -26,6 +26,7 @@ export default function TableList() {
   const isLoading = useSelector(selectCartLoading);
   const { toast } = useToast();
   const [wishlistStates, setWishlistStates] = useState({});
+  const [updatingWishlistIds, setUpdatingWishlistIds] = useState({});
 
   const handleIncrement = async (productId) => {
     try {
@@ -73,16 +74,16 @@ export default function TableList() {
     }
   };
 
-  const removeItem = async (productId) => {
+  const removeItem = async (productUuid) => {
+    if (!productUuid || isLoading) {
+      return;
+    }
+
     try {
       dispatch(setLoading(true));
-      const response = await basketService.remove(productId);
-      dispatch(
-        removeItemAction({
-          productId,
-          basket_data: response.basket_data,
-        })
-      );
+      await basketService.remove(productUuid);
+      const basketData = await basketService.load();
+      dispatch(setBasketData(basketData));
       toast({
         title: t("success"),
         description: t("item-removed"),
@@ -101,12 +102,17 @@ export default function TableList() {
   };
 
   const toggleWishlist = async (productId, currentWishlistState) => {
-    try {
-      setWishlistStates((prev) => ({
-        ...prev,
-        [productId]: !currentWishlistState,
-      }));
+    if (!productId || updatingWishlistIds[productId]) {
+      return;
+    }
 
+    setUpdatingWishlistIds((prev) => ({ ...prev, [productId]: true }));
+    setWishlistStates((prev) => ({
+      ...prev,
+      [productId]: !currentWishlistState,
+    }));
+
+    try {
       if (currentWishlistState) {
         await wishlistService.remove(productId);
       } else {
@@ -128,8 +134,15 @@ export default function TableList() {
       }));
       toast({
         title: t("error"),
-        description: t("failed-to-update-wishlist"),
+        description:
+          error?.response?.data?.message || t("failed-to-update-wishlist"),
         variant: "error",
+      });
+    } finally {
+      setUpdatingWishlistIds((prev) => {
+        const next = { ...prev };
+        delete next[productId];
+        return next;
       });
     }
   };
@@ -273,7 +286,9 @@ export default function TableList() {
                   <td className="py-6 px-2">
                     <div className="flex items-center justify-center gap-2">
                       <button
-                        className="bg-none border-none cursor-pointer text-gray-400 hover:text-[#3696E7] transition-colors"
+                        type="button"
+                        className="bg-none border-none cursor-pointer text-gray-400 hover:text-[#3696E7] transition-colors disabled:cursor-wait disabled:opacity-60"
+                        disabled={updatingWishlistIds[item.uuid]}
                         onClick={() => {
                           const currentState =
                             wishlistStates[item.uuid] !== undefined
@@ -295,8 +310,9 @@ export default function TableList() {
                         />
                       </button>
                       <button
-                        className="bg-none border-none cursor-pointer text-gray-400 hover:text-red-500 transition-colors"
-                        onClick={() => removeItem(item.id)}
+                        type="button"
+                        className="bg-none border-none cursor-pointer text-gray-400 hover:text-red-500 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                        onClick={() => removeItem(item.uuid)}
                         disabled={isLoading}
                       >
                         <Trash2 className="h-5 w-5" />

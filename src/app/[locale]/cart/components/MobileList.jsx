@@ -12,8 +12,8 @@ import {
   selectCartLoading,
   setLoading,
   setError,
-  removeItem as removeItemAction,
   updateItemQuantity,
+  setBasketData,
 } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 import { useTranslations } from "next-intl";
@@ -27,7 +27,9 @@ const ProductCard = ({
   onToggleWishlist,
   isLoading,
   wishlistState,
+  isUpdatingWishlist,
 }) => {
+  const t = useTranslations();
   const quantity = product.basket_quantity || product.quantity || 1;
   const price = product.price_final || product.price || 0;
   const oldPrice = product.price || price;
@@ -81,7 +83,9 @@ const ProductCard = ({
             </h3>
             {/* Wishlist Heart */}
             <button
-              className="flex-shrink-0 ml-2 p-1"
+              type="button"
+              className="flex-shrink-0 ml-2 p-1 disabled:cursor-wait disabled:opacity-60"
+              disabled={isUpdatingWishlist}
               onClick={() => {
                 const currentState =
                   wishlistState !== undefined
@@ -146,8 +150,9 @@ const ProductCard = ({
 
             {/* Remove Button */}
             <button
-              onClick={() => onRemove(product.id)}
-              className="flex items-center justify-center w-10 h-8 bg-gray-100 hover:bg-red-50 rounded-lg transition-colors group"
+              type="button"
+              onClick={() => onRemove(product.uuid)}
+              className="flex items-center justify-center w-10 h-8 bg-gray-100 hover:bg-red-50 rounded-lg transition-colors group disabled:cursor-not-allowed disabled:opacity-60"
               disabled={isLoading}
             >
               <Trash2 className="w-4 h-4 text-gray-500 group-hover:text-red-500 transition-colors" />
@@ -166,6 +171,7 @@ export default function MobileList() {
   const isLoading = useSelector(selectCartLoading);
   const { toast } = useToast();
   const [wishlistStates, setWishlistStates] = useState({});
+  const [updatingWishlistIds, setUpdatingWishlistIds] = useState({});
 
   const handleIncrement = async (productId) => {
     try {
@@ -213,16 +219,16 @@ export default function MobileList() {
     }
   };
 
-  const handleRemove = async (productId) => {
+  const handleRemove = async (productUuid) => {
+    if (!productUuid || isLoading) {
+      return;
+    }
+
     try {
       dispatch(setLoading(true));
-      const response = await basketService.remove(productId);
-      dispatch(
-        removeItemAction({
-          productId,
-          basket_data: response.basket_data,
-        })
-      );
+      await basketService.remove(productUuid);
+      const basketData = await basketService.load();
+      dispatch(setBasketData(basketData));
       toast({
         title: t("success"),
         description: t("item-removed"),
@@ -241,12 +247,17 @@ export default function MobileList() {
   };
 
   const toggleWishlist = async (productId, currentWishlistState) => {
-    try {
-      setWishlistStates((prev) => ({
-        ...prev,
-        [productId]: !currentWishlistState,
-      }));
+    if (!productId || updatingWishlistIds[productId]) {
+      return;
+    }
 
+    setUpdatingWishlistIds((prev) => ({ ...prev, [productId]: true }));
+    setWishlistStates((prev) => ({
+      ...prev,
+      [productId]: !currentWishlistState,
+    }));
+
+    try {
       if (currentWishlistState) {
         await wishlistService.remove(productId);
       } else {
@@ -268,8 +279,15 @@ export default function MobileList() {
       }));
       toast({
         title: t("error"),
-        description: t("failed-to-update-wishlist"),
+        description:
+          error?.response?.data?.message || t("failed-to-update-wishlist"),
         variant: "error",
+      });
+    } finally {
+      setUpdatingWishlistIds((prev) => {
+        const next = { ...prev };
+        delete next[productId];
+        return next;
       });
     }
   };
@@ -288,6 +306,7 @@ export default function MobileList() {
             onToggleWishlist={toggleWishlist}
             isLoading={isLoading}
             wishlistState={wishlistStates[item.uuid]}
+            isUpdatingWishlist={Boolean(updatingWishlistIds[item.uuid])}
           />
         ))}
       </AnimatePresence>

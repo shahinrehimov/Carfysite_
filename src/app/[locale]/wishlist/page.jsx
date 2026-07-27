@@ -15,6 +15,7 @@ const getWishlistData = async () => {
 export default async function WishlistPage() {
   const wishlistResponse = await getWishlistData();
   const favoriteProducts = wishlistResponse.data || [];
+  console.log(favoriteProducts);
   const t = await getTranslations();
 
   return (
