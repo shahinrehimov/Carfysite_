@@ -29,7 +29,12 @@ export default function ProductCard({ product }) {
   const { toast } = useToast();
   // Extract data from API structure
   const productData = product.product || product;
-  const imageUrl = productData.hover_image || "/images/product-placeholder.png";
+  // Top-level hover_image is the listing's own cascade (seller photo → variant
+  // → product); the nested product one is only the generic fallback.
+  const imageUrl =
+    product.hover_image ||
+    productData.hover_image ||
+    "/images/product-placeholder.png";
   const title = product.title || productData.title || t("product");
   const price = product.price_final || product.price || 0;
   const oldPrice = product.has_discount ? product.price : price;
