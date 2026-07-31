@@ -13,6 +13,7 @@ import { notFound } from "next/navigation";
 import SimilarProductsList from "../../../../components/product/similar-products-list";
 import { getTranslations } from "next-intl/server";
 import { generateServiceUrl } from "@/lib/generateServiceUrl";
+import { getProductGallery } from "@/lib/getProductGallery";
 const getProduct = async (category, subcategory, seller, variant) => {
   try {
     const response = await serverApi.get(
@@ -80,14 +81,7 @@ export default async function ProductDetail({ params, searchParams }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 pb-10">
               <div className="col-span-1">
                 <ProductImageGallery
-                  images={[
-                    data.main_image,
-                    data.hover_image,
-                    ...data.images,
-                    data.product.main_image || null,
-                    data.product.hover_image || null,
-                    ...(data.product.images || []),
-                  ]}
+                  images={getProductGallery(data)}
                   productTitle={data.title}
                 />
               </div>
