@@ -315,17 +315,17 @@ export default function AddressesPage() {
                   className="relative border border-gray-200 rounded-xl p-4 bg-white hover:shadow-md transition-shadow"
                 >
                   {/* Primary Checkbox and Delete Button */}
-                  <div className="absolute top-4 right-4 flex gap-2">
+                  <div className="absolute top-4 right-4 flex items-center gap-2">
                     <button
                       onClick={() => openDeleteModal(address)}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setPrimaryAddress(address.id)}
                       className={cn(
-                        "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer",
+                        "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer shrink-0",
                         address.is_default
                           ? "bg-[#00569C] border-[#00569C] text-white"
                           : "border-gray-300 hover:border-[#00569C]"
@@ -524,7 +524,10 @@ export default function AddressesPage() {
                     name="city_id"
                     control={control}
                     render={({ field }) => (
-                      <div className="relative" data-dropdown="city">
+                      <div
+                        className={cn("relative", isCityOpen && "z-30")}
+                        data-dropdown="city"
+                      >
                         <button
                           type="button"
                           onClick={() => {
@@ -553,7 +556,7 @@ export default function AddressesPage() {
                         </button>
 
                         {isCityOpen && (
-                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                          <div className="absolute z-1000 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
                             {cities.map((city) => (
                               <button
                                 key={city.id}
@@ -631,7 +634,7 @@ export default function AddressesPage() {
                 </div>
 
                 {/* Map Location Selector */}
-                <div className="space-y-2">
+                <div className="relative z-0 space-y-2">
                   <label className="text-sm font-medium text-gray-700">
                     {t("select_location_on_map")}
                   </label>

@@ -470,7 +470,7 @@ export default function Map({
   return (
     <div className={className}>
       <div
-        className="relative rounded-md border border-gray-200"
+        className="relative z-0 rounded-md border border-gray-200"
         style={{ height }}
       >
         <div className="absolute inset-0 overflow-hidden rounded-md">

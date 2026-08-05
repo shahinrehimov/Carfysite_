@@ -49,7 +49,7 @@ function buildQueryParams(searchParams, extra = {}) {
 
 async function getProducts(searchParams) {
   try {
-    const params = buildQueryParams(searchParams, { limit: 8 });
+    const params = buildQueryParams(searchParams, { limit: 20 });
     const response = await serverApi.get(`/products/load?${params.toString()}`);
     return {
       products: response.data.data,

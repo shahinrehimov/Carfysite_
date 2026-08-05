@@ -515,7 +515,10 @@ export default function AddressSelection({
                     name="city_id"
                     control={control}
                     render={({ field }) => (
-                      <div className="relative" data-dropdown="city">
+                      <div
+                        className={cn("relative", isCityOpen && "z-30")}
+                        data-dropdown="city"
+                      >
                         <button
                           type="button"
                           onClick={(e) => {
@@ -546,7 +549,7 @@ export default function AddressSelection({
                         </button>
 
                         {isCityOpen && (
-                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                          <div className="absolute z-1000 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                             {cities.map((city) => (
                               <button
                                 key={city.id}
@@ -621,7 +624,7 @@ export default function AddressSelection({
                 </div>
 
                 {/* Map Location Selector */}
-                <div className="space-y-2">
+                <div className="relative z-0 space-y-2">
                   <label className="text-sm font-medium text-gray-700">
                     {t("select_location_on_map")}
                   </label>

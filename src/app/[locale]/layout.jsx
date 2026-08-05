@@ -7,6 +7,7 @@ import "@/assets/styles/globals.css";
 import Header from "@/components/header/header";
 import { defaultMetaTags } from "@/lib/constants/defaultMetaTags";
 import Footer from "@/components/footer/footer";
+import ScrollToTop from "@/components/ScrollToTop";
 export const viewport = {
   width: "device-width",
   initialScale: 1,
@@ -48,6 +49,7 @@ export default async function LocaleLayout({ children, params }) {
     <html lang={locale} className={poppins.variable}>
       <body>
         <Providers locale={locale} messages={messages}>
+          <ScrollToTop />
           <Header />
           {children}
           <Footer />

@@ -70,9 +70,10 @@ function SingleCombobox({
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
-                  value={option.value}
-                  onSelect={(currentValue) => {
-                    onValueChange(currentValue === value ? "" : currentValue);
+                  value={option.label}
+                  keywords={[option.value]}
+                  onSelect={() => {
+                    onValueChange(option.value === value ? "" : option.value);
                     setOpen(false);
                   }}
                 >
@@ -161,7 +162,8 @@ function MultiCombobox({
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
-                  value={option.value}
+                  value={option.label}
+                  keywords={[option.value]}
                   onSelect={() => toggle(option.value)}
                 >
                   {option.label}

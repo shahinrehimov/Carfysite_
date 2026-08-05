@@ -7,7 +7,9 @@ export default function ProductSpecifications({ data }) {
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-4 mt-4 border-t border-[#E0E0E0] pt-4">
       <div className="flex flex-col">
         <div className="text-[#9E9E9E] text-sm mb-1.5">{t("city")}</div>
-        <div className="text-gray-900 font-normal text-base">---</div>
+        <div className="text-gray-900 font-normal text-base">
+          {data.seller.city.title}
+        </div>
       </div>
       <div className="flex flex-col">
         <div className="text-[#9E9E9E] text-sm mb-1.5">{t("category")}</div>

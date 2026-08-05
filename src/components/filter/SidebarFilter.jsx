@@ -56,6 +56,7 @@ function FilterSection({
                 <label
                   key={option.value}
                   className="flex items-center gap-2.5 cursor-pointer group min-w-0"
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <input
                     type="checkbox"
@@ -348,7 +349,10 @@ export default function SidebarFilter({ isOpen, onClose, initialFilters, mode = 
 
           {/* Sorting Options - Mobile Only */}
           <div className="py-4 border-b border-gray-100">
-            <label className="flex items-center justify-between py-2 cursor-pointer group">
+            <label
+              className="flex items-center justify-between py-2 cursor-pointer group"
+              onMouseDown={(e) => e.preventDefault()}
+            >
               <span className="text-sm text-gray-700">{t("price_asc")}</span>
               <div
                 className={cn(
@@ -371,7 +375,10 @@ export default function SidebarFilter({ isOpen, onClose, initialFilters, mode = 
                 className="sr-only"
               />
             </label>
-            <label className="flex items-center justify-between py-2 cursor-pointer group">
+            <label
+              className="flex items-center justify-between py-2 cursor-pointer group"
+              onMouseDown={(e) => e.preventDefault()}
+            >
               <span className="text-sm text-gray-700">{t("price_desc")}</span>
               <div
                 className={cn(

@@ -2,9 +2,9 @@
 
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown } from "lucide-react";
+// import { ChevronDown } from "lucide-react";
 import CartDropdown from "@/components/cart/cart-dropdown";
 import { isAuthenticated } from "@/lib/auth";
 import { notificationsService } from "@/lib/notificationsService";
@@ -129,7 +129,7 @@ export default function DesktopNav() {
           <span className="text-sm">{t("notifications")}</span>
         </Link>
 
-        <Link
+        {/* <Link
           href="/messages"
           className="flex items-center gap-2 text-[#1A1A1A] link-hover"
         >
@@ -141,7 +141,7 @@ export default function DesktopNav() {
             className="w-5 h-5"
           />
           <span className="text-sm">{t("messages")}</span>
-        </Link>
+        </Link> */}
 
         <Link
           href="/wishlist"

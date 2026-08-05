@@ -19,7 +19,7 @@ const getCategories = async () => {
 
 const getProducts = async () => {
   try {
-    const response = await axiosServerApi.get("/products/load?limit=24");
+    const response = await axiosServerApi.get("/products/load?limit=10");
     return response.data?.data ?? [];
   } catch {
     return [];

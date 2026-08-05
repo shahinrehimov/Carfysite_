@@ -46,12 +46,12 @@ export default function MobileNav() {
       label: t("categories"),
       key: "categories",
     },
-    {
-      href: "/messages",
-      icon: "/icons/message.svg",
-      label: t("messages"),
-      key: "messages",
-    },
+    // {
+    //   href: "/messages",
+    //   icon: "/icons/message.svg",
+    //   label: t("messages"),
+    //   key: "messages",
+    // },
     {
       href: "/wishlist",
       icon: "/icons/heart.svg",
