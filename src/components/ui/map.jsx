@@ -10,7 +10,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useTranslations } from "next-intl";
-import { LocateFixed, Loader2 } from "lucide-react";
+import { LocateFixed, Loader2, Search } from "lucide-react";
 
 // Fix for default markers in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -50,6 +50,25 @@ function MapFlyTo({ target }) {
   }, [target]);
 
   return null;
+}
+
+// Search addresses using Nominatim (OpenStreetMap)
+async function searchLocations(query) {
+  const params = new URLSearchParams({
+    format: "json",
+    q: query,
+    limit: "5",
+    addressdetails: "1",
+    countrycodes: "az",
+  });
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/search?${params}`,
+    { headers: { "Accept-Language": "az,en" } }
+  );
+  if (!response.ok) {
+    throw new Error("Search request failed");
+  }
+  return response.json();
 }
 
 // Reverse geocode coordinates into an address using Nominatim (OpenStreetMap)
@@ -151,8 +170,15 @@ export default function Map({
   const [recenterTarget, setRecenterTarget] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState("");
   const locationWatchdogRef = useRef(null);
   const geolocationWatchIdRef = useRef(null);
+  const searchDebounceRef = useRef(null);
+  const searchRequestIdRef = useRef(0);
+  const skipSearchRef = useRef(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -168,6 +194,9 @@ export default function Map({
       if (locationWatchdogRef.current) {
         clearTimeout(locationWatchdogRef.current);
       }
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
       if (
         geolocationWatchIdRef.current != null &&
         typeof navigator !== "undefined" &&
@@ -177,6 +206,69 @@ export default function Map({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (skipSearchRef.current) {
+      skipSearchRef.current = false;
+      return;
+    }
+
+    const query = searchQuery.trim();
+    if (query.length < 3) {
+      setSearchResults([]);
+      setSearchError("");
+      setIsSearching(false);
+      return;
+    }
+
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+
+    searchDebounceRef.current = setTimeout(async () => {
+      const requestId = ++searchRequestIdRef.current;
+      setIsSearching(true);
+      setSearchError("");
+
+      try {
+        const results = await searchLocations(query);
+        if (requestId !== searchRequestIdRef.current) {
+          return;
+        }
+        if (results.length === 0) {
+          setSearchResults([]);
+          setSearchError(
+            tf("no_search_results", "No locations found for this search.")
+          );
+        } else {
+          setSearchResults(results);
+          setSearchError("");
+        }
+      } catch (error) {
+        if (requestId !== searchRequestIdRef.current) {
+          return;
+        }
+        console.error("Location search error:", error);
+        setSearchResults([]);
+        setSearchError(
+          tf(
+            "search_failed",
+            "Could not search for this address. Please try again."
+          )
+        );
+      } finally {
+        if (requestId === searchRequestIdRef.current) {
+          setIsSearching(false);
+        }
+      }
+    }, 400);
+
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, [searchQuery, t]);
 
   useEffect(() => {
     const lat = parseFloat(latitude);
@@ -332,6 +424,38 @@ export default function Map({
     );
   };
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+  };
+
+  const handleSelectSearchResult = async (result) => {
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
+    if (isNaN(lat) || isNaN(lng)) {
+      return;
+    }
+
+    skipSearchRef.current = true;
+    searchRequestIdRef.current += 1;
+
+    const coords = [lat, lng];
+    setPosition(coords);
+    setRecenterTarget(coords);
+    setSearchResults([]);
+    setSearchQuery(result.display_name?.split(",")[0] || searchQuery);
+    setSearchError("");
+    setIsSearching(false);
+
+    if (onLocationSelect) {
+      onLocationSelect({
+        lat: lat.toString(),
+        lng: lng.toString(),
+        address: result.display_name?.split(",")[0] || result.display_name || "",
+        fullAddress: result.display_name || "",
+      });
+    }
+  };
+
   if (!isClient) {
     return (
       <div
@@ -346,36 +470,83 @@ export default function Map({
   return (
     <div className={className}>
       <div
-        className="relative rounded-md overflow-hidden border border-gray-200"
+        className="relative rounded-md border border-gray-200"
         style={{ height }}
       >
-        <MapContainer
-          center={position}
-          zoom={13}
-          style={{ height: "100%", width: "100%" }}
-          scrollWheelZoom={true}
+        <div className="absolute inset-0 overflow-hidden rounded-md">
+          <MapContainer
+            center={position}
+            zoom={13}
+            style={{ height: "100%", width: "100%" }}
+            scrollWheelZoom={true}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+
+            <MapResizer />
+            <MapUpdater position={position} />
+            <MapFlyTo target={recenterTarget} />
+            <Marker position={position} />
+
+            {onLocationSelect && (
+              <MapClickHandler onLocationSelect={onLocationSelect} />
+            )}
+          </MapContainer>
+        </div>
+
+        <form
+          onSubmit={handleSearchSubmit}
+          className="absolute left-2 top-2 right-12 z-1001"
         >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
+          <div className="flex overflow-hidden rounded-md border border-gray-200 bg-white shadow-md">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={tf("search_location", "Search address...")}
+              autoComplete="off"
+              className="min-w-0 flex-1 px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400"
+            />
+            <div className="flex items-center justify-center border-l border-gray-200 px-2.5 text-gray-600">
+              {isSearching ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
+            </div>
+          </div>
 
-          <MapResizer />
-          <MapUpdater position={position} />
-          <MapFlyTo target={recenterTarget} />
-          <Marker position={position} />
-
-          {onLocationSelect && (
-            <MapClickHandler onLocationSelect={onLocationSelect} />
+          {(searchResults.length > 0 || (isSearching && searchQuery.trim().length >= 3)) && (
+            <ul className="mt-1 max-h-48 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg">
+              {isSearching && searchResults.length === 0 ? (
+                <li className="px-3 py-2 text-sm text-gray-500">
+                  {tf("searching", "Searching...")}
+                </li>
+              ) : (
+                searchResults.map((result) => (
+                  <li key={result.place_id}>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectSearchResult(result)}
+                      className="w-full px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                    >
+                      {result.display_name}
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
           )}
-        </MapContainer>
+        </form>
 
         <button
           type="button"
           onClick={handleUseCurrentLocation}
           disabled={isLocating}
           title={tf("use_current_location", "Use my current location")}
-          className="absolute right-2 top-2 z-1000 flex items-center justify-center rounded-md border border-gray-200 bg-white p-2 shadow-md transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          className="absolute right-2 top-2 z-1001 flex items-center justify-center rounded-md border border-gray-200 bg-white p-2 shadow-md transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLocating ? (
             <Loader2 className="h-5 w-5 animate-spin text-gray-600" />
@@ -387,6 +558,10 @@ export default function Map({
 
       {locationError && (
         <p className="mt-2 text-sm text-red-500">{locationError}</p>
+      )}
+
+      {searchError && (
+        <p className="mt-2 text-sm text-red-500">{searchError}</p>
       )}
     </div>
   );
