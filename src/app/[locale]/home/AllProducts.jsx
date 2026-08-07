@@ -1,14 +1,38 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 import ProductCard from "@/components/product/product-card";
 import { Button } from "@/components/ui/button";
+import { api } from "@/lib/axios";
 
-function AllProducts({ products = [] }) {
-  const router = useRouter();
+function AllProducts({ initialProducts = [], initialMeta }) {
   const t = useTranslations();
+  const [products, setProducts] = useState(initialProducts);
+  const [meta, setMeta] = useState(initialMeta);
+  const [loading, setLoading] = useState(false);
+
+  const hasMoreProducts = meta.current_page < meta.last_page;
+
+  const handleLoadMore = async () => {
+    if (loading || !hasMoreProducts) return;
+
+    setLoading(true);
+    try {
+      const nextPage = meta.current_page + 1;
+      const response = await api.get(
+        `/products/load?limit=${meta.per_page}&page=${nextPage}`
+      );
+
+      setProducts((prev) => [...prev, ...response.data.data]);
+      setMeta(response.data.meta);
+    } catch (error) {
+      console.error("Error loading more products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="pt-12 pb-30">
@@ -27,10 +51,15 @@ function AllProducts({ products = [] }) {
       </div>
 
       {/* Load More */}
-      {products.length > 0 && (
+      {hasMoreProducts && (
         <div className="flex justify-center mt-10">
-          <Button variant="primary" onClick={() => router.push("/products")}>
-            {t("load_more")}
+          <Button
+            variant="primary"
+            onClick={handleLoadMore}
+            disabled={loading}
+          >
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {loading ? t("loading") : t("load_more")}
           </Button>
         </div>
       )}

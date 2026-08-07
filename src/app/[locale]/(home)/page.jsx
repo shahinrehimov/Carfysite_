@@ -20,9 +20,25 @@ const getCategories = async () => {
 const getProducts = async () => {
   try {
     const response = await axiosServerApi.get("/products/load?limit=10");
-    return response.data?.data ?? [];
+    return {
+      products: response.data?.data ?? [],
+      meta: response.data?.meta ?? {
+        current_page: 1,
+        last_page: 1,
+        per_page: 10,
+        total: 0,
+      },
+    };
   } catch {
-    return [];
+    return {
+      products: [],
+      meta: {
+        current_page: 1,
+        last_page: 1,
+        per_page: 10,
+        total: 0,
+      },
+    };
   }
 };
 
@@ -67,7 +83,7 @@ const getServices = async () => {
 };
 
 export default async function Home() {
-  const [categories, products, bestSellers, homeBanner, services] =
+  const [categories, { products, meta: productsMeta }, bestSellers, homeBanner, services] =
     await Promise.all([
       getCategories(),
       getProducts(),
@@ -84,7 +100,7 @@ export default async function Home() {
         <div className="container-left-aligned ">
           <div className="container-left-aligned-content">
             <BestSeller products={bestSellers} />
-            <AllProducts products={products} />
+            <AllProducts initialProducts={products} initialMeta={productsMeta} />
           </div>
 
           {homeBanner && (
