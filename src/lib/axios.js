@@ -2,6 +2,7 @@ import axios from "axios";
 import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import { getLocale } from "next-intl/server";
 import { promptEmailVerification } from "@/lib/emailVerificationBridge";
+import { getClientIp } from "@/lib/getClientIp";
 
 const getCookieValue = (name) => {
   return getCookie(name)?.toString();
@@ -47,6 +48,15 @@ const createAxiosInstance = (serverSide = false) => {
         } catch {
           authToken = undefined;
         }
+
+        try {
+          const clientIp = await getClientIp();
+          if (clientIp) {
+            config.headers["X-Forwarded-For"] = clientIp;
+          }
+        } catch {
+          // headers() unavailable outside request context
+        }
       } else {
         currentLang = getCookieValue("NEXT_LOCALE") || "az";
         authToken = getCookieValue("auth_token");
@@ -57,6 +67,11 @@ const createAxiosInstance = (serverSide = false) => {
           delete config.headers["identifier"];
         } else if (guestIdentifier) {
           config.headers["identifier"] = guestIdentifier;
+        }
+
+        const clientIp = getCookieValue("client_ip");
+        if (clientIp) {
+          config.headers["X-Forwarded-For"] = clientIp;
         }
       }
 

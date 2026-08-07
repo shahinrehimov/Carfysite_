@@ -3,6 +3,7 @@ import MainFilter from "@/components/filter/MainFilter";
 import ProductImageGallery from "@/components/product/product-image-gallery";
 import ProductInfo from "@/components/product/product-info";
 import ProductActions from "@/components/product/product-actions";
+import ProductSellerInfo from "@/components/product/product-seller-info";
 import ProductSpecifications from "@/components/product/product-specifications";
 import ProductReviews from "@/components/product/product-reviews";
 import ProductCard from "@/components/product/product-card";
@@ -100,6 +101,7 @@ export default async function ProductDetail({ params, searchParams }) {
               <div className="col-span-1 flex flex-col justify-between">
                 <div>
                   <ProductInfo data={data} />
+                  <ProductSellerInfo data={data} />
                   <ProductActions data={data} />
                 </div>
                 <ProductSpecifications data={data} />

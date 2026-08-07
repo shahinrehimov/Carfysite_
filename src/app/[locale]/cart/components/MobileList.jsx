@@ -17,6 +17,9 @@ import {
 } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 import { useTranslations } from "next-intl";
+import { isSellerClosed } from "@/lib/storeAvailability";
+import ClosedStoreItemWarning from "@/components/store/ClosedStoreItemWarning";
+import { cn } from "@/lib/utils";
 
 const ProductCard = ({
   product,
@@ -28,6 +31,7 @@ const ProductCard = ({
   isLoading,
   wishlistState,
   isUpdatingWishlist,
+  sellerClosed,
 }) => {
   const t = useTranslations();
   const quantity = product.basket_quantity || product.quantity || 1;
@@ -60,7 +64,12 @@ const ProductCard = ({
         height: 0,
         transition: { duration: 0.3, ease: "easeOut" },
       }}
-      className="bg-white rounded-2xl p-4 border border-gray-100"
+      className={cn(
+        "bg-white rounded-2xl p-4 border",
+        sellerClosed
+          ? "border-amber-200 bg-amber-50/60"
+          : "border-gray-100"
+      )}
     >
       <div className="flex gap-4">
         {/* Product Image */}
@@ -124,6 +133,8 @@ const ProductCard = ({
               </>
             )}
           </div>
+
+          <ClosedStoreItemWarning seller={product.seller} t={t} />
 
           {/* Quantity Controls and Remove Button */}
           <div className="flex items-center justify-between">
@@ -307,6 +318,7 @@ export default function MobileList() {
             isLoading={isLoading}
             wishlistState={wishlistStates[item.uuid]}
             isUpdatingWishlist={Boolean(updatingWishlistIds[item.uuid])}
+            sellerClosed={isSellerClosed(item.seller)}
           />
         ))}
       </AnimatePresence>

@@ -8,8 +8,22 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/axios/api";
 import { getCookie, setCookie } from "@/lib/axios/utils";
 import { logout } from "@/lib/auth";
+import { ContactChangeModal } from "./ContactChangeModal";
 
-const OTP_DURATION = 120;
+const OTP_RESEND_COOLDOWN = 60;
+
+function getUserImage(user) {
+  return user?.image ?? user?.photo ?? null;
+}
+
+function extractUserFromResponse(data) {
+  if (!data) return null;
+  if (data.user) return data.user;
+  if (data.data && typeof data.data === "object" && !Array.isArray(data.data)) {
+    if (data.data.uuid || data.data.email || data.data.phone) return data.data;
+  }
+  return null;
+}
 
 function OtpInput({ otp, onChange, inputRefs }) {
   const handleChange = (idx, val) => {
@@ -63,7 +77,7 @@ function OtpInput({ otp, onChange, inputRefs }) {
 export default function ProfilePage() {
   const t = useTranslations();
 
-  const [user] = useState(() => {
+  const [user, setUser] = useState(() => {
     try {
       const raw = getCookie("user_data");
       return raw ? JSON.parse(raw) : null;
@@ -74,14 +88,21 @@ export default function ProfilePage() {
 
   const [name, setName] = useState(user?.name ?? "");
   const [surname, setSurname] = useState(user?.surname ?? "");
-  const [email] = useState(user?.email ?? "");
-  const [phone] = useState(() => {
+
+  const email = user?.email ?? "";
+  const phone = (() => {
     const raw = user?.phone ?? "";
     return raw.startsWith("994") ? raw.slice(3) : raw;
-  });
+  })();
 
-  const [avatarPreview, setAvatarPreview] = useState(user?.photo ?? null);
-  const [avatarFile, setAvatarFile] = useState(null);
+  const canChangeEmail = !["google", "apple"].includes(user?.register_type);
+
+  const [contactModal, setContactModal] = useState(null);
+
+  const [avatarPreview, setAvatarPreview] = useState(
+    getUserImage(user) ?? null
+  );
+  const [avatarLoading, setAvatarLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   const [showPasswordSection, setShowPasswordSection] = useState(false);
@@ -94,9 +115,11 @@ export default function ProfilePage() {
   const [otp, setOtp] = useState(["", "", "", ""]);
   const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
-  const [otpTimer, setOtpTimer] = useState(OTP_DURATION);
+  const [otpTimer, setOtpTimer] = useState(0);
   const [otpExpired, setOtpExpired] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
   const timerRef = useRef(null);
+  const resendTimerRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
@@ -110,8 +133,15 @@ export default function ProfilePage() {
     setTimeout(() => setToast(null), 4000);
   }, []);
 
-  const startOtpTimer = useCallback(() => {
-    setOtpTimer(OTP_DURATION);
+  const clearPasswordTimers = useCallback(() => {
+    clearInterval(timerRef.current);
+    clearInterval(resendTimerRef.current);
+    timerRef.current = null;
+    resendTimerRef.current = null;
+  }, []);
+
+  const startOtpTimer = useCallback((seconds = 180) => {
+    setOtpTimer(seconds);
     setOtpExpired(false);
     clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
@@ -126,17 +156,93 @@ export default function ProfilePage() {
     }, 1000);
   }, []);
 
-  useEffect(() => () => clearInterval(timerRef.current), []);
+  const startResendCooldown = useCallback(() => {
+    setResendTimer(OTP_RESEND_COOLDOWN);
+    clearInterval(resendTimerRef.current);
+    resendTimerRef.current = setInterval(() => {
+      setResendTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(resendTimerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
 
-  const handleAvatarChange = (e) => {
+  useEffect(() => () => clearPasswordTimers(), [clearPasswordTimers]);
+
+  const updateUserState = useCallback((updatedUser) => {
+    setUser(updatedUser);
+    setCookie("user_data", JSON.stringify(updatedUser));
+    setAvatarPreview(getUserImage(updatedUser));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("authChange"));
+    }
+  }, []);
+
+  const handleContactChangeSuccess = useCallback(
+    (updatedUser, message) => {
+      updateUserState(updatedUser);
+      showToast(message ?? t("saved_success"));
+    },
+    [updateUserState, showToast, t]
+  );
+
+  const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
       showToast(t("avatar_size_error"), "error");
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
+
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setAvatarLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await api.upload("/profile/image", formData);
+      const updatedUser = extractUserFromResponse(res.data);
+      if (updatedUser) {
+        updateUserState(updatedUser);
+      } else if (res.data?.image || res.data?.photo) {
+        updateUserState({
+          ...user,
+          image: res.data.image ?? res.data.photo,
+          photo: res.data.photo ?? res.data.image,
+        });
+      }
+      showToast(res.data?.message ?? t("saved_success"));
+    } catch (err) {
+      setAvatarPreview(getUserImage(user));
+      showToast(err.response?.data?.message ?? t("save_error"), "error");
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+      setAvatarLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleAvatarDelete = async () => {
+    setAvatarLoading(true);
+    try {
+      const res = await api.delete("/profile/image");
+      const updatedUser = extractUserFromResponse(res.data);
+      if (updatedUser) {
+        updateUserState(updatedUser);
+      } else {
+        updateUserState({ ...user, image: null, photo: null });
+      }
+      showToast(res.data?.message ?? t("saved_success"));
+    } catch (err) {
+      showToast(err.response?.data?.message ?? t("delete_error"), "error");
+    } finally {
+      setAvatarLoading(false);
+    }
   };
 
   const handleUpdateProfile = async () => {
@@ -150,12 +256,11 @@ export default function ProfilePage() {
       const res = await api.post("/profile/update", payload);
       const updated = res.data?.data ?? res.data;
       if (updated) {
-        const merged = {
+        updateUserState({
           ...user,
           name: updated.name ?? name,
           surname: updated.surname ?? surname,
-        };
-        setCookie("user_data", JSON.stringify(merged));
+        });
       }
       showToast(t("saved_success"));
     } catch (err) {
@@ -173,13 +278,16 @@ export default function ProfilePage() {
       return;
     }
     try {
-      await api.post("/profile/change-password", {
+      const res = await api.post("/profile/change-password", {
         password,
         password_confirmation: passwordConfirmation,
       });
+      const expiresIn =
+        res.data?.data?.otp_expires_in ?? res.data?.otp_expires_in ?? 180;
       setShowOtpSection(true);
       setOtp(["", "", "", ""]);
-      startOtpTimer();
+      startOtpTimer(expiresIn);
+      startResendCooldown();
       setTimeout(() => otpRefs[0]?.current?.focus(), 100);
     } catch (err) {
       showToast(
@@ -207,20 +315,24 @@ export default function ProfilePage() {
       setPassword("");
       setPasswordConfirmation("");
       setOtp(["", "", "", ""]);
-      clearInterval(timerRef.current);
+      clearPasswordTimers();
     } catch (err) {
       showToast(err.response?.data?.message ?? t("otp_error"), "error");
     }
   };
 
   const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
     try {
-      await api.post("/profile/change-password", {
+      const res = await api.post("/profile/change-password", {
         password,
         password_confirmation: passwordConfirmation,
       });
+      const expiresIn =
+        res.data?.data?.otp_expires_in ?? res.data?.otp_expires_in ?? 180;
       setOtp(["", "", "", ""]);
-      startOtpTimer();
+      startOtpTimer(expiresIn);
+      startResendCooldown();
       setTimeout(() => otpRefs[0]?.current?.focus(), 100);
       showToast(t("otp_resent"));
     } catch (err) {
@@ -283,7 +395,11 @@ export default function ProfilePage() {
       {/* Avatar */}
       <div className="flex flex-col items-start mb-8">
         <div className="relative mb-3">
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+          <div
+            className={`w-20 h-20 rounded-full overflow-hidden bg-gray-100 border border-gray-200 ${
+              avatarLoading ? "opacity-60" : ""
+            }`}
+          >
             {avatarPreview ? (
               <Image
                 src={avatarPreview}
@@ -298,6 +414,11 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
+          {avatarLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-6 h-6 border-2 border-[#00569C] border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
         </div>
         <input
           ref={fileInputRef}
@@ -305,15 +426,29 @@ export default function ProfilePage() {
           accept="image/*"
           className="hidden"
           onChange={handleAvatarChange}
+          disabled={avatarLoading}
         />
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="text-sm border border-[#00569C] text-[#00569C] rounded-full px-5 py-1.5 hover:bg-[#00569C]/5 transition-colors"
-        >
-          {t("choose_file")}
-        </button>
-        <p className="text-xs text-gray-400 mt-2">{t("max_size")}</p>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={avatarLoading}
+            className="text-sm border border-[#00569C] text-[#00569C] rounded-full px-5 py-1.5 hover:bg-[#00569C]/5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {t("choose_file")}
+          </button>
+          {avatarPreview && (
+            <button
+              type="button"
+              onClick={handleAvatarDelete}
+              disabled={avatarLoading}
+              className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <Trash2 size={15} />
+              {t("delete")}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Name / Surname */}
@@ -356,6 +491,15 @@ export default function ProfilePage() {
             readOnly
             className={`${inputClass} bg-gray-50 cursor-default`}
           />
+          {canChangeEmail && (
+            <button
+              type="button"
+              onClick={() => setContactModal("email")}
+              className="mt-2 text-sm font-medium text-[#00569C] hover:text-[#004580] transition-colors pl-1"
+            >
+              {t("change_email")}
+            </button>
+          )}
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1.5 pl-1">
@@ -373,6 +517,13 @@ export default function ProfilePage() {
               className={`${inputClass} pl-[90px] bg-gray-50 cursor-default`}
             />
           </div>
+          <button
+            type="button"
+            onClick={() => setContactModal("phone")}
+            className="mt-2 text-sm font-medium text-[#00569C] hover:text-[#004580] transition-colors pl-1"
+          >
+            {t("change_phone")}
+          </button>
         </div>
       </div>
 
@@ -452,13 +603,19 @@ export default function ProfilePage() {
                 </div>
                 <div className="mt-2 text-sm text-gray-500">
                   {t("no_code")}{" "}
-                  <button
-                    type="button"
-                    onClick={handleResendOtp}
-                    className="text-[#00569C] font-medium hover:underline"
-                  >
-                    {t("resend")}
-                  </button>
+                  {resendTimer > 0 ? (
+                    <span className="text-gray-400">
+                      {formatTime(resendTimer)}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      className="text-[#00569C] font-medium hover:underline"
+                    >
+                      {t("resend")}
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -486,6 +643,13 @@ export default function ProfilePage() {
       >
         {t("delete_account")}
       </button>
+
+      <ContactChangeModal
+        type={contactModal}
+        open={contactModal !== null}
+        onClose={() => setContactModal(null)}
+        onSuccess={handleContactChangeSuccess}
+      />
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (

@@ -12,6 +12,7 @@ import { setBasketData, setLoading, setError } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 import { useTranslations } from "next-intl";
 import { getProductUrl } from "@/lib/getProductUrl";
+import StoreAvailabilityBadge from "@/components/store/StoreAvailabilityBadge";
 
 export default function ProductCard({ product }) {
   const t = useTranslations();
@@ -185,9 +186,22 @@ export default function ProductCard({ product }) {
         {title}
       </h3>
       {productData.brand && (
-        <p className="text-[13px] lg:text-[14px] text-gray-600 mb-2 lg:mb-3">
+        <p className="text-[13px] lg:text-[14px] text-gray-600 mb-1">
           {productData.brand.title}
         </p>
+      )}
+
+      {product.seller && (
+        <div className="flex flex-col gap-0.5 mb-2 lg:mb-3">
+          <p className="text-[12px] lg:text-[13px] text-gray-500 truncate">
+            {product.seller.label || product.seller.store_code}
+          </p>
+          <StoreAvailabilityBadge
+            seller={product.seller}
+            t={t}
+            closedOnly
+          />
+        </div>
       )}
 
       {/* Rating */}

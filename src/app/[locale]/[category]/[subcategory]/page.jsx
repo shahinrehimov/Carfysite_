@@ -14,6 +14,7 @@ import SimilarProductsList from "../../../../components/product/similar-products
 import { getTranslations } from "next-intl/server";
 import { generateServiceUrl } from "@/lib/generateServiceUrl";
 import { getProductGallery } from "@/lib/getProductGallery";
+import ProductSellerInfo from "@/components/product/product-seller-info";
 const getProduct = async (category, subcategory, seller, variant) => {
   try {
     const response = await serverApi.get(
@@ -89,6 +90,7 @@ export default async function ProductDetail({ params, searchParams }) {
               <div className="col-span-1 flex flex-col justify-between">
                 <div>
                   <ProductInfo data={data} />
+                  <ProductSellerInfo data={data} />
                   <ProductActions data={data} />
                 </div>
                 <ProductSpecifications data={data} />

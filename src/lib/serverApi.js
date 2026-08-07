@@ -1,6 +1,7 @@
 import axios from "axios";
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
+import { getClientIp } from "@/lib/getClientIp";
 
 /**
  * Server-side API utility for making requests with proper cookie context
@@ -47,6 +48,11 @@ const createServerApiInstance = async () => {
         } catch (error) {
           config.headers["Accept-Language"] = "en";
         }
+      }
+
+      const clientIp = await getClientIp();
+      if (clientIp) {
+        config.headers["X-Forwarded-For"] = clientIp;
       }
 
       return config;

@@ -38,6 +38,11 @@ axiosInstance.interceptors.request.use(
       config.headers["identifier"] = guestIdentifier;
     }
 
+    const clientIp = await getCookie("client_ip");
+    if (clientIp) {
+      config.headers["X-Forwarded-For"] = clientIp;
+    }
+
     return config;
   },
   (error) => {

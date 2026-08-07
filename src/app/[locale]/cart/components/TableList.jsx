@@ -18,6 +18,9 @@ import {
 } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 import { useTranslations } from "next-intl";
+import { isSellerClosed } from "@/lib/storeAvailability";
+import ClosedStoreItemWarning from "@/components/store/ClosedStoreItemWarning";
+import { cn } from "@/lib/utils";
 
 export default function TableList() {
   const t = useTranslations();
@@ -190,6 +193,7 @@ export default function TableList() {
                 item.has_discount && oldPrice > price
                   ? Math.round(((oldPrice - price) / oldPrice) * 100)
                   : 0;
+              const sellerClosed = isSellerClosed(item.seller);
 
               return (
                 <motion.tr
@@ -200,7 +204,12 @@ export default function TableList() {
                     height: 0,
                     transition: { duration: 0.3, ease: "easeOut" },
                   }}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  className={cn(
+                    "border-b border-gray-100 transition-colors",
+                    sellerClosed
+                      ? "bg-amber-50/60 hover:bg-amber-50"
+                      : "hover:bg-gray-50"
+                  )}
                 >
                   {/* Item Column */}
                   <td className="py-6 px-2">
@@ -217,6 +226,7 @@ export default function TableList() {
                         />
                       </div>
                       <span className="font-medium text-gray-900">{title}</span>
+                      <ClosedStoreItemWarning seller={item.seller} t={t} />
                     </div>
                   </td>
 

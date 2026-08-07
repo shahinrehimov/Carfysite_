@@ -11,10 +11,13 @@ import AddressSelection from "./components/AddressSelection";
 import PaymentMethod from "./components/PaymentMethod";
 import { generateServiceUrl } from "@/lib/generateServiceUrl";
 import { checkoutService } from "@/lib/checkoutService";
+import { basketService } from "@/lib/basketService";
 import { api } from "@/lib/axios/api";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/providers/ToastProvider";
-import { clearCart } from "@/store/cart";
+import { clearCart, setBasketData } from "@/store/cart";
+import { isSellerClosed } from "@/lib/storeAvailability";
+import { cn } from "@/lib/utils";
 
 const formatPrice = (value) =>
   value != null ? Number(value).toFixed(2) : "0.00";
@@ -39,6 +42,7 @@ export default function CheckoutPage() {
   const [previewLoading, setPreviewLoading] = useState(true);
   const [completedOrder, setCompletedOrder] = useState(null);
   const [useReferralBalance, setUseReferralBalance] = useState(false);
+  const [removingSellerId, setRemovingSellerId] = useState(null);
   const { toast } = useToast();
   const dispatch = useDispatch();
 
@@ -116,6 +120,48 @@ export default function CheckoutPage() {
   const handleAddressSelect = (addressId) => setSelectedAddressId(addressId);
   const handlePaymentMethodSelect = (method) =>
     setSelectedPaymentMethod(method);
+
+  const refreshCheckoutPreview = async () => {
+    if (!selectedAddressId) return;
+    const result = await checkoutService.getCheckoutPreview(selectedAddressId);
+    if (result.success) {
+      setCheckoutPreview(result.data);
+    }
+  };
+
+  const handleRemoveClosedSellerItems = async (seller) => {
+    if (!seller?.items?.length) return;
+
+    setRemovingSellerId(seller.company_id);
+    try {
+      for (const item of seller.items) {
+        const productUuid = item.product?.uuid ?? item.uuid;
+        if (productUuid) {
+          await basketService.remove(productUuid);
+        }
+      }
+
+      const basketData = await basketService.load();
+      dispatch(setBasketData(basketData));
+      await refreshCheckoutPreview();
+
+      toast({
+        title: t("success"),
+        description: t("closed_store_items_removed"),
+        variant: "success",
+      });
+    } catch (error) {
+      toast({
+        title: t("error"),
+        description: error?.response?.data?.message || t("failed-to-remove"),
+        variant: "error",
+      });
+    } finally {
+      setRemovingSellerId(null);
+    }
+  };
+
+  const canCheckout = checkoutPreview?.can_checkout !== false;
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -270,77 +316,108 @@ export default function CheckoutPage() {
               ) : checkoutPreview ? (
                 <div className="flex flex-col gap-4">
                   {/* Sellers breakdown */}
-                  {checkoutPreview.sellers?.map((seller) => (
-                    <div
-                      key={seller.company_id}
-                      className="flex flex-col gap-2"
-                    >
-                      <p className="text-sm font-semibold text-gray-700">
-                        {seller.store_code}
-                      </p>
+                  {checkoutPreview.sellers?.map((seller) => {
+                    const sellerClosed =
+                      seller.is_open === false ||
+                      isSellerClosed({ availability: seller.availability });
 
-                      {seller.weight_warning && (
-                        <div className="flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
-                          <span>⚠️</span>
-                          <span>{t("weight_warning_message")}</span>
-                        </div>
-                      )}
+                    return (
+                      <div
+                        key={seller.company_id}
+                        className={cn(
+                          "flex flex-col gap-2",
+                          sellerClosed &&
+                            "p-3 bg-amber-50/60 border border-amber-200 rounded-lg"
+                        )}
+                      >
+                        <p className="text-sm font-semibold text-gray-700">
+                          {seller.store_code}
+                        </p>
 
-                      {seller.is_sedan && (
-                        <div className="flex items-start gap-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1.5">
-                          <span>🚗</span>
-                          <span>{t("sedan_required_message")}</span>
-                        </div>
-                      )}
+                        {sellerClosed && seller.availability?.message && (
+                          <p className="text-xs text-amber-800">
+                            {seller.availability.message}
+                          </p>
+                        )}
 
-                      {seller.items?.map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="flex gap-2 items-start text-sm"
-                        >
-                          <span className="flex-1 text-gray-600">
-                            {item.title}{" "}
-                            <span className="text-gray-400">
-                              x{item.quantity}
+                        {sellerClosed && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveClosedSellerItems(seller)
+                            }
+                            disabled={removingSellerId === seller.company_id}
+                            className="text-xs text-left text-[#3696E7] hover:underline disabled:opacity-50 cursor-pointer"
+                          >
+                            {removingSellerId === seller.company_id
+                              ? t("processing")
+                              : t("remove_closed_store_items")}
+                          </button>
+                        )}
+
+                        {seller.weight_warning && (
+                          <div className="flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
+                            <span>⚠️</span>
+                            <span>{t("weight_warning_message")}</span>
+                          </div>
+                        )}
+
+                        {seller.is_sedan && (
+                          <div className="flex items-start gap-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1.5">
+                            <span>🚗</span>
+                            <span>{t("sedan_required_message")}</span>
+                          </div>
+                        )}
+
+                        {seller.items?.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="flex gap-2 items-start text-sm"
+                          >
+                            <span className="flex-1 text-gray-600">
+                              {item.title}{" "}
+                              <span className="text-gray-400">
+                                x{item.quantity}
+                              </span>
                             </span>
-                          </span>
-                          <span className="font-medium shrink-0">
-                            {formatPrice(item.price)} ₼
-                          </span>
-                        </div>
-                      ))}
-
-                      <div className="flex gap-2 items-center text-sm">
-                        <span className="flex-1 text-gray-500">
-                          {t("shipping")}
-                        </span>
-                        <div className="flex-1 border-b border-dashed border-gray-300"></div>
-                        <div className="flex items-center gap-1 shrink-0">
-                          <span className="text-gray-600">
-                            {seller.shipping === 0
-                              ? t("free")
-                              : `${formatPrice(seller.shipping)} ₼`}
-                          </span>
-                          {seller.shipping_is_estimate && (
-                            <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-1">
-                              ~
+                            <span className="font-medium shrink-0">
+                              {formatPrice(item.price)} ₼
                             </span>
-                          )}
+                          </div>
+                        ))}
+
+                        <div className="flex gap-2 items-center text-sm">
+                          <span className="flex-1 text-gray-500">
+                            {t("shipping")}
+                          </span>
+                          <div className="flex-1 border-b border-dashed border-gray-300"></div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className="text-gray-600">
+                              {seller.shipping === 0
+                                ? t("free")
+                                : `${formatPrice(seller.shipping)} ₼`}
+                            </span>
+                            {seller.shipping_is_estimate && (
+                              <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-1">
+                                ~
+                              </span>
+                            )}
+                          </div>
                         </div>
+
+                        {seller.shipping_eta_minutes != null && (
+                          <div className="flex gap-2 items-center text-xs text-gray-500">
+                            <span>🕐</span>
+                            <span>
+                              ~{seller.shipping_eta_minutes} {t("minutes")}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="border-b border-gray-100"></div>
                       </div>
-
-                      {seller.shipping_eta_minutes != null && (
-                        <div className="flex gap-2 items-center text-xs text-gray-500">
-                          <span>🕐</span>
-                          <span>
-                            ~{seller.shipping_eta_minutes} {t("minutes")}
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="border-b border-gray-100"></div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
                   {/* Referral perks banner */}
                   {checkoutPreview.referral &&
@@ -436,7 +513,10 @@ export default function CheckoutPage() {
                 type="submit"
                 variant="primary"
                 disabled={
-                  isSubmitting || !selectedAddressId || !selectedPaymentMethod
+                  isSubmitting ||
+                  !selectedAddressId ||
+                  !selectedPaymentMethod ||
+                  !canCheckout
                 }
                 className="w-full h-12 lg:h-14 text-white rounded-full mt-6 font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
