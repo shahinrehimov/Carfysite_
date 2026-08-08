@@ -23,7 +23,7 @@ async function Promotion() {
   const setting = services.setting;
   return (
     <section className="w-full bg-[#CEE5F8] ">
-      <div className="container mx-auto px-4 py-8 md:py-0 relative">
+      <div className="container mx-auto px-4 py-8 md:py-0 relative min-h-[280px] lg:min-h-0">
         <Image
           src="/images/handphone.png"
           alt="Carfy Mobile App"

@@ -47,11 +47,11 @@ export default async function LocaleLayout({ children, params }) {
   const messages = await getTranslations(locale);
   return (
     <html lang={locale} className={poppins.variable}>
-      <body>
+      <body className="flex min-h-dvh flex-col">
         <Providers locale={locale} messages={messages}>
           <ScrollToTop />
           <Header />
-          {children}
+          <main className="flex-1">{children}</main>
           <Footer />
         </Providers>
       </body>

@@ -93,7 +93,7 @@ export default async function Products({ searchParams }) {
           /> */}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pb-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pb-4 lg:pb-10 items-start">
           <DesktopSidebar initialFilters={resolvedParams} />
 
           <div className="col-span-1 lg:col-span-4">

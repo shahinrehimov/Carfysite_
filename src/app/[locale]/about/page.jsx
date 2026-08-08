@@ -102,7 +102,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Content Section Below Banner */}
-      <section className="w-full pt-10 pb-20 lg:pb-30 bg-white">
+      <section className="w-full pt-10 pb-12 lg:pb-30 bg-white">
         <div className="container">
           <p className="text-gray-600 text-sm lg:text-base leading-relaxed mb-4">
             {t("about_content")}
@@ -112,7 +112,7 @@ export default async function AboutPage() {
 
       {/* App Promotion */}
       <Promotion />
-      <div className="w-full h-[100px] bg-[#CEE5F8] mb-[-100px]"></div>
+      <div className="w-full h-[50px] bg-[#CEE5F8] mb-[-50px] lg:h-[100px] lg:mb-[-100px]"></div>
     </div>
   );
 }

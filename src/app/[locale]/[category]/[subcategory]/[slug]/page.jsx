@@ -88,9 +88,9 @@ export default async function ProductDetail({ params, searchParams }) {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pb-4 lg:pb-10">
           <div className="col-span-1 lg:col-span-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 pb-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 pb-4 lg:pb-10">
               <div className="col-span-1">
                 <ProductImageGallery
                   images={getProductGallery(data)}
@@ -108,7 +108,7 @@ export default async function ProductDetail({ params, searchParams }) {
               </div>
             </div>
 
-            <div className="pb-10">
+            <div className="pb-4 lg:pb-10">
               <p className="text-gray-700 text-sm lg:text-base leading-relaxed text-justify">
                 {data.product.description}
               </p>

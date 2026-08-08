@@ -29,7 +29,7 @@ export default function WishlistItems({ initialProducts }) {
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5 pb-10">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5 pb-4 lg:pb-10">
       {favoriteProducts.map((product) => (
         <div key={product.uuid}>
           <ProductCard

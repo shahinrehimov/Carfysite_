@@ -130,6 +130,10 @@
 }
 
 @layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   .container {
     width: min(100% - 8vw, 96rem);
     margin-inline: auto;

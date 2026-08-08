@@ -47,7 +47,7 @@ export default function ThirdPartyLoginPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+      <div className="min-h-0 flex items-center justify-center p-4 py-10 lg:min-h-[70vh] bg-gray-50">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-lg p-8 text-center">
           <p className="text-red-600 mb-6">{error}</p>
           <Link
@@ -62,7 +62,7 @@ export default function ThirdPartyLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+    <div className="min-h-0 flex items-center justify-center p-4 py-10 lg:min-h-[70vh] bg-gray-50">
       <p className="text-gray-600 font-medium">{t("logging_in")}</p>
     </div>
   );

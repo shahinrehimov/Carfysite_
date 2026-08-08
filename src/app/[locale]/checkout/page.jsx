@@ -261,13 +261,13 @@ export default function CheckoutPage() {
 
   return (
     <div className="container">
-      <div className="flex flex-col gap-10 py-10">
+      <div className="flex flex-col gap-10 py-6 lg:py-10">
         <h2 className="text-2xl lg:text-3xl xl:text-4xl font-semibold text-center lg:text-left">
           {t("checkout")}
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-12 gap-2 lg:gap-10 pb-10">
+          <div className="grid grid-cols-12 gap-2 lg:gap-10 pb-4 lg:pb-10">
             <div className="col-span-12 lg:col-span-8 flex flex-col gap-6 lg:gap-10">
               {/* Address Selection */}
               <div>

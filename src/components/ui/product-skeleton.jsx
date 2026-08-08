@@ -225,7 +225,7 @@ export async function HomePageLoading() {
             </div>
 
             {/* All products */}
-            <div className="pt-12 pb-30">
+            <div className="pt-12 pb-12 lg:pb-30">
               <SkeletonBlock className="h-8 w-40 mb-6" />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {Array.from({ length: 8 }).map((_, i) => (
@@ -258,7 +258,7 @@ export async function HomePageLoading() {
         </div>
       </section>
 
-      <div className="w-full h-[100px] bg-[#CEE5F8] mb-[-100px]" />
+      <div className="w-full h-[50px] bg-[#CEE5F8] mb-[-50px] lg:h-[100px] lg:mb-[-100px]" />
     </div>
   );
 }
