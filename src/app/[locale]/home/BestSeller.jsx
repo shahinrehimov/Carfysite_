@@ -14,7 +14,7 @@ function BestSeller({ products = [] }) {
   const t = useTranslations();
 
   return (
-    <div className="pt-4 lg:pt-12 pb-12">
+    <div className="pt-4 lg:pt-12 pb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="lg:text-[24px] font-medium lg:font-semibold text-gray-900">
@@ -34,6 +34,10 @@ function BestSeller({ products = [] }) {
           bulletActiveClass: "swiper-pagination-bullet-active",
         }}
         breakpoints={{
+          0: {
+            slidesPerView: 2,
+            spaceBetween: 20,
+          },
           640: {
             slidesPerView: 2,
             spaceBetween: 20,

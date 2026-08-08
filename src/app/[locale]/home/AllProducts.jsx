@@ -35,7 +35,7 @@ function AllProducts({ initialProducts = [], initialMeta }) {
   };
 
   return (
-    <div className="pt-12 pb-12 lg:pb-30">
+    <div className="pt-6 lg:pt-12 pb-12 lg:pb-30">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="lg:text-[24px] font-medium lg:font-semibold text-gray-900">
@@ -53,11 +53,7 @@ function AllProducts({ initialProducts = [], initialMeta }) {
       {/* Load More */}
       {hasMoreProducts && (
         <div className="flex justify-center mt-10">
-          <Button
-            variant="primary"
-            onClick={handleLoadMore}
-            disabled={loading}
-          >
+          <Button variant="primary" onClick={handleLoadMore} disabled={loading}>
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? t("loading") : t("load_more")}
           </Button>
