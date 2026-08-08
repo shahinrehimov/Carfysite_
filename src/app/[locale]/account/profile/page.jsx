@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/axios/api";
 import { getCookie, setCookie } from "@/lib/axios/utils";
 import { logout } from "@/lib/auth";
+import { DatePicker } from "@/components/ui/date-picker";
 import { ContactChangeModal } from "./ContactChangeModal";
 
 const OTP_RESEND_COOLDOWN = 60;
@@ -23,6 +24,15 @@ function extractUserFromResponse(data) {
     if (data.data.uuid || data.data.email || data.data.phone) return data.data;
   }
   return null;
+}
+
+function formatBirthDateForInput(value) {
+  if (!value) return "";
+  const str = String(value);
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+  const match = str.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  if (match) return `${match[3]}-${match[2]}-${match[1]}`;
+  return "";
 }
 
 function OtpInput({ otp, onChange, inputRefs }) {
@@ -88,6 +98,9 @@ export default function ProfilePage() {
 
   const [name, setName] = useState(user?.name ?? "");
   const [surname, setSurname] = useState(user?.surname ?? "");
+  const [birthDate, setBirthDate] = useState(() =>
+    formatBirthDateForInput(user?.birth_date)
+  );
 
   const email = user?.email ?? "";
   const phone = (() => {
@@ -251,7 +264,7 @@ export default function ProfilePage() {
         name,
         surname,
         gender: user?.gender ?? null,
-        birth_date: user?.birth_date ?? null,
+        birth_date: birthDate || null,
       };
       const res = await api.post("/profile/update", payload);
       const updated = res.data?.data ?? res.data;
@@ -260,7 +273,9 @@ export default function ProfilePage() {
           ...user,
           name: updated.name ?? name,
           surname: updated.surname ?? surname,
+          birth_date: updated.birth_date ?? (birthDate || null),
         });
+        setBirthDate(formatBirthDateForInput(updated.birth_date ?? birthDate));
       }
       showToast(t("saved_success"));
     } catch (err) {
@@ -477,6 +492,19 @@ export default function ProfilePage() {
             placeholder={t("surname")}
           />
         </div>
+      </div>
+
+      {/* Birth Date */}
+      <div className="mb-4">
+        <label className="block text-xs text-gray-500 mb-1.5 pl-1">
+          {t("birth_date")}
+        </label>
+        <DatePicker
+          value={birthDate}
+          onChange={setBirthDate}
+          placeholder={t("birth_date")}
+          maxDate={new Date().toISOString().slice(0, 10)}
+        />
       </div>
 
       {/* Email / Phone */}
