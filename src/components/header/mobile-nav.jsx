@@ -4,6 +4,7 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { Home } from "lucide-react";
 import { useSelector } from "react-redux";
 import { selectTotalItems } from "@/store/cart";
 import { usePathname } from "next/navigation";
@@ -35,11 +36,21 @@ export default function MobileNav() {
     };
   }, []);
 
-  const isActive = (path) => {
+  const isActive = (path, key) => {
+    if (path === "/" || key === "home") {
+      const segments = pathname?.split("/").filter(Boolean) ?? [];
+      return segments.length === 1;
+    }
     return pathname?.includes(path);
   };
 
   const navItems = [
+    {
+      href: "/",
+      lucideIcon: Home,
+      label: t("home"),
+      key: "home",
+    },
     {
       href: "/categories",
       icon: "/icons/category.svg",
@@ -78,8 +89,9 @@ export default function MobileNav() {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 pb-safe">
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
-            const active = isActive(item.href);
+            const active = isActive(item.href, item.key);
             const isCategories = item.key === "categories";
+            const LucideIcon = item.lucideIcon;
 
             if (isCategories) {
               return (
@@ -127,23 +139,27 @@ export default function MobileNav() {
                 }`}
               >
                 <div className="relative mb-1">
-                  <Image
-                    src={item.icon}
-                    alt={item.label}
-                    width={24}
-                    height={24}
-                    className={`w-6 h-6 ${
-                      active ? "brightness-0 saturate-100" : ""
-                    }`}
-                    style={
-                      active
-                        ? {
-                            filter:
-                              "invert(23%) sepia(92%) saturate(1234%) hue-rotate(181deg) brightness(96%) contrast(101%)",
-                          }
-                        : {}
-                    }
-                  />
+                  {LucideIcon ? (
+                    <LucideIcon className="w-6 h-6" strokeWidth={1.5} />
+                  ) : (
+                    <Image
+                      src={item.icon}
+                      alt={item.label}
+                      width={24}
+                      height={24}
+                      className={`w-6 h-6 ${
+                        active ? "brightness-0 saturate-100" : ""
+                      }`}
+                      style={
+                        active
+                          ? {
+                              filter:
+                                "invert(23%) sepia(92%) saturate(1234%) hue-rotate(181deg) brightness(96%) contrast(101%)",
+                            }
+                          : {}
+                      }
+                    />
+                  )}
                 </div>
                 <span className={`text-[10px] ${active ? "font-medium" : ""}`}>
                   {item.label}

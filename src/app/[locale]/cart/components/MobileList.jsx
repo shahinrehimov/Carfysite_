@@ -66,21 +66,14 @@ const ProductCard = ({
       }}
       className={cn(
         "bg-white rounded-2xl p-4 border",
-        sellerClosed
-          ? "border-amber-200 bg-amber-50/60"
-          : "border-gray-100"
+        sellerClosed ? "border-amber-200 bg-amber-50/60" : "border-gray-100"
       )}
     >
       <div className="flex gap-4">
         {/* Product Image */}
         <div className="flex-shrink-0">
           <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden relative">
-            <Image
-              src={imageUrl}
-              alt={title}
-              fill
-              className="object-contain"
-            />
+            <Image src={imageUrl} alt={title} fill className="object-contain" />
           </div>
         </div>
 
@@ -110,8 +103,8 @@ const ProductCard = ({
                       ? "text-[#3696E7] fill-[#3696E7]"
                       : "text-gray-400 hover:text-[#3696E7]"
                     : product.in_wishlist
-                    ? "text-[#3696E7] fill-[#3696E7]"
-                    : "text-gray-400 hover:text-[#3696E7]"
+                      ? "text-[#3696E7] fill-[#3696E7]"
+                      : "text-gray-400 hover:text-[#3696E7]"
                 }`}
               />
             </button>
@@ -331,4 +324,3 @@ export default function MobileList() {
     </div>
   );
 }
-

@@ -4,7 +4,7 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-// import { ChevronDown } from "lucide-react";
+import { Home } from "lucide-react";
 import CartDropdown from "@/components/cart/cart-dropdown";
 import { isAuthenticated } from "@/lib/auth";
 import { notificationsService } from "@/lib/notificationsService";
@@ -108,6 +108,14 @@ export default function DesktopNav() {
       </div>
 
       <div className="flex items-center gap-6">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-[#1A1A1A] link-hover"
+        >
+          <Home className="w-5 h-5" strokeWidth={1.5} />
+          <span className="text-sm">{t("home")}</span>
+        </Link>
+
         <Link
           href="/account/notifications"
           className="flex items-center gap-2 text-[#1A1A1A] link-hover"

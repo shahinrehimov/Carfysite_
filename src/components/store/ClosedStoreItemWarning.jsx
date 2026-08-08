@@ -11,7 +11,7 @@ export default function ClosedStoreItemWarning({ seller, t }) {
   const message = seller.availability?.message;
 
   return (
-    <div className="mt-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
+    <div className="mt-2 mb-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
       {message || t("store_closed")}
     </div>
   );
