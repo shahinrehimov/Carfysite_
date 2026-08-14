@@ -160,6 +160,11 @@ export default function MobileNav() {
                       }
                     />
                   )}
+                  {item.badge > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-[#FF6B35] text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
+                      {item.badge}
+                    </span>
+                  )}
                 </div>
                 <span className={`text-[10px] ${active ? "font-medium" : ""}`}>
                   {item.label}

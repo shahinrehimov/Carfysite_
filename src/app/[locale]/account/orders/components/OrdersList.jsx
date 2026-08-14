@@ -126,7 +126,8 @@ const OrdersList = () => {
   };
 
   const getStatusBadge = (status) => {
-    const base = "px-4 py-1 rounded-full text-sm font-medium border";
+    const base =
+      "inline-block px-3 py-1 lg:px-4 rounded-full text-xs lg:text-sm font-medium border";
     switch (status) {
       case "processing":
         return `${base} text-blue-600 border-blue-300 bg-blue-50`;
@@ -160,37 +161,37 @@ const OrdersList = () => {
             className="border border-gray-200 rounded-lg overflow-hidden"
           >
             <div className="p-4 lg:p-6 bg-white">
-              <div className="flex flex-row lg:items-center justify-between gap-4">
-                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-lg font-semibold text-gray-900">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-col gap-3 min-w-0 sm:flex-row sm:items-center sm:gap-4">
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-base lg:text-lg font-semibold text-gray-900">
                       {order.date}
                     </span>
-                    <span className="text-sm text-gray-500 font-mono">
+                    <span className="text-xs lg:text-sm text-gray-500 font-mono truncate">
                       {order.code}
                     </span>
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-xs lg:text-sm font-medium text-gray-700">
                       {order.products_count} {t("products")}
                     </span>
                   </div>
 
-                  <div className="lg:ml-8">
+                  <div className="lg:ml-8 shrink-0">
                     <span className={getStatusBadge(order.status)}>
                       {order.status_label}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full lg:w-auto shrink-0">
                   <Link
                     href={`/account/orders/${order.id}`}
-                    className="flex items-center justify-center px-6 h-[44px] bg-[#3696E7] text-white rounded-full font-medium"
+                    className="flex flex-1 lg:flex-none items-center justify-center px-4 lg:px-6 h-10 lg:h-11 bg-[#3696E7] text-white rounded-full font-medium text-sm lg:text-base whitespace-nowrap"
                   >
                     {t("details")}
                   </Link>
                   <button
                     onClick={() => toggleOrderExpansion(order.id)}
-                    className="flex items-center justify-center w-[44px] h-[44px] bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition-colors cursor-pointer focus:outline-none"
+                    className="flex items-center justify-center w-10 h-10 lg:w-11 lg:h-11 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition-colors cursor-pointer focus:outline-none shrink-0"
                     disabled={loadingDetails[order.id]}
                   >
                     {loadingDetails[order.id] ? (
@@ -319,7 +320,7 @@ const OrdersList = () => {
                                       (delivery, di) => (
                                         <div
                                           key={di}
-                                          className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
                                         >
                                           <div className="flex flex-col gap-1">
                                             <span

@@ -29,10 +29,14 @@ export default function ProductSpecifications({ data }) {
         </div>
       </div>
 
-      <div className="flex flex-col">
-        <div className="text-[#9E9E9E] text-sm mb-1.5">{t("year")}</div>
-        <div className="text-gray-900 font-normal text-base">{data.year}</div>
-      </div>
+      {data.year_from && data.year_to && (
+        <div className="flex flex-col">
+          <div className="text-[#9E9E9E] text-sm mb-1.5">{t("year")}</div>
+          <div className="text-gray-900 font-normal text-base">
+            {data.year_from} {data.year_to ? `- ${data.year_to}` : ""}
+          </div>
+        </div>
+      )}
 
       {data.options.map((option) => (
         <div className="flex flex-col" key={option.value}>
