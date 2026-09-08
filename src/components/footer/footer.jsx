@@ -32,7 +32,7 @@ export default async function Footer() {
   const socialLinks = services.social;
   const setting = services.setting;
   const footerLinks = [
-    { href: "/about", label: t("aboutUs") },
+    { href: "/about", label: t("about_us") },
     {
       href: "/pages/privacy-policy",
       label: t("privacy_policy"),
@@ -86,7 +86,7 @@ export default async function Footer() {
 
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <h3 className="text-sm lg:text-base font-semibold text-gray-900 mb-2.5 lg:mb-4">
-              {t("callCenter")}
+              {t("call_center")}
             </h3>
             <div className="space-y-2 lg:space-y-3">
               <p className="text-sm text-gray-600">
@@ -98,20 +98,12 @@ export default async function Footer() {
                   {setting?.phone}
                 </a>
               </p>
-              <div>
-                <p className="text-sm text-gray-600 mb-0.5">
-                  {t("workingHours")}
-                </p>
-                <p className="text-sm text-gray-900 font-medium">
-                  {t("hours")}
-                </p>
-              </div>
             </div>
           </div>
 
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <h3 className="text-sm lg:text-base font-semibold text-gray-900 mb-2.5 lg:mb-4">
-              {t("followUs")}
+              {t("follow_us")}
             </h3>
             <ul className="flex flex-wrap items-center justify-center md:flex-col md:items-start gap-3 md:gap-3">
               {socialLinks.map((social) => (
@@ -123,12 +115,7 @@ export default async function Footer() {
                     aria-label={social.title}
                     className="flex items-center justify-center md:justify-start gap-2.5 text-sm text-gray-700 hover:text-gray-900 transition-colors"
                   >
-                    <Image
-                      src={social.image}
-                      alt=""
-                      width={20}
-                      height={20}
-                    />
+                    <Image src={social.image} alt="" width={20} height={20} />
                     <span className="hidden md:inline">{social.title}</span>
                   </a>
                 </li>
@@ -138,7 +125,9 @@ export default async function Footer() {
         </div>
 
         <div className="mt-6 lg:mt-8 pt-5 lg:pt-8 border-t border-gray-200">
-          <p className="text-center text-xs lg:text-sm text-gray-600">{t("copyright")}</p>
+          <p className="text-center text-xs lg:text-sm text-gray-600">
+            {t("copyright")}
+          </p>
         </div>
       </div>
     </footer>
