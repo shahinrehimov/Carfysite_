@@ -4,57 +4,19 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Loader2, Search } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { api } from "@/lib/axios";
 import { cn } from "@/lib/utils";
 
-const COPY = {
-  az: {
-    categories: "Kateqoriyalar",
-    products: "Məhsullar",
-    empty: "Heç nə tapılmadı",
-    allResults: (query) => `“${query}” üçün bütün nəticələr`,
-    inStores: (count) => `${count} mağazada`,
-    fromPrice: (count, price) => `${count} mağazada · ${price} ₼-dan`,
-  },
-  en: {
-    categories: "Categories",
-    products: "Products",
-    empty: "Nothing found",
-    allResults: (query) => `All results for “${query}”`,
-    inStores: (count) => `${count} stores`,
-    fromPrice: (count, price) => `${count} stores · from ${price} ₼`,
-  },
-  ru: {
-    categories: "Категории",
-    products: "Товары",
-    empty: "Ничего не найдено",
-    allResults: (query) => `Все результаты по запросу «${query}»`,
-    inStores: (count) => `в ${count} магазинах`,
-    fromPrice: (count, price) => `в ${count} магазинах · от ${price} ₼`,
-  },
-};
-
-function copyFor(locale) {
-  return COPY[locale] || COPY.az;
-}
-
-function translated(t, key, fallback, values) {
-  let value;
+function label(t, key, values) {
   try {
-    value = values ? t(key, values) : t(key);
+    const value = values ? t(key, values) : t(key);
+    if (!value || value === key || value === `{${key}}`) return key;
+    return value;
   } catch {
-    return fallback;
+    return key;
   }
-
-  // Missing site translations come back as the key itself, or as an ICU
-  // placeholder that collapses to the key name.
-  if (!value || value === key || value === `{${key}}` || value.includes(key)) {
-    return fallback;
-  }
-
-  return value;
 }
 
 function formatMoney(value) {
@@ -212,7 +174,7 @@ function ProductThumb({ src, alt }) {
 
   if (!src || failed) {
     return (
-      <div className="w-14 h-14 rounded-lg bg-gray-100 shrink-0" aria-hidden />
+      <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-lg bg-gray-100 shrink-0" aria-hidden />
     );
   }
 
@@ -222,29 +184,21 @@ function ProductThumb({ src, alt }) {
       alt={alt}
       width={56}
       height={56}
-      className="w-14 h-14 rounded-lg object-contain bg-gray-50 shrink-0"
+      className="w-11 h-11 sm:w-14 sm:h-14 rounded-lg object-contain bg-gray-50 shrink-0"
       onError={() => setFailed(true)}
     />
   );
 }
 
-function sellersText(sellers, t, copy) {
+function sellersText(sellers, t) {
   if (!sellers || sellers.count <= 1) return null;
   if (sellers.has_other_prices) {
-    const price = formatMoney(sellers.min_price);
-    return translated(
-      t,
-      "search_suggestions_from_price",
-      copy.fromPrice(sellers.count, price),
-      { count: sellers.count, price }
-    );
+    return label(t, "search_suggestions_from_price", {
+      count: sellers.count,
+      price: formatMoney(sellers.min_price),
+    });
   }
-  return translated(
-    t,
-    "search_suggestions_stores",
-    copy.inStores(sellers.count),
-    { count: sellers.count }
-  );
+  return label(t, "search_suggestions_stores", { count: sellers.count });
 }
 
 export default function SearchSuggestions({
@@ -258,9 +212,7 @@ export default function SearchSuggestions({
   onClose,
 }) {
   const t = useTranslations();
-  const locale = useLocale();
   const router = useRouter();
-  const copy = copyFor(locale);
   const panelRef = useRef(null);
   const listId = useId();
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -298,32 +250,82 @@ export default function SearchSuggestions({
     setActiveIndex(-1);
   }, [trimmed, products, categories]);
 
+  const pinFieldRef = useRef(false);
+
+  useEffect(() => {
+    if (open) pinFieldRef.current = true;
+  }, [open]);
+
   useEffect(() => {
     if (!open) return undefined;
 
-    const update = () => {
+    let frame = 0;
+
+    const place = () => {
       const element = anchorRef.current;
       if (!element) return;
+
+      const viewport = window.visualViewport;
+      const viewportTop = viewport?.offsetTop ?? 0;
+      const viewportWidth = viewport?.width ?? window.innerWidth;
+      const viewportBottom =
+        viewportTop + (viewport?.height ?? window.innerHeight);
+      const keyboardInset = Math.max(0, window.innerHeight - viewportBottom);
+      const isMobile = window.innerWidth < 1024;
+      const keyboardOpen = isMobile && keyboardInset > 80;
+      const bottomGap = keyboardOpen ? 64 : isMobile ? 88 : 16;
+      const bottomLimit = viewportBottom - bottomGap;
+
+      if (pinFieldRef.current && isMobile) {
+        pinFieldRef.current = false;
+        const current = element.getBoundingClientRect();
+        const targetTop = viewportTop + 8;
+        if (current.top > targetTop + 12 || current.bottom > bottomLimit - 200) {
+          window.scrollBy(0, current.top - targetTop);
+        }
+      }
+
       const rect = element.getBoundingClientRect();
-      const bottomGap = window.innerWidth < 1024 ? 88 : 16;
-      const left = Math.max(8, rect.left);
-      const width = Math.min(rect.width, window.innerWidth - left - 8);
+      const margin = isMobile ? 12 : 8;
+      const left = isMobile ? margin : Math.max(margin, rect.left);
+      const width = isMobile
+        ? viewportWidth - margin * 2
+        : Math.min(rect.width, viewportWidth - left - margin);
+      const top = Math.max(viewportTop + 8, rect.bottom + 8);
+
       setBox({
-        top: rect.bottom + 8,
+        top,
         left,
         width,
-        maxHeight: Math.max(180, window.innerHeight - rect.bottom - 8 - bottomGap),
+        maxHeight: Math.max(160, bottomLimit - top),
       });
     };
 
-    update();
-    window.addEventListener("resize", update);
-    window.addEventListener("scroll", update, true);
-    return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update, true);
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(place);
     };
-  }, [open, anchorRef, trimmed, products.length, categories.length]);
+
+    const onViewportResize = () => {
+      pinFieldRef.current = true;
+      schedule();
+    };
+
+    schedule();
+    window.addEventListener("resize", schedule);
+    window.addEventListener("scroll", schedule, true);
+    const viewport = window.visualViewport;
+    viewport?.addEventListener("resize", onViewportResize);
+    viewport?.addEventListener("scroll", schedule);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("scroll", schedule, true);
+      window.visualViewport?.removeEventListener("resize", onViewportResize);
+      window.visualViewport?.removeEventListener("scroll", schedule);
+    };
+  }, [open, anchorRef]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -394,8 +396,8 @@ export default function SearchSuggestions({
   }
 
   const showEmpty = status === "success" && products.length === 0 && categories.length === 0;
-  const categoriesLabel = translated(t, "categories", copy.categories);
-  const productsLabel = translated(t, "products", copy.products);
+  const categoriesLabel = label(t, "categories");
+  const productsLabel = label(t, "products");
   let optionIndex = 0;
 
   const panel = (
@@ -410,8 +412,8 @@ export default function SearchSuggestions({
         width: box.width,
         maxHeight: box.maxHeight,
       }}
-      onMouseDown={(event) => event.preventDefault()}
-      className="z-[45] overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-xl"
+      onPointerDown={(event) => event.preventDefault()}
+      className="z-[70] overflow-y-auto overscroll-contain rounded-2xl border border-gray-200 bg-white shadow-xl"
     >
       {status === "loading" && products.length === 0 && categories.length === 0 && (
         <div className="flex items-center justify-center gap-2 px-4 py-6 text-sm text-gray-500">
@@ -426,7 +428,7 @@ export default function SearchSuggestions({
 
       {showEmpty && (
         <p className="px-4 py-6 text-sm text-center text-gray-500">
-          {translated(t, "no_results_found", copy.empty)}
+          {label(t, "no_results_found")}
         </p>
       )}
 
@@ -481,7 +483,7 @@ export default function SearchSuggestions({
               const product = item.product;
               const active = index === activeIndex;
               const hasDiscount = Boolean(product.has_discount) && product.discount != null;
-              const otherSellers = sellersText(product.sellers, t, copy);
+              const otherSellers = sellersText(product.sellers, t);
               return (
                 <Link
                   key={item.key}
@@ -559,12 +561,7 @@ export default function SearchSuggestions({
         >
           <Search className="h-4 w-4 shrink-0" />
           <span className="min-w-0 truncate">
-            {translated(
-              t,
-              "search_suggestions_all",
-              copy.allResults(trimmed),
-              { query: trimmed }
-            )}
+            {label(t, "search_suggestions_all", { query: trimmed })}
           </span>
         </Link>
       )}

@@ -324,13 +324,16 @@ export default function MainFilter({ type = "default", initialFilters }) {
                   className="opacity-40 shrink-0"
                 />
                 <input
-                  type="text"
+                  type="search"
+                  name="q"
+                  enterKeyHint="search"
                   value={search}
                   role="combobox"
                   aria-expanded={suggestionsOpen}
                   aria-autocomplete="list"
                   autoComplete="off"
                   autoCorrect="off"
+                  autoCapitalize="off"
                   spellCheck={false}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -344,7 +347,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
                     if (e.key === "Enter" && !suggestionsOpen) handleFind();
                   }}
                   placeholder={t("search")}
-                  className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C80] text-sm lg:text-base font-light min-w-0 w-0"
+                  className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C80] text-base font-light min-w-0 w-0 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
                 />
               </div>
               <button
