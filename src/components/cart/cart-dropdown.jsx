@@ -14,6 +14,9 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus } from "lucide-react";
+import { basketLineKey, itemFitment, needsFitmentChoice } from "@/lib/fitmentSelection";
+import FitmentBadge, { FitmentMissingNotice } from "@/components/product/fitment-badge";
+import FitmentSelectionModal from "@/components/product/fitment-selection-modal";
 
 export default function CartDropdown() {
   const cartItems = useSelector(selectCartItems);
@@ -22,6 +25,8 @@ export default function CartDropdown() {
   const dispatch = useDispatch();
   const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
+  const [fitmentTarget, setFitmentTarget] = useState(null);
+  const [fixingFitment, setFixingFitment] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
 
@@ -46,31 +51,33 @@ export default function CartDropdown() {
     }).format(price);
   };
 
-  const handleRemoveFromCart = async (uuid) => {
+  const reloadBasket = async () => {
+    const data = await basketService.load();
+    dispatch(setBasketData(data));
+  };
+
+  const handleRemoveFromCart = async (item) => {
     try {
-      await basketService.remove(uuid);
-      const data = await basketService.load();
-      dispatch(setBasketData(data));
+      await basketService.remove(item.uuid, itemFitment(item));
+      await reloadBasket();
     } catch (error) {
       console.error("Error removing from cart:", error);
     }
   };
 
-  const handleIncrement = async (uuid) => {
+  const handleIncrement = async (item) => {
     try {
-      await basketService.increment(uuid);
-      const data = await basketService.load();
-      dispatch(setBasketData(data));
+      await basketService.increment(item.uuid, itemFitment(item));
+      await reloadBasket();
     } catch (error) {
       console.error("Error incrementing cart item:", error);
     }
   };
 
-  const handleDecrement = async (uuid) => {
+  const handleDecrement = async (item) => {
     try {
-      await basketService.decrement(uuid);
-      const data = await basketService.load();
-      dispatch(setBasketData(data));
+      await basketService.decrement(item.uuid, itemFitment(item));
+      await reloadBasket();
     } catch (error) {
       console.error("Error decrementing cart item:", error);
     }
@@ -162,7 +169,7 @@ export default function CartDropdown() {
 
                       return (
                         <div
-                          key={item.id}
+                          key={basketLineKey(item)}
                           className="rounded-xl p-3 flex  gap-3"
                         >
                           <div className="w-[66px] h-[66px] rounded-lg bg-white  flex items-center justify-center shrink-0 overflow-hidden">
@@ -179,6 +186,12 @@ export default function CartDropdown() {
                             <h4 className="text-sm font-normal text-[#1A1A1A] mb-1 line-clamp-2">
                               {title}
                             </h4>
+                            <FitmentBadge selection={itemFitment(item)} />
+                            {needsFitmentChoice(item) && (
+                              <FitmentMissingNotice
+                                onChoose={() => setFitmentTarget(item)}
+                              />
+                            )}
                             <p className="text-xs text-gray-500">
                               {item.oem_code}
                             </p>
@@ -190,7 +203,7 @@ export default function CartDropdown() {
                             </p>
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => handleDecrement(item.uuid)}
+                                onClick={() => handleDecrement(item)}
                                 className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#3696E7] hover:text-[#3696E7] transition-colors cursor-pointer"
                               >
                                 <Minus className="w-3 h-3" />
@@ -199,13 +212,13 @@ export default function CartDropdown() {
                                 {quantity}
                               </span>
                               <button
-                                onClick={() => handleIncrement(item.uuid)}
+                                onClick={() => handleIncrement(item)}
                                 className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:border-[#3696E7] hover:text-[#3696E7] transition-colors cursor-pointer"
                               >
                                 <Plus className="w-3 h-3" />
                               </button>
                               <button
-                                onClick={() => handleRemoveFromCart(item.uuid)}
+                                onClick={() => handleRemoveFromCart(item)}
                                 className="cursor-pointer"
                               >
                                 <Image
@@ -269,6 +282,32 @@ export default function CartDropdown() {
           </div>
         </>
       )}
+      <FitmentSelectionModal
+        open={Boolean(fitmentTarget)}
+        onOpenChange={(open) => {
+          if (!open) setFitmentTarget(null);
+        }}
+        productUuid={fitmentTarget?.uuid}
+        pending={fixingFitment}
+        onConfirm={async (selection) => {
+          if (!fitmentTarget?.uuid) return;
+          setFixingFitment(true);
+          try {
+            await basketService.remove(fitmentTarget.uuid);
+            await basketService.add(
+              fitmentTarget.uuid,
+              fitmentTarget.basket_quantity || fitmentTarget.quantity || 1,
+              selection,
+            );
+            await reloadBasket();
+            setFitmentTarget(null);
+          } catch (error) {
+            console.error("Error choosing fitment:", error);
+          } finally {
+            setFixingFitment(false);
+          }
+        }}
+      />
     </div>
   );
 }

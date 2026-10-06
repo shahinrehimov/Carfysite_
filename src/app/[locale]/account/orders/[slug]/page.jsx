@@ -7,6 +7,8 @@ import { api } from "@/lib/axios/api";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { AccountDetailLoading } from "@/components/account/account-loading";
+import FitmentBadge from "@/components/product/fitment-badge";
+import { itemFitment } from "@/lib/fitmentSelection";
 
 const getDeliveryStatusClass = (status) => {
   switch (status) {
@@ -430,7 +432,7 @@ export default function OrderPage({ params }) {
 
                     return (
                     <ItemWrapper
-                      key={item.product?.uuid || index}
+                      key={`${item.product?.uuid || index}-${itemFitment(item)?.brand?.id ?? ""}-${itemFitment(item)?.brand_model?.id ?? ""}`}
                       {...wrapperProps}
                       className={`flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-white rounded-lg transition-colors${
                         productHref
@@ -454,6 +456,7 @@ export default function OrderPage({ params }) {
                             <h4 className="font-medium text-gray-900 text-sm mb-1 truncate">
                               {item.product?.title}
                             </h4>
+                            <FitmentBadge selection={itemFitment(item)} />
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="text-lg font-semibold">
@@ -506,6 +509,7 @@ export default function OrderPage({ params }) {
                             {item.product?.title ||
                               item.product?.product?.title}
                           </h4>
+                          <FitmentBadge selection={itemFitment(item)} />
                           {item.product?.product?.brand?.title && (
                             <p className="text-sm text-gray-500">
                               {item.product.product.brand.title}

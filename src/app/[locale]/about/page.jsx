@@ -2,12 +2,17 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import MainFilter from "@/components/filter/MainFilter";
 import Promotion from "../home/Promotion";
+import { shareMetadata } from "@/lib/shareMetadata";
 
-export async function generateMetadata() {
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
   const t = await getTranslations();
-  return {
+  return shareMetadata({
     title: t("about_title"),
-  };
+    description: t("about_feature_1_desc"),
+    path: `/${locale}/about`,
+    locale,
+  });
 }
 
 export default async function AboutPage() {

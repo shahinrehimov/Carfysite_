@@ -7,6 +7,8 @@ import Image from "next/image";
 import { api } from "@/lib/axios/api";
 import { useTranslations } from "next-intl";
 import { AccountListLoading } from "@/components/account/account-loading";
+import FitmentBadge from "@/components/product/fitment-badge";
+import { itemFitment } from "@/lib/fitmentSelection";
 
 const PAGE_LIMIT = 15;
 
@@ -251,7 +253,7 @@ const OrdersList = () => {
                       <div className="space-y-3">
                         {detail.items?.map((item, index) => (
                           <div
-                            key={item.product?.uuid || index}
+                            key={`${item.product?.uuid || index}-${itemFitment(item)?.brand?.id ?? ""}-${itemFitment(item)?.brand_model?.id ?? ""}`}
                             className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-100"
                           >
                             <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
@@ -271,6 +273,7 @@ const OrdersList = () => {
                               <p className="font-medium text-gray-900 text-sm truncate">
                                 {item.product?.title}
                               </p>
+                              <FitmentBadge selection={itemFitment(item)} />
                               <div className="flex items-center gap-2 mt-0.5">
                                 <span className="text-xs text-gray-500">
                                   x{item.quantity}

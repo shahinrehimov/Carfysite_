@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,9 @@ import {
   categoriesForUi,
   modelOptionsForBrandSlug,
 } from "@/lib/productFilters";
+import SearchSuggestions, {
+  useProductSuggestions,
+} from "@/components/search/search-suggestions";
 
 function firstParam(searchParams, key) {
   const val = searchParams?.[key];
@@ -58,6 +61,8 @@ export default function MainFilter({ type = "default", initialFilters }) {
   const [minPrice, setMinPrice] = useState(() => firstParam(initialFilters, "min_price"));
   const [maxPrice, setMaxPrice] = useState(() => firstParam(initialFilters, "max_price"));
   const [search, setSearch] = useState(() => firstParam(initialFilters, "search"));
+  const searchFieldRef = useRef(null);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [currency, setCurrency] = useState("AZN");
   const [isCarSearchOpen, setIsCarSearchOpen] = useState(false);
   const [userCars, setUserCars] = useState([]);
@@ -94,6 +99,12 @@ export default function MainFilter({ type = "default", initialFilters }) {
     setSelectedUserCarId(pUserCarId);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pMarka, pModels, pCity, pColor, pStatus, pMinYear, pMaxYear, pMinPrice, pMaxPrice, pSearch, pUserCarId]);
+
+  const {
+    products: suggestionProducts,
+    categories: suggestionCategories,
+    status: suggestionStatus,
+  } = useProductSuggestions(search, suggestionsOpen);
 
   const brands = filterData?.brands ?? [];
   const yearRange = filterData?.yearRange ?? null;
@@ -195,6 +206,7 @@ export default function MainFilter({ type = "default", initialFilters }) {
   };
 
   const handleSubmit = () => {
+    setSuggestionsOpen(false);
     const params = buildFilterParams();
     const qs = params.toString();
     router.push(qs ? `/products?${qs}` : "/products");
@@ -273,7 +285,10 @@ export default function MainFilter({ type = "default", initialFilters }) {
       >
         <div className="w-full min-w-0 grid grid-cols-1 lg:grid-cols-4 gap-4">
           <button
-            onClick={() => setIsCategoryMenuOpen(true)}
+            onClick={() => {
+              setSuggestionsOpen(false);
+              setIsCategoryMenuOpen(true);
+            }}
             className={cn(
               "cursor-pointer col-span-1 bg-white text-lg font-regular rounded-full h-[48px] lg:h-[60px] hidden lg:flex items-center justify-center gap-2",
               type == "default" ? "border border-[#00569C]" : ""
@@ -290,7 +305,10 @@ export default function MainFilter({ type = "default", initialFilters }) {
             </span>
           </button>
 
-          <div className="col-span-1 lg:col-span-2 relative min-w-0">
+          <div
+            className="col-span-1 lg:col-span-2 relative min-w-0"
+            ref={searchFieldRef}
+          >
             <div
               className={cn(
                 "bg-white rounded-full h-[48px] lg:h-[60px] flex items-center min-w-0 overflow-hidden pl-4 lg:pl-6 gap-2 lg:gap-3",
@@ -308,16 +326,32 @@ export default function MainFilter({ type = "default", initialFilters }) {
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  role="combobox"
+                  aria-expanded={suggestionsOpen}
+                  aria-autocomplete="list"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSearch(value);
+                    setSuggestionsOpen(value.trim().length >= 2);
+                  }}
+                  onFocus={() => {
+                    if (search.trim().length >= 2) setSuggestionsOpen(true);
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") handleFind();
+                    if (e.key === "Enter" && !suggestionsOpen) handleFind();
                   }}
                   placeholder={t("search")}
                   className="flex-1 bg-transparent outline-none text-[#00569C] placeholder:text-[#00569C80] text-sm lg:text-base font-light min-w-0 w-0"
                 />
               </div>
               <button
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                onClick={() => {
+                  setSuggestionsOpen(false);
+                  setIsFilterOpen(!isFilterOpen);
+                }}
                 className="cursor-pointer px-1 shrink-0 flex items-center justify-center border rounded-[8px] w-[36px] lg:w-[42px] h-[36px] lg:h-[42px] border-[#00569C]"
               >
                 <Image
@@ -335,6 +369,20 @@ export default function MainFilter({ type = "default", initialFilters }) {
                 {t("find")}
               </button>
             </div>
+            <SearchSuggestions
+              open={suggestionsOpen}
+              query={search}
+              products={suggestionProducts}
+              categories={suggestionCategories}
+              status={suggestionStatus}
+              anchorRef={searchFieldRef}
+              viewAllHref={(() => {
+                const params = buildFilterParams();
+                const qs = params.toString();
+                return qs ? `/products?${qs}` : "/products";
+              })()}
+              onClose={() => setSuggestionsOpen(false)}
+            />
           </div>
 
           <div className="col-span-1">

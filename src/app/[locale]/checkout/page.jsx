@@ -18,6 +18,9 @@ import { useToast } from "@/providers/ToastProvider";
 import { clearCart, setBasketData } from "@/store/cart";
 import { isSellerClosed } from "@/lib/storeAvailability";
 import { cn } from "@/lib/utils";
+import { itemFitment, needsFitmentChoice } from "@/lib/fitmentSelection";
+import FitmentBadge, { FitmentMissingNotice } from "@/components/product/fitment-badge";
+import FitmentSelectionModal from "@/components/product/fitment-selection-modal";
 
 const formatPrice = (value) =>
   value != null ? Number(value).toFixed(2) : "0.00";
@@ -43,6 +46,8 @@ export default function CheckoutPage() {
   const [completedOrder, setCompletedOrder] = useState(null);
   const [useReferralBalance, setUseReferralBalance] = useState(false);
   const [removingSellerId, setRemovingSellerId] = useState(null);
+  const [fitmentTarget, setFitmentTarget] = useState(null);
+  const [fixingFitment, setFixingFitment] = useState(false);
   const { toast } = useToast();
   const dispatch = useDispatch();
 
@@ -137,7 +142,7 @@ export default function CheckoutPage() {
       for (const item of seller.items) {
         const productUuid = item.product?.uuid ?? item.uuid;
         if (productUuid) {
-          await basketService.remove(productUuid);
+          await basketService.remove(productUuid, itemFitment(item));
         }
       }
 
@@ -161,7 +166,12 @@ export default function CheckoutPage() {
     }
   };
 
-  const canCheckout = checkoutPreview?.can_checkout !== false;
+  const missingFitment = Boolean(
+    checkoutPreview?.sellers?.some((seller) =>
+      seller.items?.some((item) => needsFitmentChoice(item)),
+    ),
+  );
+  const canCheckout = checkoutPreview?.can_checkout !== false && !missingFitment;
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -371,15 +381,23 @@ export default function CheckoutPage() {
 
                         {seller.items?.map((item, idx) => (
                           <div
-                            key={idx}
+                            key={`${item.product?.uuid ?? item.uuid ?? idx}-${itemFitment(item)?.brand?.id ?? ""}-${itemFitment(item)?.brand_model?.id ?? ""}`}
                             className="flex gap-2 items-start text-sm"
                           >
-                            <span className="flex-1 text-gray-600">
-                              {item.title}{" "}
-                              <span className="text-gray-400">
-                                x{item.quantity}
+                            <div className="flex-1 text-gray-600">
+                              <span>
+                                {item.title}{" "}
+                                <span className="text-gray-400">
+                                  x{item.quantity}
+                                </span>
                               </span>
-                            </span>
+                              <FitmentBadge selection={itemFitment(item)} />
+                              {needsFitmentChoice(item) && (
+                                <FitmentMissingNotice
+                                  onChoose={() => setFitmentTarget(item)}
+                                />
+                              )}
+                            </div>
                             <span className="font-medium shrink-0">
                               {formatPrice(item.price)} ₼
                             </span>
@@ -525,6 +543,39 @@ export default function CheckoutPage() {
             </div>
           </div>
         </form>
+        <FitmentSelectionModal
+          open={Boolean(fitmentTarget)}
+          onOpenChange={(open) => {
+            if (!open) setFitmentTarget(null);
+          }}
+          productUuid={fitmentTarget?.product?.uuid ?? fitmentTarget?.uuid}
+          pending={fixingFitment}
+          onConfirm={async (selection) => {
+            const productUuid = fitmentTarget?.product?.uuid ?? fitmentTarget?.uuid;
+            if (!productUuid) return;
+            setFixingFitment(true);
+            try {
+              await basketService.remove(productUuid);
+              await basketService.add(
+                productUuid,
+                fitmentTarget.quantity || 1,
+                selection,
+              );
+              const basketData = await basketService.load();
+              dispatch(setBasketData(basketData));
+              await refreshCheckoutPreview();
+              setFitmentTarget(null);
+            } catch (error) {
+              toast({
+                title: t("error"),
+                description: error?.response?.data?.message || t("failed-to-update"),
+                variant: "error",
+              });
+            } finally {
+              setFixingFitment(false);
+            }
+          }}
+        />
       </div>
     </div>
   );

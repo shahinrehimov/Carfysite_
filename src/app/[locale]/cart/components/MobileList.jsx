@@ -12,7 +12,6 @@ import {
   selectCartLoading,
   setLoading,
   setError,
-  updateItemQuantity,
   setBasketData,
 } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
@@ -20,6 +19,9 @@ import { useTranslations } from "next-intl";
 import { isSellerClosed } from "@/lib/storeAvailability";
 import ClosedStoreItemWarning from "@/components/store/ClosedStoreItemWarning";
 import { cn } from "@/lib/utils";
+import { basketLineKey, itemFitment, needsFitmentChoice } from "@/lib/fitmentSelection";
+import FitmentBadge, { FitmentMissingNotice } from "@/components/product/fitment-badge";
+import FitmentSelectionModal from "@/components/product/fitment-selection-modal";
 
 const ProductCard = ({
   product,
@@ -28,6 +30,7 @@ const ProductCard = ({
   onDecrement,
   onRemove,
   onToggleWishlist,
+  onChooseFitment,
   isLoading,
   wishlistState,
   isUpdatingWishlist,
@@ -80,9 +83,15 @@ const ProductCard = ({
         {/* Product Details */}
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start mb-2">
-            <h3 className="font-medium text-gray-900 leading-tight text-sm line-clamp-2">
-              {title}
-            </h3>
+            <div>
+              <h3 className="font-medium text-gray-900 leading-tight text-sm line-clamp-2">
+                {title}
+              </h3>
+              <FitmentBadge selection={itemFitment(product)} />
+              {needsFitmentChoice(product) && (
+                <FitmentMissingNotice onChoose={() => onChooseFitment(product)} />
+              )}
+            </div>
             {/* Wishlist Heart */}
             <button
               type="button"
@@ -134,7 +143,7 @@ const ProductCard = ({
             {/* Quantity Controls */}
             <div className="flex items-center border border-gray-300 rounded-full overflow-hidden">
               <button
-                onClick={() => onDecrement(product.uuid)}
+                onClick={() => onDecrement(product)}
                 className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition-colors"
                 disabled={isLoading || quantity <= 1}
               >
@@ -144,7 +153,7 @@ const ProductCard = ({
                 {quantity}
               </span>
               <button
-                onClick={() => onIncrement(product.uuid)}
+                onClick={() => onIncrement(product)}
                 className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition-colors"
                 disabled={isLoading}
               >
@@ -155,7 +164,7 @@ const ProductCard = ({
             {/* Remove Button */}
             <button
               type="button"
-              onClick={() => onRemove(product.uuid)}
+              onClick={() => onRemove(product)}
               className="flex items-center justify-center w-10 h-8 bg-gray-100 hover:bg-red-50 rounded-lg transition-colors group disabled:cursor-not-allowed disabled:opacity-60"
               disabled={isLoading}
             >
@@ -176,18 +185,19 @@ export default function MobileList() {
   const { toast } = useToast();
   const [wishlistStates, setWishlistStates] = useState({});
   const [updatingWishlistIds, setUpdatingWishlistIds] = useState({});
+  const [fitmentTarget, setFitmentTarget] = useState(null);
+  const [fixingFitment, setFixingFitment] = useState(false);
 
-  const handleIncrement = async (productId) => {
+  const reloadBasket = async () => {
+    const basketData = await basketService.load();
+    dispatch(setBasketData(basketData));
+  };
+
+  const handleIncrement = async (item) => {
     try {
       dispatch(setLoading(true));
-      const response = await basketService.increment(productId);
-      dispatch(
-        updateItemQuantity({
-          productId,
-          quantity: response.quantity,
-          basket_data: response.basket_data,
-        })
-      );
+      await basketService.increment(item.uuid, itemFitment(item));
+      await reloadBasket();
     } catch (error) {
       toast({
         title: t("error"),
@@ -200,17 +210,11 @@ export default function MobileList() {
     }
   };
 
-  const handleDecrement = async (productId) => {
+  const handleDecrement = async (item) => {
     try {
       dispatch(setLoading(true));
-      const response = await basketService.decrement(productId);
-      dispatch(
-        updateItemQuantity({
-          productId,
-          quantity: response.quantity,
-          basket_data: response.basket_data,
-        })
-      );
+      await basketService.decrement(item.uuid, itemFitment(item));
+      await reloadBasket();
     } catch (error) {
       toast({
         title: t("error"),
@@ -223,16 +227,15 @@ export default function MobileList() {
     }
   };
 
-  const handleRemove = async (productUuid) => {
-    if (!productUuid || isLoading) {
+  const handleRemove = async (item) => {
+    if (!item?.uuid || isLoading) {
       return;
     }
 
     try {
       dispatch(setLoading(true));
-      await basketService.remove(productUuid);
-      const basketData = await basketService.load();
-      dispatch(setBasketData(basketData));
+      await basketService.remove(item.uuid, itemFitment(item));
+      await reloadBasket();
       toast({
         title: t("success"),
         description: t("item-removed"),
@@ -301,13 +304,14 @@ export default function MobileList() {
       <AnimatePresence>
         {cartItems.map((item, index) => (
           <ProductCard
-            key={item.id}
+            key={basketLineKey(item)}
             product={item}
             index={index}
             onIncrement={handleIncrement}
             onDecrement={handleDecrement}
             onRemove={handleRemove}
             onToggleWishlist={toggleWishlist}
+            onChooseFitment={setFitmentTarget}
             isLoading={isLoading}
             wishlistState={wishlistStates[item.uuid]}
             isUpdatingWishlist={Boolean(updatingWishlistIds[item.uuid])}
@@ -321,6 +325,38 @@ export default function MobileList() {
           <p className="text-gray-500 text-lg">{t("cart-empty")}</p>
         </div>
       )}
+      <FitmentSelectionModal
+        open={Boolean(fitmentTarget)}
+        onOpenChange={(open) => {
+          if (!open) setFitmentTarget(null);
+        }}
+        productUuid={fitmentTarget?.uuid}
+        pending={fixingFitment}
+        onConfirm={async (selection) => {
+          if (!fitmentTarget?.uuid) return;
+          setFixingFitment(true);
+          try {
+            dispatch(setLoading(true));
+            await basketService.remove(fitmentTarget.uuid);
+            await basketService.add(
+              fitmentTarget.uuid,
+              fitmentTarget.basket_quantity || fitmentTarget.quantity || 1,
+              selection,
+            );
+            await reloadBasket();
+            setFitmentTarget(null);
+          } catch (error) {
+            toast({
+              title: t("error"),
+              description: error?.response?.data?.message || t("failed-to-update"),
+              variant: "error",
+            });
+          } finally {
+            dispatch(setLoading(false));
+            setFixingFitment(false);
+          }
+        }}
+      />
     </div>
   );
 }

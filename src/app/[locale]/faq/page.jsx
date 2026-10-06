@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { HelpCircle } from "lucide-react";
 import { serverApi } from "@/lib/axios";
 import FaqAccordion from "./FaqAccordion";
+import { shareMetadata } from "@/lib/shareMetadata";
 
 const getFaqs = async () => {
   try {
@@ -12,11 +13,15 @@ const getFaqs = async () => {
   }
 };
 
-export async function generateMetadata() {
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
   const t = await getTranslations();
-  return {
+  return shareMetadata({
     title: t("faq"),
-  };
+    description: t("faq_description"),
+    path: `/${locale}/faq`,
+    locale,
+  });
 }
 
 export default async function FaqPage() {

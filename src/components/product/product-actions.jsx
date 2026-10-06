@@ -10,6 +10,7 @@ import { wishlistService } from "@/lib/wishlistService";
 import { setBasketData, setLoading, setError } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
 import { cn } from "@/lib/utils";
+import FitmentSelectionModal from "@/components/product/fitment-selection-modal";
 
 export default function ProductActions({ data }) {
   const t = useTranslations();
@@ -18,6 +19,8 @@ export default function ProductActions({ data }) {
   const [isFavorite, setIsFavorite] = useState(data?.in_wishlist || false);
   const [inBasket, setInBasket] = useState(data?.in_basket || false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [fitmentOpen, setFitmentOpen] = useState(false);
+  const needsFitment = Boolean(data?.requires_fitment_selection);
 
   useEffect(() => {
     setIsFavorite(data?.in_wishlist || false);
@@ -59,7 +62,12 @@ export default function ProductActions({ data }) {
   };
 
   const handleAddToCart = async () => {
-    if (isAddingToCart || !data?.uuid || inBasket) {
+    if (isAddingToCart || !data?.uuid || (!needsFitment && inBasket)) {
+      return;
+    }
+
+    if (needsFitment) {
+      setFitmentOpen(true);
       return;
     }
 
@@ -117,10 +125,10 @@ export default function ProductActions({ data }) {
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={isAddingToCart || inBasket || !canAct}
+          disabled={isAddingToCart || (!needsFitment && inBasket) || !canAct}
           className={cn(
             "flex-1 group bg-white hover:bg-[#00569C] hover:text-white text-[#00569C] border border-[#00569C] font-semibold py-3.5 px-6 rounded-full transition-all flex items-center justify-center gap-2",
-            isAddingToCart || inBasket || !canAct
+            isAddingToCart || (!needsFitment && inBasket) || !canAct
               ? "opacity-70 cursor-not-allowed hover:bg-white hover:text-[#00569C]"
               : "cursor-pointer"
           )}
@@ -135,7 +143,7 @@ export default function ProductActions({ data }) {
           <span>
             {isAddingToCart
               ? t("adding")
-              : inBasket
+              : !needsFitment && inBasket
                 ? t("in_cart")
                 : t("add_to_cart")}
           </span>
@@ -154,6 +162,39 @@ export default function ProductActions({ data }) {
           />
         </button>
       </div>
+      <FitmentSelectionModal
+        open={fitmentOpen}
+        onOpenChange={setFitmentOpen}
+        productUuid={data?.uuid}
+        options={data?.fitment_selection_options}
+        pending={isAddingToCart}
+        onConfirm={async (selection) => {
+          setIsAddingToCart(true);
+          try {
+            dispatch(setLoading(true));
+            await basketService.add(data.uuid, 1, selection);
+            const basketData = await basketService.load();
+            dispatch(setBasketData(basketData));
+            setFitmentOpen(false);
+            toast({
+              title: t("success"),
+              description: t("product-added-to-cart"),
+              variant: "success",
+            });
+          } catch (error) {
+            toast({
+              title: t("error"),
+              description:
+                error?.response?.data?.message || t("failed-to-add-to-cart"),
+              variant: "error",
+            });
+            dispatch(setError(error.message));
+          } finally {
+            dispatch(setLoading(false));
+            setIsAddingToCart(false);
+          }
+        }}
+      />
     </div>
   );
 }

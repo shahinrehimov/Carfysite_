@@ -7,7 +7,7 @@ import ProductSellerInfo from "@/components/product/product-seller-info";
 import ProductSpecifications from "@/components/product/product-specifications";
 import ProductReviews from "@/components/product/product-reviews";
 import ProductCard from "@/components/product/product-card";
-import React from "react";
+import React, { cache } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { serverApi } from "@/lib/axios";
@@ -16,10 +16,16 @@ import SimilarProductsList from "../../../../../components/product/similar-produ
 import { getTranslations } from "next-intl/server";
 import { generateServiceUrl } from "@/lib/generateServiceUrl";
 import { getProductGallery } from "@/lib/getProductGallery";
-const getProduct = async (category, subcategory, slug, seller, variant) => {
+import ProductShareTags from "@/components/product/product-share-tags";
+import { productShareMetadata } from "@/lib/shareMetadata";
+const getProduct = cache(async (category, subcategory, slug, seller, variant) => {
   try {
+    const params = new URLSearchParams();
+    if (seller) params.set("seller", seller);
+    if (variant) params.set("variant", variant);
+    params.set("with_related", "yes");
     const response = await serverApi.get(
-      `/products/show/${category}/${subcategory}/${slug}?seller=${seller}${variant ? `&variant=${variant}` : ""}&with_related=yes`
+      `/products/show/${category}/${subcategory}/${slug}?${params.toString()}`
     );
     return response.data.data;
   } catch (error) {
@@ -29,7 +35,19 @@ const getProduct = async (category, subcategory, slug, seller, variant) => {
     );
     return null;
   }
-};
+});
+
+export async function generateMetadata({ params, searchParams }) {
+  const { locale, category, subcategory, slug } = await params;
+  const { seller, variant } = await searchParams;
+  const data = await getProduct(category, subcategory, slug, seller, variant);
+  if (!data) return { title: "Carfy" };
+  return productShareMetadata(data, {
+    locale,
+    segments: [category, subcategory, slug],
+    search: { seller, variant },
+  });
+}
 const services = [
   {
     key: "setting",
@@ -59,6 +77,7 @@ export default async function ProductDetail({ params, searchParams }) {
 
   return (
     <div>
+      <ProductShareTags data={data} />
       <div className="bg-[#F8F8F8]">
         <MainFilter type="default" />
       </div>

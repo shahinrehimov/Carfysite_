@@ -2,11 +2,13 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { FileText } from "lucide-react";
 import serverApi from "@/lib/serverApi";
+import { cache } from "react";
+import { shareMetadata } from "@/lib/shareMetadata";
 
 const resolveUrl = (item) =>
   typeof item === "string" ? item : (item?.url ?? item?.path ?? null);
 
-const getPageData = async (slug) => {
+const getPageData = cache(async (slug) => {
   try {
     const result = await serverApi.get(`/pages/show/${slug}`);
     return result.data?.data ?? null;
@@ -18,21 +20,24 @@ const getPageData = async (slug) => {
     );
     return null;
   }
-};
+});
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const page = await getPageData(slug);
 
   if (!page) {
     return { title: "Not Found" };
   }
 
-  return {
+  return shareMetadata({
     title: page.meta_title || page.title,
-    description: page.meta_description,
+    description: page.meta_description || page.title,
+    path: `/${locale}/pages/${slug}`,
+    image: resolveUrl(page.main_image),
+    locale,
     keywords: page.meta_keywords,
-  };
+  });
 }
 
 export default async function StaticPage({ params }) {

@@ -1,0 +1,168 @@
+import BreadcrumbView from "@/components/breadcrumb/breadcrumb";
+import MainFilter from "@/components/filter/MainFilter";
+import ProductImageGallery from "@/components/product/product-image-gallery";
+import ProductInfo from "@/components/product/product-info";
+import ProductActions from "@/components/product/product-actions";
+import ProductSpecifications from "@/components/product/product-specifications";
+import ProductReviews from "@/components/product/product-reviews";
+import React, { cache } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { serverApi } from "@/lib/axios";
+import { notFound } from "next/navigation";
+import SimilarProductsList from "@/components/product/similar-products-list";
+import { getTranslations } from "next-intl/server";
+import { generateServiceUrl } from "@/lib/generateServiceUrl";
+import { getProductGallery } from "@/lib/getProductGallery";
+import ProductSellerInfo from "@/components/product/product-seller-info";
+import ProductShareTags from "@/components/product/product-share-tags";
+import { productShareMetadata } from "@/lib/shareMetadata";
+
+const getProduct = cache(async (uuid, seller, variant) => {
+  try {
+    const params = new URLSearchParams();
+    if (seller) params.set("seller", seller);
+    if (variant) params.set("variant", variant);
+    params.set("with_related", "yes");
+    const response = await serverApi.get(
+      `/products/show/${uuid}?${params.toString()}`
+    );
+    return response.data.data;
+  } catch {
+    return null;
+  }
+});
+
+export async function generateMetadata({ params, searchParams }) {
+  const { locale, uuid } = await params;
+  const { seller, variant } = await searchParams;
+  const data = await getProduct(uuid, seller, variant);
+  if (!data) return { title: "Carfy" };
+  return productShareMetadata(data, {
+    locale,
+    segments: ["products", "show", uuid],
+    search: { seller, variant },
+  });
+}
+
+const getServices = async () => {
+  try {
+    const res = await serverApi.get(
+      generateServiceUrl([{ key: "setting", limit: 100 }])
+    );
+    return res.data.data;
+  } catch {
+    return { setting: null };
+  }
+};
+
+export default async function ProductByUuid({ params, searchParams }) {
+  const { uuid } = await params;
+  const { seller, variant } = await searchParams;
+  const data = await getProduct(uuid, seller, variant);
+  const services = await getServices();
+  const setting = services.setting;
+  const t = await getTranslations();
+  if (!data) notFound();
+
+  const category = data.product?.main_category;
+
+  return (
+    <div>
+      <ProductShareTags data={data} />
+      <div className="bg-[#F8F8F8]">
+        <MainFilter type="default" />
+      </div>
+      <div className="container">
+        <div className="py-4">
+          <BreadcrumbView
+            data={[
+              { id: 1, type: "link", href: "/", title: t("home") },
+              ...(category?.parent
+                ? [
+                    {
+                      id: 2,
+                      type: "link",
+                      href: `/products?categories[]=${category.parent.slug}`,
+                      title: category.parent.title,
+                    },
+                  ]
+                : []),
+              ...(category
+                ? [
+                    {
+                      id: 3,
+                      type: "link",
+                      href: category.parent
+                        ? `/products?sub_categories[]=${category.slug}`
+                        : `/products?categories[]=${category.slug}`,
+                      title: category.title,
+                    },
+                  ]
+                : []),
+              { id: 4, type: "page", title: data.title },
+            ]}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pb-4 lg:pb-10">
+          <div className="col-span-1 lg:col-span-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 pb-4 lg:pb-10">
+              <div className="col-span-1">
+                <ProductImageGallery
+                  images={getProductGallery(data)}
+                  productTitle={data.title}
+                />
+              </div>
+
+              <div className="col-span-1 flex flex-col justify-between">
+                <div>
+                  <ProductInfo data={data} />
+                  <ProductSellerInfo data={data} />
+                  <ProductActions data={data} />
+                </div>
+                <ProductSpecifications data={data} />
+              </div>
+            </div>
+
+            <div className="pb-4 lg:pb-10">
+              <p className="text-gray-700 text-sm lg:text-base leading-relaxed text-justify">
+                {data.description}
+              </p>
+            </div>
+
+            <ProductReviews data={data} />
+          </div>
+          <div className="col-span-1 hidden lg:block">
+            <div className="bg-[#F3F9FE] rounded-4xl p-6 lg:p-8 flex flex-col items-center justify-center gap-4">
+              <Image src="/icons/chat.svg" alt="chat" width={64} height={64} />
+              <p className="text-gray-700 text-center text-sm lg:text-lg font-regular">
+                {t("contact_us_for_more_information")}
+              </p>
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full text-[12px] lg:text-[14px] font-medium cursor-pointer h-10 lg:h-11"
+                asChild
+              >
+                <a href={`mailto:${setting?.email ?? ""}`}>{t("write_to_us")}</a>
+              </Button>
+            </div>
+            <div className="mt-4 px-6">
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full text-lg font-medium cursor-pointer h-10 lg:h-14"
+                asChild
+              >
+                <a href={`tel:${setting?.phone ?? ""}`}>{t("call_us")}</a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <SimilarProductsList similarProducts={data.related_products || []} />
+    </div>
+  );
+}

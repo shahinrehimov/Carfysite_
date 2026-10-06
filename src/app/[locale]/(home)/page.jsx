@@ -7,6 +7,17 @@ import Promotion from "../home/Promotion";
 import serverApi from "@/lib/serverApi";
 import { serverApi as axiosServerApi } from "@/lib/axios";
 import { generateServiceUrl } from "@/lib/generateServiceUrl";
+import { shareMetadata } from "@/lib/shareMetadata";
+
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+  return shareMetadata({
+    title: "Carfy",
+    description: "Carfy",
+    path: `/${locale}`,
+    locale,
+  });
+}
 
 const getCategories = async () => {
   try {

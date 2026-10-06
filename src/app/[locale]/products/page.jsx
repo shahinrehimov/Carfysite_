@@ -4,6 +4,8 @@ import ProductsList from "@/components/product/ProductsList";
 import MobileFilterToggle from "@/components/product/MobileFilterToggle";
 import DesktopSidebar from "@/components/product/DesktopSidebar";
 import { serverApi } from "@/lib/axios";
+import { getTranslations } from "next-intl/server";
+import { shareMetadata } from "@/lib/shareMetadata";
 
 const FILTER_KEYS = [
   "search",
@@ -66,6 +68,17 @@ async function getProducts(searchParams) {
       },
     };
   }
+}
+
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+  const t = await getTranslations();
+  return shareMetadata({
+    title: t("products"),
+    description: t("products"),
+    path: `/${locale}/products`,
+    locale,
+  });
 }
 
 export default async function Products({ searchParams }) {

@@ -5,6 +5,9 @@ export const defaultMetaTags = {
   openGraph: {
     title: "Carfy",
     description: "Carfy",
+    siteName: "Carfy",
+    type: "website",
+    locale: "az_AZ",
   },
   twitter: {
     card: "summary_large_image",

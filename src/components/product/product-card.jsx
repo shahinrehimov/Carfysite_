@@ -13,6 +13,7 @@ import { useToast } from "@/providers/ToastProvider";
 import { useTranslations } from "next-intl";
 import { getProductUrl } from "@/lib/getProductUrl";
 import StoreAvailabilityBadge from "@/components/store/StoreAvailabilityBadge";
+import FitmentSelectionModal from "@/components/product/fitment-selection-modal";
 
 export default function ProductCard({ product }) {
   const t = useTranslations();
@@ -20,6 +21,8 @@ export default function ProductCard({ product }) {
   const [inBasket, setInBasket] = useState(product.in_basket || false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isUpdatingWishlist, setIsUpdatingWishlist] = useState(false);
+  const [fitmentOpen, setFitmentOpen] = useState(false);
+  const needsFitment = Boolean(product.requires_fitment_selection);
 
   useEffect(() => {
     setIsLiked(product.in_wishlist || false);
@@ -40,6 +43,16 @@ export default function ProductCard({ product }) {
   const price = product.price_final || product.price || 0;
   const oldPrice = product.has_discount ? product.price : price;
   const hasDiscount = product.has_discount && oldPrice > price;
+  const categoryInfo = productData.category;
+  const categoryLabel = categoryInfo?.title
+    ? categoryInfo.parent_title
+      ? `${categoryInfo.parent_title} › ${categoryInfo.title}`
+      : categoryInfo.title
+    : null;
+  const discountBadge =
+    product.discount_type === "by_amount"
+      ? `-${product.discount} ₼`
+      : `-${product.discount}%`;
 
   // Handle wishlist toggle (optimistic UI)
   const handleWishlistToggle = async (e) => {
@@ -93,7 +106,12 @@ export default function ProductCard({ product }) {
   const handleAddToCart = async (e) => {
     e.stopPropagation();
 
-    if (isAddingToCart || !product?.uuid || inBasket) {
+    if (isAddingToCart || !product?.uuid || (!needsFitment && inBasket)) {
+      return;
+    }
+
+    if (needsFitment) {
+      setFitmentOpen(true);
       return;
     }
 
@@ -132,6 +150,7 @@ export default function ProductCard({ product }) {
     <div
       className=" cursor-pointer bg-white rounded-[20px] p-3 lg:p-5 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col"
       onClick={() => {
+        if (fitmentOpen) return;
         const url = getProductUrl(product);
         if (url) router.push(url);
       }}
@@ -162,9 +181,9 @@ export default function ProductCard({ product }) {
         </button>
 
         {/* Discount Badge */}
-        {hasDiscount && product.discount > 0 && (
+        {hasDiscount && Number(product.discount) > 0 && (
           <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-            -{product.discount}%
+            {discountBadge}
           </div>
         )}
       </div>
@@ -185,6 +204,11 @@ export default function ProductCard({ product }) {
       <h3 className="text-[13px] lg:text-[14px] text-gray-900 mb-0.5 font-medium line-clamp-2">
         {title}
       </h3>
+      {categoryLabel && (
+        <p className="text-[12px] lg:text-[13px] text-gray-500 mb-1 line-clamp-1">
+          {categoryLabel}
+        </p>
+      )}
       {productData.brand && (
         <p className="text-[13px] lg:text-[14px] text-gray-600 mb-1">
           {productData.brand.title}
@@ -231,21 +255,55 @@ export default function ProductCard({ product }) {
           size="default"
           className={cn(
             "w-full text-[12px] lg:text-[14px] font-medium h-10 lg:h-11",
-            inBasket
+            !needsFitment && inBasket
               ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed opacity-70"
               : "cursor-pointer"
           )}
           onClick={handleAddToCart}
-          disabled={isAddingToCart || inBasket}
+          disabled={isAddingToCart || (!needsFitment && inBasket)}
         >
           <ShoppingCart className="w-4 h-4" />
           {isAddingToCart
             ? t("adding")
-            : inBasket
+            : !needsFitment && inBasket
               ? t("in_cart")
               : t("add_to_cart")}
         </Button>
       </div>
+      <FitmentSelectionModal
+        open={fitmentOpen}
+        onOpenChange={setFitmentOpen}
+        productUuid={product.uuid}
+        options={product.fitment_selection_options}
+        pending={isAddingToCart}
+        onConfirm={async (selection) => {
+          setIsAddingToCart(true);
+          try {
+            dispatch(setLoading(true));
+            await basketService.add(product.uuid, 1, selection);
+            const basketData = await basketService.load();
+            dispatch(setBasketData(basketData));
+            setFitmentOpen(false);
+            toast({
+              title: t("product_added_to_cart"),
+              description: t("product_added_to_cart_description"),
+              variant: "success",
+            });
+          } catch (error) {
+            toast({
+              title: t("failed_to_add_to_cart"),
+              description:
+                error?.response?.data?.message ||
+                t("failed_to_add_to_cart_description"),
+              variant: "error",
+            });
+            dispatch(setError(error.message));
+          } finally {
+            dispatch(setLoading(false));
+            setIsAddingToCart(false);
+          }
+        }}
+      />
     </div>
   );
 }

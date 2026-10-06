@@ -13,7 +13,6 @@ import {
   selectCartLoading,
   setLoading,
   setError,
-  updateItemQuantity,
   setBasketData,
 } from "@/store/cart";
 import { useToast } from "@/providers/ToastProvider";
@@ -21,6 +20,9 @@ import { useTranslations } from "next-intl";
 import { isSellerClosed } from "@/lib/storeAvailability";
 import ClosedStoreItemWarning from "@/components/store/ClosedStoreItemWarning";
 import { cn } from "@/lib/utils";
+import { basketLineKey, itemFitment, needsFitmentChoice } from "@/lib/fitmentSelection";
+import FitmentBadge, { FitmentMissingNotice } from "@/components/product/fitment-badge";
+import FitmentSelectionModal from "@/components/product/fitment-selection-modal";
 
 export default function TableList() {
   const t = useTranslations();
@@ -30,18 +32,19 @@ export default function TableList() {
   const { toast } = useToast();
   const [wishlistStates, setWishlistStates] = useState({});
   const [updatingWishlistIds, setUpdatingWishlistIds] = useState({});
+  const [fitmentTarget, setFitmentTarget] = useState(null);
+  const [fixingFitment, setFixingFitment] = useState(false);
 
-  const handleIncrement = async (productId) => {
+  const reloadBasket = async () => {
+    const basketData = await basketService.load();
+    dispatch(setBasketData(basketData));
+  };
+
+  const handleIncrement = async (item) => {
     try {
       dispatch(setLoading(true));
-      const response = await basketService.increment(productId);
-      dispatch(
-        updateItemQuantity({
-          productId,
-          quantity: response.quantity,
-          basket_data: response.basket_data,
-        })
-      );
+      await basketService.increment(item.uuid, itemFitment(item));
+      await reloadBasket();
     } catch (error) {
       toast({
         title: t("error"),
@@ -54,17 +57,11 @@ export default function TableList() {
     }
   };
 
-  const handleDecrement = async (productId) => {
+  const handleDecrement = async (item) => {
     try {
       dispatch(setLoading(true));
-      const response = await basketService.decrement(productId);
-      dispatch(
-        updateItemQuantity({
-          productId,
-          quantity: response.quantity,
-          basket_data: response.basket_data,
-        })
-      );
+      await basketService.decrement(item.uuid, itemFitment(item));
+      await reloadBasket();
     } catch (error) {
       toast({
         title: t("error"),
@@ -77,16 +74,15 @@ export default function TableList() {
     }
   };
 
-  const removeItem = async (productUuid) => {
-    if (!productUuid || isLoading) {
+  const removeItem = async (item) => {
+    if (!item?.uuid || isLoading) {
       return;
     }
 
     try {
       dispatch(setLoading(true));
-      await basketService.remove(productUuid);
-      const basketData = await basketService.load();
-      dispatch(setBasketData(basketData));
+      await basketService.remove(item.uuid, itemFitment(item));
+      await reloadBasket();
       toast({
         title: t("success"),
         description: t("item-removed"),
@@ -197,7 +193,7 @@ export default function TableList() {
 
               return (
                 <motion.tr
-                  key={item.id}
+                  key={basketLineKey(item)}
                   initial={{ opacity: 1, height: "auto" }}
                   exit={{
                     opacity: 0,
@@ -225,8 +221,16 @@ export default function TableList() {
                           className="object-contain rounded-lg"
                         />
                       </div>
-                      <span className="font-medium text-gray-900">{title}</span>
-                      <ClosedStoreItemWarning seller={item.seller} t={t} />
+                      <div>
+                        <span className="font-medium text-gray-900">{title}</span>
+                        <FitmentBadge selection={itemFitment(item)} />
+                        {needsFitmentChoice(item) && (
+                          <FitmentMissingNotice
+                            onChoose={() => setFitmentTarget(item)}
+                          />
+                        )}
+                        <ClosedStoreItemWarning seller={item.seller} t={t} />
+                      </div>
                     </div>
                   </td>
 
@@ -238,7 +242,7 @@ export default function TableList() {
                           variant="ghost"
                           size="sm"
                           className="h-12 w-12 rounded-none hover:bg-gray-100 border-0"
-                          onClick={() => handleDecrement(item.uuid)}
+                          onClick={() => handleDecrement(item)}
                           disabled={isLoading || quantity <= 1}
                         >
                           <Minus className="h-4 w-4" />
@@ -250,7 +254,7 @@ export default function TableList() {
                           variant="ghost"
                           size="sm"
                           className="h-12 w-12 rounded-none hover:bg-gray-100 border-0"
-                          onClick={() => handleIncrement(item.uuid)}
+                          onClick={() => handleIncrement(item)}
                           disabled={isLoading}
                         >
                           <Plus className="h-4 w-4" />
@@ -322,7 +326,7 @@ export default function TableList() {
                       <button
                         type="button"
                         className="bg-none border-none cursor-pointer text-gray-400 hover:text-red-500 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                        onClick={() => removeItem(item.uuid)}
+                        onClick={() => removeItem(item)}
                         disabled={isLoading}
                       >
                         <Trash2 className="h-5 w-5" />
@@ -341,6 +345,38 @@ export default function TableList() {
           <p className="text-gray-500 text-lg">{t("cart-empty")}</p>
         </div>
       )}
+      <FitmentSelectionModal
+        open={Boolean(fitmentTarget)}
+        onOpenChange={(open) => {
+          if (!open) setFitmentTarget(null);
+        }}
+        productUuid={fitmentTarget?.uuid}
+        pending={fixingFitment}
+        onConfirm={async (selection) => {
+          if (!fitmentTarget?.uuid) return;
+          setFixingFitment(true);
+          try {
+            dispatch(setLoading(true));
+            await basketService.remove(fitmentTarget.uuid);
+            await basketService.add(
+              fitmentTarget.uuid,
+              fitmentTarget.basket_quantity || fitmentTarget.quantity || 1,
+              selection,
+            );
+            await reloadBasket();
+            setFitmentTarget(null);
+          } catch (error) {
+            toast({
+              title: t("error"),
+              description: error?.response?.data?.message || t("failed-to-update"),
+              variant: "error",
+            });
+          } finally {
+            dispatch(setLoading(false));
+            setFixingFitment(false);
+          }
+        }}
+      />
     </div>
   );
 }

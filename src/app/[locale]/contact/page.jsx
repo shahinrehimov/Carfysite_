@@ -3,6 +3,7 @@ import { serverApi } from "@/lib/serverApi";
 import { generateServiceUrl } from "@/lib/generateServiceUrl";
 import ContactForm from "./ContactForm";
 import Image from "next/image";
+import { shareMetadata } from "@/lib/shareMetadata";
 const getContactSettings = async () => {
   try {
     const url = generateServiceUrl([{ key: "setting", limit: 100 }]);
@@ -13,11 +14,15 @@ const getContactSettings = async () => {
   }
 };
 
-export async function generateMetadata() {
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
   const t = await getTranslations();
-  return {
+  return shareMetadata({
     title: t("contact"),
-  };
+    description: t("contact_description"),
+    path: `/${locale}/contact`,
+    locale,
+  });
 }
 
 export default async function ContactPage() {
